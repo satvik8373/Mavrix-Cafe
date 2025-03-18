@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 const { MenuItem } = require('./models/MenuItem');
 const { Order } = require('./models/Order');
 
@@ -11,19 +10,6 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Serve static files
-app.use(express.static(path.join(__dirname)));
-
-// Serve index.html for root path
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Serve admin.html for /admin path
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {

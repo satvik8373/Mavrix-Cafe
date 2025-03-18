@@ -915,9 +915,12 @@
     </div>
 
     <script>
-        const API_URL = '/api';  // Changed from 'http://localhost:3000/api'
         let cart = [];
         let tableNumber = null;
+
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : `https://${window.location.hostname}/api`;
 
         // Get table number from URL
         function getTableNumber() {

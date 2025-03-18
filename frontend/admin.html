@@ -859,21 +859,22 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            min-width: 300px;
-            max-width: 400px;
+            min-width: 250px;
+            max-width: 350px;
             background: white;
             color: #333;
-            padding: 15px 20px;
-            border-radius: 8px;
+            padding: 12px 15px;
+            border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s ease, opacity 0.3s ease;
             z-index: 10000;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.4;
+            border-left: 4px solid transparent;
         }
 
         .toast.show {
@@ -881,101 +882,73 @@
         }
 
         .toast i {
-            font-size: 20px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
-        .toast-success {
-            border-left: 4px solid #2ecc71;
-        }
-
-        .toast-error {
-            border-left: 4px solid #e74c3c;
-        }
-
-        .toast-warning {
-            border-left: 4px solid #f1c40f;
-        }
-
-        .toast-info {
-            border-left: 4px solid #3498db;
-        }
-
-        .toast-success i { color: #2ecc71; }
-        .toast-error i { color: #e74c3c; }
-        .toast-warning i { color: #f1c40f; }
-        .toast-info i { color: #3498db; }
-
         .toast-message {
             flex: 1;
-            font-weight: 500;
+            margin-right: 5px;
         }
 
         .toast-close {
             background: none;
             border: none;
             color: #999;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             padding: 0;
             line-height: 1;
-            transition: color 0.2s ease;
+            margin-left: auto;
         }
 
         .toast-close:hover {
             color: #666;
         }
 
+        .toast-success {
+            border-left-color: var(--success-color);
+        }
+
+        .toast-success i {
+            color: var(--success-color);
+        }
+
+        .toast-error {
+            border-left-color: var(--danger-color);
+        }
+
+        .toast-error i {
+            color: var(--danger-color);
+        }
+
+        .toast-warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .toast-warning i {
+            color: var(--warning-color);
+        }
+
+        .toast-info {
+            border-left-color: #2196F3;
+        }
+
+        .toast-info i {
+            color: #2196F3;
+        }
+
         @media (max-width: 480px) {
             .toast {
-                width: 90%;
-                left: 50%;
-                transform: translate(-50%, -100%);
+                width: calc(100% - 40px);
+                left: 20px;
+                right: 20px;
+                transform: translateY(-100%);
             }
             
             .toast.show {
-                transform: translate(-50%, 0);
+                transform: translateY(0);
             }
-        }
-
-        /* New styles for form validation */
-        .form-group input.error,
-        .form-group select.error {
-            border-color: #e74c3c;
-            background-color: #fff8f8;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-            display: block;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-
-        .product-form {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .product-form:focus-within {
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
@@ -1209,10 +1182,6 @@
 
         // Toast Notification System
         function showToast(message, type = 'success') {
-            // Remove any existing toasts
-            const existingToasts = document.querySelectorAll('.toast');
-            existingToasts.forEach(toast => toast.remove());
-
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             
@@ -1233,37 +1202,26 @@
                     break;
             }
             
-            // Create message container with formatted message
+            // Create message container
             const messageDiv = document.createElement('div');
             messageDiv.className = 'toast-message';
-            
-            // Format the error message to be more professional
-            if (type === 'error') {
-                if (message.includes('Cannot GET')) {
-                    messageDiv.textContent = 'Product not found. It may have been deleted or moved.';
-                } else if (message.includes('Failed to fetch')) {
-                    messageDiv.textContent = 'Unable to connect to server. Please check your connection.';
-                } else if (message.includes('NetworkError')) {
-                    messageDiv.textContent = 'Network error occurred. Please try again.';
-                } else if (message.includes('required')) {
-                    messageDiv.textContent = message.charAt(0).toUpperCase() + message.slice(1);
-                } else {
-                    messageDiv.textContent = message;
-                }
-            } else {
-                messageDiv.textContent = message;
-            }
+            messageDiv.textContent = message;
             
             // Add close button
             const closeBtn = document.createElement('button');
             closeBtn.className = 'toast-close';
             closeBtn.innerHTML = '&times;';
-            closeBtn.onclick = () => toast.remove();
             
             // Assemble toast
             toast.appendChild(icon);
             toast.appendChild(messageDiv);
             toast.appendChild(closeBtn);
+            
+            // Position toast based on existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            const offset = existingToasts.length * 60;
+            toast.style.top = `${20 + offset}px`;
+            
             document.body.appendChild(toast);
             
             // Show animation
@@ -1271,17 +1229,15 @@
                 toast.classList.add('show');
             });
             
-            // Auto dismiss after 4 seconds for success, 6 seconds for errors
+            // Auto dismiss after 5 seconds
             const timeout = setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, type === 'error' ? 6000 : 4000);
+                removeToast(toast);
+            }, 5000);
             
             // Clear timeout if manually closed
             closeBtn.onclick = () => {
                 clearTimeout(timeout);
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
+                removeToast(toast);
             };
         }
 
@@ -1316,15 +1272,15 @@
                 </div>
                 <span class="product-category">${product.category}</span>
                 <div class="product-actions">
-                    <button onclick="editProduct('${product._id.toString()}')" class="action-btn edit-btn">
+                    <button onclick="editProduct('${product._id}')" class="action-btn edit-btn">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button onclick="toggleAvailability('${product._id.toString()}', ${!product.available})" 
+                    <button onclick="toggleAvailability('${product._id}', ${!product.available})" 
                         class="action-btn toggle-btn ${product.available ? '' : 'unavailable'}">
                         <i class="fas ${product.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                         ${product.available ? 'Available' : 'Unavailable'}
                     </button>
-                    <button onclick="deleteProductConfirm('${product._id.toString()}')" class="action-btn delete-btn">
+                    <button onclick="deleteProductConfirm('${product._id}')" class="action-btn delete-btn">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1760,80 +1716,43 @@
         // Product Management Functions
         async function editProduct(productId) {
             try {
-                if (!productId) {
-                    throw new Error('Invalid product ID');
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to load product details');
                 }
-
+                const product = await response.json();
+                
                 // Switch to products tab first
                 const productsTab = document.querySelector('[data-tab="products"]');
                 if (productsTab) {
                     productsTab.click();
                 }
-
-                // Show loading state
-                showToast('Loading product details...', 'info');
-
-                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
                 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        await displayProducts(); // Refresh product list
-                        throw new Error('This product no longer exists. The product list has been refreshed.');
-                    }
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Unable to load product details. Please try again.');
-                }
-
-                const product = await response.json();
-                
-                if (!product || !product._id) {
-                    throw new Error('Invalid product data received');
-                }
-
-                // Scroll form into view
+                // Scroll to form
                 const productForm = document.querySelector('.product-form');
                 if (productForm) {
-                    productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    productForm.scrollIntoView({ behavior: 'smooth' });
                 }
                 
-                // Update form with a slight delay to ensure smooth scrolling
+                // Update form with a slight delay to ensure tab switch is complete
                 setTimeout(() => {
-                    // Update form fields safely
-                    const updateField = (id, value) => {
-                        const field = document.getElementById(id);
-                        if (field) {
-                            field.value = value;
-                        }
-                    };
-
-                    updateField('productId', product._id);
-                    updateField('productName', product.name || '');
-                    updateField('productPrice', product.price || '');
-                    updateField('productCategory', product.category || '');
+                    // Update form fields
+                    document.getElementById('productId').value = product._id;
+                    document.getElementById('productName').value = product.name || '';
+                    document.getElementById('productPrice').value = product.price || '';
+                    document.getElementById('productCategory').value = product.category || '';
                     
                     // Update form UI
-                    const formTitle = document.getElementById('formTitle');
-                    const submitButton = document.getElementById('submitButtonText');
-                    const cancelButton = document.getElementById('cancelButton');
+                    document.getElementById('formTitle').textContent = 'Edit Product';
+                    document.getElementById('submitButtonText').textContent = 'Update Product';
+                    document.getElementById('cancelButton').style.display = 'block';
                     
-                    if (formTitle) formTitle.textContent = `Edit Product: ${product.name}`;
-                    if (submitButton) submitButton.textContent = 'Update Product';
-                    if (cancelButton) cancelButton.style.display = 'block';
-                    
-                    // Focus on the name field
-                    const nameField = document.getElementById('productName');
-                    if (nameField) {
-                        nameField.focus();
-                        nameField.select();
-                    }
-                    
-                    showToast('Product loaded for editing', 'success');
-                }, 300);
-
+                    showToast('Product loaded for editing', 'info');
+                }, 100);
             } catch (error) {
                 console.error('Error editing product:', error);
-                showToast(error.message, 'error');
-                resetProductForm();
+                showToast(`Error loading product: ${error.message}`, 'error');
             }
         }
 
@@ -1891,66 +1810,24 @@
             event.preventDefault();
             
             try {
-                // Get form elements
-                const form = event.target;
-                const productId = document.getElementById('productId')?.value;
-                const nameField = document.getElementById('productName');
-                const priceField = document.getElementById('productPrice');
-                const categoryField = document.getElementById('productCategory');
-
-                if (!nameField || !priceField || !categoryField) {
-                    throw new Error('Form fields not found. Please refresh the page.');
-                }
-
+                const productId = document.getElementById('productId').value;
                 const productData = {
-                    name: nameField.value.trim(),
-                    price: parseFloat(priceField.value),
-                    category: categoryField.value,
+                    name: document.getElementById('productName').value.trim(),
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    category: document.getElementById('productCategory').value,
                     available: true
                 };
                 
-                // Clear previous validation errors
-                const clearErrors = () => {
-                    form.querySelectorAll('.error-message').forEach(err => err.remove());
-                    form.querySelectorAll('.error').forEach(field => field.classList.remove('error'));
-                };
-                clearErrors();
-
-                // Validate with visual feedback
-                const addError = (field, message) => {
-                    field.classList.add('error');
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'error-message';
-                    errorDiv.textContent = message;
-                    field.parentElement.appendChild(errorDiv);
-                };
-
-                let hasErrors = false;
-
-                if (!productData.name) {
-                    addError(nameField, 'Please enter a product name');
-                    hasErrors = true;
-                } else if (productData.name.length < 2) {
-                    addError(nameField, 'Product name must be at least 2 characters long');
-                    hasErrors = true;
+                // Enhanced validation
+                const validationErrors = [];
+                if (!productData.name) validationErrors.push('Product name is required');
+                if (productData.name.length < 3) validationErrors.push('Product name must be at least 3 characters');
+                if (isNaN(productData.price) || productData.price <= 0) validationErrors.push('Please enter a valid price');
+                if (!productData.category) validationErrors.push('Please select a category');
+                
+                if (validationErrors.length > 0) {
+                    throw new Error(validationErrors.join('\n'));
                 }
-
-                if (isNaN(productData.price) || productData.price <= 0) {
-                    addError(priceField, 'Please enter a valid price greater than 0');
-                    hasErrors = true;
-                }
-
-                if (!productData.category) {
-                    addError(categoryField, 'Please select a product category');
-                    hasErrors = true;
-                }
-
-                if (hasErrors) {
-                    return;
-                }
-
-                // Show loading state
-                showToast('Saving product...', 'info');
                 
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
@@ -1966,13 +1843,13 @@
                 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Unable to save product. Please try again.');
+                    throw new Error(errorData.message || `Failed to ${productId ? 'update' : 'add'} product`);
                 }
                 
                 showToast(
                     productId 
-                        ? `"${productData.name}" has been updated successfully` 
-                        : `"${productData.name}" has been added successfully`, 
+                        ? `Product "${productData.name}" updated successfully` 
+                        : `New product "${productData.name}" added successfully`, 
                     'success'
                 );
                 
@@ -1981,14 +1858,32 @@
                 await updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showToast(error.message, 'error');
+                const errorMessages = error.message.split('\n');
+                errorMessages.forEach(message => {
+                    showToast(message, 'error');
+                });
             }
         }
 
         function resetProductForm() {
-            const form = document.getElementById('productForm');
-            if (!form) return;
-            // ... safe reset operations
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('submitButtonText').textContent = 'Add Product';
+            document.getElementById('cancelButton').style.display = 'none';
+        }
+
+        // Add toast removal function
+        function removeToast(toast) {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+                // Reposition remaining toasts
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach((t, index) => {
+                    t.style.top = `${20 + (index * 60)}px`;
+                });
+            }, 300);
         }
     </script>
 </body>

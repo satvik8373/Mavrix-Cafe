@@ -37,12 +37,19 @@ const orderSuccessModal = document.getElementById('orderSuccess');
 
 // Get products from localStorage or use default menu
 function getMenuData() {
-    const products = localStorage.getItem('cafeProducts');
-    if (products) {
-        return JSON.parse(products);
+    try {
+        const products = localStorage.getItem('cafeProducts');
+        if (products) {
+            const parsedProducts = JSON.parse(products);
+            console.log('Retrieved products:', parsedProducts);
+            return parsedProducts;
+        }
+        console.log('Using default menu data');
+        return menuData;
+    } catch (error) {
+        console.error('Error getting menu data:', error);
+        return menuData;
     }
-    // If no products in localStorage, use default menu
-    return menuData;
 }
 
 // Initialize menu
@@ -54,37 +61,68 @@ function initializeMenu() {
 
 // Display menu items
 function displayMenuItems(category) {
-    menuItemsContainer.innerHTML = '';
-    
-    let items = [];
-    const products = getMenuData();
-    
-    if (category === 'all') {
-        items = [...(products.drinks || []), ...(products.food || []), ...(products.desserts || [])];
-    } else {
-        items = products[category] || [];
-    }
-
-    items.forEach(item => {
-        const menuItem = document.createElement('div');
-        menuItem.className = 'menu-item';
+    try {
+        console.log('Displaying category:', category);
+        menuItemsContainer.innerHTML = '';
         
-        if (item.available === false) {
-            menuItem.classList.add('unavailable');
+        let items = [];
+        const products = getMenuData();
+        console.log('Products data:', products);
+        
+        if (category === 'all') {
+            Object.keys(products).forEach(cat => {
+                if (Array.isArray(products[cat])) {
+                    items = items.concat(products[cat]);
+                }
+            });
+        } else if (products[category] && Array.isArray(products[category])) {
+            items = products[category];
         }
         
-        menuItem.innerHTML = `
-            <h3>${item.name}</h3>
-            <p>$${item.price.toFixed(2)}</p>
-            ${item.available === false ? 
-                `<p class="unavailable-text">Currently Unavailable</p>` :
-                `<button onclick="addToOrder(${item.id})" ${item.available === false ? 'disabled' : ''}>
-                    Add to Order
-                </button>`
+        console.log('Items to display:', items);
+
+        if (items.length === 0) {
+            menuItemsContainer.innerHTML = `
+                <div class="no-items-message">
+                    <p>No items available in this category</p>
+                </div>
+            `;
+            return;
+        }
+
+        items.forEach(item => {
+            if (!item || typeof item !== 'object') {
+                console.error('Invalid item:', item);
+                return;
             }
+
+            const menuItem = document.createElement('div');
+            menuItem.className = 'menu-item';
+            
+            if (item.available === false) {
+                menuItem.classList.add('unavailable');
+            }
+            
+            menuItem.innerHTML = `
+                <h3>${item.name || 'Unnamed Item'}</h3>
+                <p>₹${(item.price || 0).toFixed(2)}</p>
+                ${item.available === false ? 
+                    `<p class="unavailable-text">Currently Unavailable</p>` :
+                    `<button onclick="addToOrder(${item.id})" ${item.available === false ? 'disabled' : ''}>
+                        Add to Order
+                    </button>`
+                }
+            `;
+            menuItemsContainer.appendChild(menuItem);
+        });
+    } catch (error) {
+        console.error('Error displaying menu items:', error);
+        menuItemsContainer.innerHTML = `
+            <div class="error-message">
+                <p>Error loading menu items. Please try refreshing the page.</p>
+            </div>
         `;
-        menuItemsContainer.appendChild(menuItem);
-    });
+    }
 }
 
 // Setup category buttons
@@ -216,23 +254,78 @@ function closeModal() {
     orderSuccessModal.style.display = 'none';
 }
 
-// Add these styles to your styles.css file
+// Add these styles for better mobile display
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
+    .menu-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        transition: transform 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .menu-item h3 {
+        margin: 0;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .menu-item p {
+        margin: 0;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .menu-item button {
+        background: var(--primary-color, #2c3e50);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s ease;
+    }
+
+    .menu-item button:hover {
+        background: var(--secondary-color, #34495e);
+    }
+
     .menu-item.unavailable {
         opacity: 0.7;
-        position: relative;
     }
-    
+
     .unavailable-text {
         color: #dc3545;
-        font-weight: 500;
-        margin: 0.5rem 0;
+        font-size: 0.9rem;
     }
-    
-    .menu-item.unavailable button {
-        background: #ccc;
-        cursor: not-allowed;
+
+    .no-items-message,
+    .error-message {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+
+    @media (max-width: 768px) {
+        .menu-item {
+            margin: 0.5rem;
+            padding: 0.8rem;
+        }
+
+        .menu-item h3 {
+            font-size: 1rem;
+        }
+
+        .menu-item button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
     }
 `;
 document.head.appendChild(styleSheet);

@@ -1759,7 +1759,13 @@
         async function editProduct(productId) {
             try {
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
+                if (response.status === 404) {
+                    showValidation('Product no longer exists. The product list has been refreshed.', 'error');
+                    displayProducts(); // Refresh the product list
+                    return;
+                }
                 if (!response.ok) throw new Error('Failed to fetch product');
+                
                 const product = await response.json();
                 
                 // Update form
@@ -1773,11 +1779,12 @@
                 document.getElementById('submitButtonText').textContent = 'Update Product';
                 document.getElementById('cancelButton').style.display = 'block';
                 
-                // Switch to products tab
+                // Switch to products tab and scroll to form
                 document.querySelector('[data-tab="products"]').click();
+                document.querySelector('.product-form').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Error editing product:', error);
-                showValidation('Error loading product details', 'error');
+                showValidation('Unable to edit product. Please try again.', 'error');
             }
         }
 
@@ -1791,14 +1798,19 @@
                     body: JSON.stringify({ available: newAvailability })
                 });
                 
+                if (response.status === 404) {
+                    showValidation('Product no longer exists. The product list has been refreshed.', 'error');
+                    displayProducts(); // Refresh the product list
+                    return;
+                }
                 if (!response.ok) throw new Error('Failed to update product availability');
                 
-                showValidation(`Product ${newAvailability ? 'available' : 'unavailable'}`, 'success');
+                showValidation(`Product ${newAvailability ? 'marked as available' : 'marked as unavailable'}`, 'success');
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
-                showValidation('Error updating product availability', 'error');
+                showValidation('Unable to update product availability. Please try again.', 'error');
             }
         }
 
@@ -1814,14 +1826,19 @@
                     method: 'DELETE'
                 });
                 
+                if (response.status === 404) {
+                    showValidation('Product no longer exists. The product list has been refreshed.', 'error');
+                    displayProducts(); // Refresh the product list
+                    return;
+                }
                 if (!response.ok) throw new Error('Failed to delete product');
                 
-                showValidation('Product deleted successfully', 'success');
+                showValidation('Product successfully deleted', 'success');
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showValidation('Error deleting product', 'error');
+                showValidation('Unable to delete product. Please try again.', 'error');
             }
         }
 
@@ -1830,11 +1847,25 @@
             
             const productId = document.getElementById('productId').value;
             const productData = {
-                name: document.getElementById('productName').value,
+                name: document.getElementById('productName').value.trim(),
                 price: parseFloat(document.getElementById('productPrice').value),
                 category: document.getElementById('productCategory').value,
                 available: true
             };
+            
+            // Validate input
+            if (!productData.name) {
+                showValidation('Please enter a product name', 'error');
+                return;
+            }
+            if (isNaN(productData.price) || productData.price <= 0) {
+                showValidation('Please enter a valid price', 'error');
+                return;
+            }
+            if (!productData.category) {
+                showValidation('Please select a category', 'error');
+                return;
+            }
             
             try {
                 const url = productId 
@@ -1849,15 +1880,20 @@
                     body: JSON.stringify(productData)
                 });
                 
+                if (response.status === 404 && productId) {
+                    showValidation('Product no longer exists. Please add as a new product.', 'error');
+                    resetProductForm();
+                    return;
+                }
                 if (!response.ok) throw new Error('Failed to save product');
                 
-                showValidation(`Product ${productId ? 'updated' : 'added'} successfully`, 'success');
+                showValidation(`Product successfully ${productId ? 'updated' : 'added'}`, 'success');
                 resetProductForm();
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showValidation('Error saving product', 'error');
+                showValidation('Unable to save product. Please try again.', 'error');
             }
         }
 
@@ -1879,9 +1915,12 @@
             `;
             validationMessage.classList.add('show');
             
+            // Ensure the validation message is visible
+            validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
             setTimeout(() => {
                 validationMessage.classList.remove('show');
-            }, 3000);
+            }, 4000); // Increased display time to 4 seconds for better readability
         }
     </script>
 </body>

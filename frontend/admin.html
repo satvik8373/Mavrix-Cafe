@@ -1212,6 +1212,32 @@
         
         const API_URL = config.API_URL;
         
+        // Fetch orders from API
+        async function getOrders() {
+            try {
+                const response = await fetch(`${API_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+                showToast('Error fetching orders', 'error');
+                return [];
+            }
+        }
+
+        // Fetch menu items from API
+        async function getMenuItems() {
+            try {
+                const response = await fetch(`${API_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+                showToast('Error fetching menu items', 'error');
+                return [];
+            }
+        }
+
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
@@ -1220,6 +1246,7 @@
                 await updateStats();
                 setupAutoRefresh();
                 setupFilterButtons();
+                setupTabButtons();
             } catch (error) {
                 console.error('Error initializing admin dashboard:', error);
                 showToast('Error initializing dashboard', 'error');
@@ -1383,6 +1410,25 @@
             });
         }
 
+        // Setup tab buttons
+        function setupTabButtons() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button and corresponding content
+                    button.classList.add('active');
+                    const tabId = `${button.dataset.tab}Tab`;
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
         // Helper function for category icons
         function getCategoryIcon(category) {
             const icons = {
@@ -1394,7 +1440,9 @@
         }
 
         // Initialize when the page loads
-        document.addEventListener('DOMContentLoaded', initializeAdmin);
+        document.addEventListener('DOMContentLoaded', () => {
+            digitInputs[0].focus();
+        });
 
         // Make functions available globally
         window.completeOrder = async function(orderId) {
@@ -1443,6 +1491,77 @@
                 showToast('Error deleting product', 'error');
             }
         };
+
+        // Handle refresh button click
+        window.handleRefresh = async function() {
+            const refreshButton = document.getElementById('refreshButton');
+            refreshButton.classList.add('refreshing');
+            
+            try {
+                await displayOrders();
+                await displayProducts();
+                await updateStats();
+                showToast('Data refreshed successfully');
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                showToast('Error refreshing data', 'error');
+            } finally {
+                refreshButton.classList.remove('refreshing');
+            }
+        };
+
+        // Password validation
+        const ADMIN_PASSWORD = '123456'; // This should be stored securely in production
+        const passwordScreen = document.getElementById('passwordScreen');
+        const adminContent = document.getElementById('adminContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordMessage = document.getElementById('passwordMessage');
+        const submitButton = document.getElementById('submitPassword');
+        const digitInputs = document.querySelectorAll('.digit-input');
+
+        // Setup digit inputs
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value) {
+                    if (index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+                    checkPassword();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+            });
+        });
+
+        function checkPassword() {
+            const enteredPassword = Array.from(digitInputs)
+                .map(input => input.value)
+                .join('');
+            
+            submitButton.disabled = enteredPassword.length !== 6;
+        }
+
+        submitButton.addEventListener('click', () => {
+            const enteredPassword = Array.from(digitInputs)
+                .map(input => input.value)
+                .join('');
+            
+            if (enteredPassword === ADMIN_PASSWORD) {
+                passwordScreen.style.display = 'none';
+                adminContent.classList.add('visible');
+                initializeAdmin();
+            } else {
+                passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password';
+                passwordInput.classList.add('shake');
+                setTimeout(() => passwordInput.classList.remove('shake'), 500);
+                digitInputs.forEach(input => input.value = '');
+                digitInputs[0].focus();
+            }
+        });
     </script>
 </body>
 </html> 

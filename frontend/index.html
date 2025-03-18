@@ -204,37 +204,42 @@
         }
 
         // Add to cart
-        function addToCart(itemId) {
-            const products = getProducts();
-            let product = null;
-            
-            // Find the product
-            for (const category in products) {
-                const found = products[category].find(p => p.id === parseInt(itemId));
-                if (found) {
-                    product = found;
-                    break;
+        async function addToCart(itemId) {
+            try {
+                const products = await getProducts();
+                let product = null;
+                
+                // Find the product
+                for (const category in products) {
+                    const found = products[category].find(p => p.id === itemId);
+                    if (found) {
+                        product = found;
+                        break;
+                    }
                 }
-            }
 
-            if (product && product.available) {
-                const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
-                
-                // Check if item already in cart
-                const existingItem = cart.find(item => item.id === product.id);
-                if (existingItem) {
-                    existingItem.quantity += quantity;
-                } else {
-                    cart.push({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: quantity
-                    });
+                if (product && product.available) {
+                    const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
+                    
+                    // Check if item already in cart
+                    const existingItem = cart.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity += quantity;
+                    } else {
+                        cart.push({
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            quantity: quantity
+                        });
+                    }
+                    
+                    updateCartCount();
+                    showToast('Item added to cart!');
                 }
-                
-                updateCartCount();
-                showToast('Item added to cart!');
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showToast('Failed to add item to cart', 'error');
             }
         }
 

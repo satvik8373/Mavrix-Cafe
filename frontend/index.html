@@ -1124,7 +1124,7 @@
         }
 
         // Submit order
-        function submitOrder(event) {
+        async function submitOrder(event) {
             event.preventDefault();
             
             if (!tableNumber) {
@@ -1133,66 +1133,64 @@
             }
             
             const customerName = document.getElementById('customerName').value;
-            const customerPhone = document.getElementById('customerPhone').value;
+            const phoneNumber = document.getElementById('customerPhone').value;
             
-            const order = {
-                id: Date.now().toString(),
-                tableNumber,
+            if (!customerName || !phoneNumber) {
+                showToast('Please enter your name and phone number', 'error');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                showToast('Your cart is empty!', 'error');
+                return;
+            }
+
+            const orderData = {
+                tableNumber: parseInt(tableNumber),
+                items: cart.map(item => ({
+                    itemId: item._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                })),
+                totalAmount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
                 customerName,
-                customerPhone,
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                status: 'pending',
-                timestamp: new Date().toISOString()
+                phoneNumber,
+                status: 'pending'
             };
 
-            // Show loading animation
-            document.getElementById('loadingOverlay').style.display = 'block';
-            
-            // Simulate order processing with cooking animation
-            setTimeout(() => {
-                // Show completed state
-                const coffeeCup = document.getElementById('coffeeCup');
-                const coffeeSmoke = document.getElementById('coffeeSmoke');
-                const coffeeLiquid = document.getElementById('coffeeLiquid');
-                const checkMark = document.getElementById('checkMark');
-                const loadingText = document.getElementById('loadingText');
-
-                // Update to completed state
-                coffeeCup.classList.add('completed');
-                coffeeSmoke.classList.add('completed');
-                coffeeLiquid.classList.add('completed');
-                checkMark.classList.add('show');
-                loadingText.textContent = 'Order Ready!';
-                loadingText.style.color = '#27ae60';
-
-                // Save order
-                const orders = JSON.parse(localStorage.getItem('cafeOrders') || '[]');
-                orders.push(order);
-                localStorage.setItem('cafeOrders', JSON.stringify(orders));
+            try {
+                // Show loading animation
+                document.getElementById('loadingOverlay').style.display = 'block';
                 
-                // Wait a moment to show completion state
-                setTimeout(() => {
-                    // Reset animation states
-                    coffeeCup.classList.remove('completed');
-                    coffeeSmoke.classList.remove('completed');
-                    coffeeLiquid.classList.remove('completed');
-                    checkMark.classList.remove('show');
-                    loadingText.textContent = 'Preparing your order...';
-                    loadingText.style.color = 'white';
+                // Send order to backend
+                const response = await fetch(`${API_BASE_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
 
-                    // Clear cart and close modal
-                    cart = [];
-                    updateCartCount();
-                    closeOrderModal();
-                    
-                    // Hide loading animation
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    
-                    // Show success message
-                    showToast('Order placed successfully!');
-                }, 1500); // Show completion state for 1.5 seconds
-            }, 2000); // Initial preparation animation for 2 seconds
+                if (!response.ok) {
+                    throw new Error('Failed to submit order');
+                }
+
+                // Clear cart and form
+                cart = [];
+                updateCartCount();
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                closeOrderModal();
+                
+                // Show success message
+                showToast('Order placed successfully!', 'success');
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                showToast('Failed to place order. Please try again.', 'error');
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
         }
 
         // Add category scrolling functionality

@@ -1,7 +1,7 @@
 {
-  "name": "mavrix-cafe",
+  "name": "mavrix-cafe-backend",
   "version": "1.0.0",
-  "description": "Mavrix Cafe ordering system",
+  "description": "Backend for Mavrix Cafe",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -14,9 +14,6 @@
     "mongoose": "^7.0.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
-  },
-  "engines": {
-    "node": ">=14.0.0"
+    "nodemon": "^3.1.9"
   }
 }

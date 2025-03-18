@@ -35,22 +35,199 @@ const categoryButtons = document.querySelectorAll('.category-btn');
 const submitOrderBtn = document.getElementById('submitOrder');
 const orderSuccessModal = document.getElementById('orderSuccess');
 
-// Get products from localStorage or use default menu
+// Data persistence functions
+const STORAGE_KEYS = {
+    PRODUCTS: 'mavrix_cafe_products',
+    ORDERS: 'mavrix_cafe_orders',
+    BACKUP: 'mavrix_cafe_backup',
+    LAST_SYNC: 'mavrix_cafe_last_sync'
+};
+
+// Initialize default data if not exists
+function initializeDefaultData() {
+    try {
+        let products = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        let orders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        
+        // If no products exist, initialize with default menu
+        if (!products) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(menuData));
+            console.log('Initialized default products');
+        }
+        
+        // If no orders exist, initialize empty array
+        if (!orders) {
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
+            console.log('Initialized empty orders');
+        }
+        
+        createDataBackup();
+        
+        // Verify data was saved correctly
+        const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        
+        if (!savedProducts || !savedOrders) {
+            throw new Error('Data initialization failed');
+        }
+        
+        console.log('Data initialized successfully');
+    } catch (error) {
+        console.error('Error initializing data:', error);
+        // Fallback to default data
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(menuData));
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify([]));
+    }
+}
+
+// Create backup of all data
+function createDataBackup() {
+    try {
+        const backup = {
+            products: JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS)),
+            orders: JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS)),
+            timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(STORAGE_KEYS.BACKUP, JSON.stringify(backup));
+        localStorage.setItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
+        console.log('Data backup created:', backup);
+    } catch (error) {
+        console.error('Error creating backup:', error);
+    }
+}
+
+// Restore data from backup if main data is corrupted
+function restoreFromBackup() {
+    try {
+        const backup = JSON.parse(localStorage.getItem(STORAGE_KEYS.BACKUP));
+        if (backup) {
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(backup.products));
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(backup.orders));
+            console.log('Data restored from backup');
+            return true;
+        }
+    } catch (error) {
+        console.error('Error restoring from backup:', error);
+    }
+    return false;
+}
+
+// Enhanced getMenuData with improved error handling and logging
 function getMenuData() {
     try {
-        const products = localStorage.getItem('cafeProducts');
+        const products = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        console.log('Retrieved raw products data:', products);
+        
         if (products) {
             const parsedProducts = JSON.parse(products);
-            console.log('Retrieved products:', parsedProducts);
+            
+            // Validate data structure
+            if (!parsedProducts || typeof parsedProducts !== 'object') {
+                throw new Error('Invalid products data structure');
+            }
+            
+            // Ensure all required categories exist
+            const requiredCategories = ['drinks', 'food', 'desserts'];
+            requiredCategories.forEach(category => {
+                if (!parsedProducts[category]) {
+                    parsedProducts[category] = [];
+                }
+            });
+            
+            // Save validated structure back to storage
+            localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(parsedProducts));
+            console.log('Validated products data:', parsedProducts);
+            
             return parsedProducts;
         }
-        console.log('Using default menu data');
-        return menuData;
+        throw new Error('No products found');
     } catch (error) {
         console.error('Error getting menu data:', error);
+        if (restoreFromBackup()) {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.PRODUCTS));
+        }
         return menuData;
     }
 }
+
+// Enhanced getOrders with backup recovery
+function getOrders() {
+    try {
+        const orders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+        if (orders) {
+            const parsedOrders = JSON.parse(orders);
+            if (!Array.isArray(parsedOrders)) {
+                throw new Error('Invalid orders data');
+            }
+            return parsedOrders;
+        }
+        throw new Error('No orders found');
+    } catch (error) {
+        console.error('Error getting orders:', error);
+        // Try to restore from backup
+        if (restoreFromBackup()) {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.ORDERS));
+        }
+        // If backup fails, return empty array
+        return [];
+    }
+}
+
+// Enhanced saveOrders with backup creation
+function saveOrders(orders) {
+    try {
+        localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+        createDataBackup(); // Create backup after successful save
+        console.log('Orders saved successfully');
+    } catch (error) {
+        console.error('Error saving orders:', error);
+        alert('There was an error saving the order. Please try again.');
+    }
+}
+
+// Enhanced saveProducts with validation and sync
+function saveProducts(products) {
+    try {
+        // Validate products structure
+        if (!products || typeof products !== 'object') {
+            throw new Error('Invalid products data');
+        }
+        
+        // Ensure all products have required fields
+        Object.values(products).flat().forEach(product => {
+            if (!product.id || !product.name || typeof product.price !== 'number') {
+                throw new Error(`Invalid product data: ${JSON.stringify(product)}`);
+            }
+        });
+        
+        // Save to localStorage
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
+        console.log('Products saved successfully:', products);
+        
+        // Create backup
+        createDataBackup();
+        
+        // Verify save was successful
+        const savedData = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        if (!savedData) {
+            throw new Error('Product save verification failed');
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error saving products:', error);
+        alert('There was an error saving the products. Please try again.');
+        return false;
+    }
+}
+
+// Periodic backup check (every 5 minutes)
+setInterval(() => {
+    const lastSync = localStorage.getItem(STORAGE_KEYS.LAST_SYNC);
+    if (!lastSync || (new Date() - new Date(lastSync)) > 5 * 60 * 1000) {
+        createDataBackup();
+    }
+}, 5 * 60 * 1000);
 
 // Initialize menu
 function initializeMenu() {
@@ -62,12 +239,10 @@ function initializeMenu() {
 // Display menu items
 function displayMenuItems(category) {
     try {
-        console.log('Displaying category:', category);
-        menuItemsContainer.innerHTML = '';
+        menuItemsContainer.innerHTML = '<div class="loading">Loading menu items...</div>';
         
-        let items = [];
         const products = getMenuData();
-        console.log('Products data:', products);
+        let items = [];
         
         if (category === 'all') {
             Object.keys(products).forEach(cat => {
@@ -79,8 +254,8 @@ function displayMenuItems(category) {
             items = products[category];
         }
         
-        console.log('Items to display:', items);
-
+        menuItemsContainer.innerHTML = '';
+        
         if (items.length === 0) {
             menuItemsContainer.innerHTML = `
                 <div class="no-items-message">
@@ -186,22 +361,11 @@ function removeFromOrder(itemId) {
     updateOrderDisplay();
 }
 
-// Get orders from localStorage
-function getOrders() {
-    const orders = localStorage.getItem('cafeOrders');
-    return orders ? JSON.parse(orders) : [];
-}
-
-// Save orders to localStorage
-function saveOrders(orders) {
-    localStorage.setItem('cafeOrders', JSON.stringify(orders));
-}
-
-// Setup order submission
+// Modified setupOrderSubmission with enhanced error handling
 function setupOrderSubmission() {
     submitOrderBtn.addEventListener('click', () => {
-        const customerName = document.getElementById('customerName').value;
-        const customerPhone = document.getElementById('customerPhone').value;
+        const customerName = document.getElementById('customerName').value.trim();
+        const customerPhone = document.getElementById('customerPhone').value.trim();
 
         if (!customerName || !customerPhone) {
             alert('Please fill in your name and phone number');
@@ -218,7 +382,7 @@ function setupOrderSubmission() {
             console.log('Existing orders:', orders);
 
             const newOrder = {
-                id: Date.now().toString(), // Convert to string to match comparison in admin
+                id: Date.now().toString(),
                 tableNumber,
                 customerName,
                 customerPhone,
@@ -231,7 +395,6 @@ function setupOrderSubmission() {
 
             orders.push(newOrder);
             saveOrders(orders);
-            console.log('Orders after save:', getOrders());
             
             // Show success modal
             orderSuccessModal.style.display = 'flex';
@@ -243,8 +406,8 @@ function setupOrderSubmission() {
             document.getElementById('customerPhone').value = '';
 
         } catch (error) {
-            console.error('Error saving order:', error);
-            alert('There was an error saving your order. Please try again.');
+            console.error('Error processing order:', error);
+            alert('There was an error processing your order. Please try again.');
         }
     });
 }
@@ -327,8 +490,50 @@ styleSheet.textContent = `
             font-size: 0.9rem;
         }
     }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: var(--coffee-dark);
+        font-weight: 500;
+    }
+    
+    .menu-item {
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 `;
 document.head.appendChild(styleSheet);
 
+// Initialize data when the application starts
+initializeDefaultData();
+
 // Initialize the application
-initializeMenu(); 
+initializeMenu();
+
+// Add synchronization check on page load
+window.addEventListener('load', () => {
+    try {
+        initializeDefaultData();
+        
+        // Verify data accessibility
+        const products = getMenuData();
+        const orders = getOrders();
+        
+        console.log('Initial data load - Products:', products);
+        console.log('Initial data load - Orders:', orders);
+        
+        // Setup periodic data refresh
+        setInterval(() => {
+            displayMenuItems(document.querySelector('.category-btn.active')?.dataset.category || 'all');
+        }, 30000); // Refresh every 30 seconds
+        
+    } catch (error) {
+        console.error('Error during initial data load:', error);
+    }
+}); 

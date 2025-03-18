@@ -1377,11 +1377,94 @@
                 const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
                 const totalOrders = orders.length;
                 const activeItems = menuItems.filter(item => item.available).length;
+                const pendingOrders = orders.filter(order => order.status === 'pending').length;
+                const completedToday = orders.filter(order => {
+                    const orderDate = new Date(order.timestamp);
+                    const today = new Date();
+                    return order.status === 'completed' && 
+                           orderDate.toDateString() === today.toDateString();
+                }).length;
                 
-                // Update DOM
-                document.getElementById('totalRevenue').textContent = `₹${totalRevenue.toFixed(2)}`;
-                document.getElementById('totalOrders').textContent = totalOrders;
-                document.getElementById('activeItems').textContent = activeItems;
+                // Safely update DOM elements
+                const updateElement = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                };
+
+                // Update statistics
+                updateElement('revenueValue', totalRevenue.toFixed(2));
+                updateElement('ordersValue', totalOrders);
+                updateElement('scansValue', totalOrders); // Using orders as proxy for scans
+                updateElement('customersValue', new Set(orders.map(o => o.phoneNumber)).size);
+                updateElement('pendingOrdersCount', pendingOrders);
+                updateElement('completedOrdersCount', completedToday);
+                updateElement('totalProductsCount', menuItems.length);
+
+                // Calculate and display top products
+                const productSales = {};
+                orders.forEach(order => {
+                    order.items.forEach(item => {
+                        if (!productSales[item.name]) {
+                            productSales[item.name] = { quantity: 0, revenue: 0 };
+                        }
+                        productSales[item.name].quantity += item.quantity;
+                        productSales[item.name].revenue += item.price * item.quantity;
+                    });
+                });
+
+                const topProducts = Object.entries(productSales)
+                    .sort(([,a], [,b]) => b.revenue - a.revenue)
+                    .slice(0, 5);
+
+                const topProductsContainer = document.getElementById('topProducts');
+                if (topProductsContainer) {
+                    topProductsContainer.innerHTML = topProducts.length ? topProducts.map(([name, data]) => `
+                        <div class="top-item">
+                            <div class="top-item-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="top-item-info">
+                                <div class="top-item-title">${name}</div>
+                                <div class="top-item-value">₹${data.revenue.toFixed(2)} • ${data.quantity} sold</div>
+                            </div>
+                        </div>
+                    `).join('') : '<p>No sales data available</p>';
+                }
+
+                // Calculate and display top customers
+                const customerSales = {};
+                orders.forEach(order => {
+                    if (!customerSales[order.phoneNumber]) {
+                        customerSales[order.phoneNumber] = {
+                            name: order.customerName,
+                            visits: 0,
+                            spent: 0
+                        };
+                    }
+                    customerSales[order.phoneNumber].visits++;
+                    customerSales[order.phoneNumber].spent += order.totalAmount;
+                });
+
+                const topCustomers = Object.entries(customerSales)
+                    .sort(([,a], [,b]) => b.spent - a.spent)
+                    .slice(0, 5);
+
+                const topCustomersContainer = document.getElementById('topCustomers');
+                if (topCustomersContainer) {
+                    topCustomersContainer.innerHTML = topCustomers.length ? topCustomers.map(([phone, data]) => `
+                        <div class="top-item">
+                            <div class="top-item-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="top-item-info">
+                                <div class="top-item-title">${data.name}</div>
+                                <div class="top-item-value">₹${data.spent.toFixed(2)} • ${data.visits} visits</div>
+                            </div>
+                        </div>
+                    `).join('') : '<p>No customer data available</p>';
+                }
             } catch (error) {
                 console.error('Error updating stats:', error);
                 showToast('Error updating dashboard statistics', 'error');
@@ -1391,17 +1474,25 @@
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
+                // First display products and orders
                 await Promise.all([
                     displayProducts(),
-                    displayOrders(),
-                    updateStats()
+                    displayOrders()
                 ]);
                 
-                // Set up auto-refresh
-                setInterval(() => {
-                    displayOrders();
-                    updateStats();
-                }, 30000); // Refresh every 30 seconds
+                // Then update stats after a short delay to ensure DOM elements are ready
+                setTimeout(async () => {
+                    await updateStats();
+                    
+                    // Set up auto-refresh
+                    setInterval(() => {
+                        const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                        if (activeTab === 'dashboard') {
+                            updateStats();
+                        }
+                        displayOrders();
+                    }, 30000); // Refresh every 30 seconds
+                }, 500);
             } catch (error) {
                 console.error('Error initializing admin dashboard:', error);
                 showToast('Error initializing dashboard', 'error');

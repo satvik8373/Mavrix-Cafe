@@ -1474,24 +1474,26 @@
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
-                // First display products and orders
                 await Promise.all([
                     displayProducts(),
                     displayOrders()
                 ]);
                 
-                // Then update stats after a short delay to ensure DOM elements are ready
                 setTimeout(async () => {
-                    await updateStats();
+                    await Promise.all([
+                        updateStats(),
+                        updateDashboard('day')
+                    ]);
                     
-                    // Set up auto-refresh
+                    // Set up auto-refresh with proper tab checking
                     setInterval(() => {
                         const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
                         if (activeTab === 'dashboard') {
                             updateStats();
+                            updateDashboard(/* ... */);
                         }
                         displayOrders();
-                    }, 30000); // Refresh every 30 seconds
+                    }, 30000);
                 }, 500);
             } catch (error) {
                 console.error('Error initializing admin dashboard:', error);
@@ -1703,6 +1705,114 @@
                 refreshButton.classList.remove('refreshing');
             }, 1000);
         }
+
+        // Product Management Functions
+        async function editProduct(productId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
+                if (!response.ok) throw new Error('Failed to fetch product');
+                const product = await response.json();
+                
+                // Update form
+                document.getElementById('productId').value = product._id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productCategory').value = product.category;
+                
+                // Update form UI
+                document.getElementById('formTitle').textContent = 'Edit Product';
+                document.getElementById('submitButtonText').textContent = 'Update Product';
+                document.getElementById('cancelButton').style.display = 'block';
+                
+                // Scroll to form
+                document.querySelector('.product-form').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error editing product:', error);
+                showToast('Error loading product details', 'error');
+            }
+        }
+
+        async function toggleAvailability(productId, newAvailability) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ available: newAvailability })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update product availability');
+                
+                showToast(`Product ${newAvailability ? 'enabled' : 'disabled'} successfully`);
+                displayProducts();
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                showToast('Error updating product availability', 'error');
+            }
+        }
+
+        async function deleteProductConfirm(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to delete product');
+                    
+                    showToast('Product deleted successfully');
+                    displayProducts();
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    showToast('Error deleting product', 'error');
+                }
+            }
+        }
+
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            
+            const productId = document.getElementById('productId').value;
+            const productData = {
+                name: document.getElementById('productName').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                available: true
+            };
+            
+            try {
+                const url = productId 
+                    ? `${API_BASE_URL}/menu/${productId}`
+                    : `${API_BASE_URL}/menu`;
+                    
+                const response = await fetch(url, {
+                    method: productId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save product');
+                
+                showToast(`Product ${productId ? 'updated' : 'added'} successfully`);
+                resetProductForm();
+                displayProducts();
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showToast('Error saving product', 'error');
+            }
+        }
+
+        function resetProductForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('submitButtonText').textContent = 'Add Product';
+            document.getElementById('cancelButton').style.display = 'none';
+        }
+
     </script>
 </body>
 </html> 

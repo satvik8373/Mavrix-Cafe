@@ -910,11 +910,7 @@
                 return organizedProducts;
             } catch (error) {
                 console.error('Error fetching products:', error);
-                return {
-                    drinks: [],
-                    food: [],
-                    desserts: []
-                };
+                return { drinks: [], food: [], desserts: [] };
             }
         }
 

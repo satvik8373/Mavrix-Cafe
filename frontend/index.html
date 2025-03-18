@@ -11,6 +11,7 @@
     <title>Mavrix Cafe</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="config.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -790,49 +791,9 @@
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <header class="header">
-            <div class="header-content">
-                <h1><i class="fas fa-coffee"></i> Mavrix Cafe</h1>
-                <p>Delicious food & beverages at your table</p>
-                <div class="table-info">
-                    <i class="fas fa-table"></i> Table <span id="tableNumber">-</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="category-tabs-container">
-            <button class="scroll-arrow left" onclick="scrollCategories('left')" id="leftArrow">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="scroll-arrow right" onclick="scrollCategories('right')" id="rightArrow">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <div class="category-tabs">
-                <div class="category-scroll" id="categoryScroll">
-                    <button class="category-tab active" data-category="all">
-                        <i class="fas fa-th-list"></i> All Items
-                    </button>
-                    <button class="category-tab" data-category="drinks">
-                        <i class="fas fa-coffee"></i> Drinks
-                    </button>
-                    <button class="category-tab" data-category="food">
-                        <i class="fas fa-utensils"></i> Food
-                    </button>
-                    <button class="category-tab" data-category="desserts">
-                        <i class="fas fa-ice-cream"></i> Desserts
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="menu-grid" id="menuGrid"></div>
-
-        <div class="cart-preview" onclick="openOrderModal()">
-            <i class="fas fa-shopping-cart"></i>
-            <span>View Cart</span>
-            <div class="cart-count" id="cartCount">0</div>
-        </div>
+    <div id="menuItems" class="menu-container">
+        <!-- Menu items will be loaded here -->
+        <p>Loading menu items...</p>
     </div>
 
     <div id="orderModal">
@@ -883,6 +844,16 @@
     </div>
 
     <script>
+        // Debug logging
+        console.log('Config loaded:', window.config);
+        console.log('API URL:', window.config.API_URL);
+
+        // Call getMenuItems when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded, fetching menu items...');
+            getMenuItems();
+        });
+
         let cart = [];
         let tableNumber = null;
 
@@ -1236,6 +1207,44 @@
             document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
             window.addEventListener('resize', updateScrollArrows);
         });
+
+        async function getMenuItems() {
+            try {
+                console.log('Fetching menu items from:', `${window.config.API_URL}/menu`);
+                const response = await fetch(`${window.config.API_URL}/menu`);
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch menu items: ${response.status}`);
+                }
+                const menuItems = await response.json();
+                console.log('Received menu items:', menuItems);
+                displayMenuItems(menuItems);
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+                showToast('Error loading menu items', 'error');
+            }
+        }
+
+        // Add error handling and logging
+        function displayMenuItems(items) {
+            console.log('Displaying menu items:', items);
+            const menuContainer = document.getElementById('menuItems');
+            if (!menuContainer) {
+                console.error('Menu container not found');
+                return;
+            }
+            menuContainer.innerHTML = '';
+            
+            if (!items || items.length === 0) {
+                menuContainer.innerHTML = '<p>No menu items available</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const itemElement = createMenuItemElement(item);
+                menuContainer.appendChild(itemElement);
+            });
+        }
     </script>
 </body>
 </html> 

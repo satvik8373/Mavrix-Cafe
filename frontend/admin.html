@@ -32,9 +32,10 @@
         }
 
         .admin-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            min-height: 100vh;
         }
 
         .admin-header {
@@ -110,6 +111,19 @@
             box-shadow: var(--shadow);
         }
 
+        .tab-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
         .tab-btn {
             padding: 1rem 2rem;
             border: none;
@@ -119,8 +133,10 @@
             transition: var(--transition);
             font-weight: 500;
             color: var(--text-secondary);
-            flex: 1;
-            text-align: center;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .tab-btn:hover {
@@ -479,6 +495,100 @@
             
             .product-price {
                 align-self: flex-start;
+            }
+
+            .admin-container {
+                padding: 10px;
+            }
+            
+            .tab-container {
+                padding: 0.5rem;
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                flex: 1;
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .product-form {
+                padding: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .orders-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .filter-buttons {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .time-filter {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .time-filter button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .qr-generator-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+
+            .qr-generator-btn i {
+                font-size: 1.2rem;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            input[type="tel"],
+            select {
+                font-size: 16px !important;
+                padding: 0.8rem !important;
+            }
+
+            .validation-message {
+                font-size: 0.9rem;
+                padding: 0.8rem;
             }
         }
 
@@ -1034,6 +1144,131 @@
             z-index: 1000;
             padding: 0 2rem;
         }
+
+        .qr-generator-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+            text-decoration: none;
+        }
+
+        .qr-generator-btn:hover {
+            transform: scale(1.1);
+            background: var(--accent-color);
+        }
+
+        .qr-generator-btn i {
+            font-size: 1.5rem;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+
+            .tab-container {
+                padding: 0.5rem;
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                flex: 1;
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .product-form {
+                padding: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .orders-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .filter-buttons {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .time-filter {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+
+            .time-filter button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+                flex: 1;
+                min-width: 100px;
+            }
+
+            .qr-generator-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+
+            .qr-generator-btn i {
+                font-size: 1.2rem;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            input[type="tel"],
+            select {
+                font-size: 16px !important;
+                padding: 0.8rem !important;
+            }
+
+            .validation-message {
+                font-size: 0.9rem;
+                padding: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1258,6 +1493,11 @@
 
                 <div class="product-grid" id="productGrid"></div>
             </div>
+
+            <!-- Add QR Generator Button -->
+            <a href="qr-generator.html" class="qr-generator-btn" title="Generate QR Codes">
+                <i class="fas fa-qrcode"></i>
+            </a>
         </div>
     </div>
 
@@ -1882,6 +2122,49 @@
             setTimeout(() => {
                 validationMessage.classList.remove('show');
             }, 3000);
+        }
+
+        function setupMobileOptimizations() {
+            // Prevent double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (event) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Prevent pinch zoom
+            document.addEventListener('touchmove', (event) => {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+
+            // Handle tab scrolling on mobile
+            const tabContainer = document.querySelector('.tab-container');
+            let isScrolling = false;
+            let startX;
+            let scrollLeft;
+
+            tabContainer.addEventListener('touchstart', (e) => {
+                isScrolling = true;
+                startX = e.touches[0].pageX - tabContainer.offsetLeft;
+                scrollLeft = tabContainer.scrollLeft;
+            });
+
+            tabContainer.addEventListener('touchmove', (e) => {
+                if (!isScrolling) return;
+                e.preventDefault();
+                const x = e.touches[0].pageX - tabContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                tabContainer.scrollLeft = scrollLeft - walk;
+            });
+
+            tabContainer.addEventListener('touchend', () => {
+                isScrolling = false;
+            });
         }
     </script>
 </body>

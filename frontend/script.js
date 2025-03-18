@@ -1,14 +1,19 @@
-// API URL
-const API_URL = 'http://localhost:3000/api';
+// Import config
+import config from './config.js';
+
+// Use config API URL
+const API_URL = config.API_URL;
 
 // Fetch menu items from MongoDB
 async function getMenuItems() {
     try {
         const response = await fetch(`${API_URL}/menu`);
+        if (!response.ok) throw new Error('Failed to fetch menu items');
         const menuItems = await response.json();
         return menuItems;
     } catch (error) {
         console.error('Error fetching menu items:', error);
+        showToast('Error fetching menu items', 'error');
         return [];
     }
 }
@@ -23,10 +28,12 @@ async function saveOrder(orderData) {
             },
             body: JSON.stringify(orderData)
         });
+        if (!response.ok) throw new Error('Failed to save order');
         const order = await response.json();
         return order;
     } catch (error) {
         console.error('Error saving order:', error);
+        showToast('Error saving order', 'error');
         throw error;
     }
 }

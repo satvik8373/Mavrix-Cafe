@@ -886,6 +886,15 @@
         let cart = [];
         let tableNumber = null;
 
+        // Get table number from URL
+        function getTableNumber() {
+            const params = new URLSearchParams(window.location.search);
+            tableNumber = params.get('table');
+            if (tableNumber) {
+                document.getElementById('tableNumber').textContent = tableNumber;
+            }
+        }
+
         // API Configuration
         const API_BASE_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000/api'
@@ -910,56 +919,67 @@
                 return organizedProducts;
             } catch (error) {
                 console.error('Error fetching products:', error);
+                showToast('Failed to load menu items', 'error');
                 return { drinks: [], food: [], desserts: [] };
             }
         }
 
         // Get products from localStorage or API
         async function getProducts() {
-            let products = localStorage.getItem('cafeProducts');
-            if (!products) {
-                products = await fetchProducts();
-            } else {
-                products = JSON.parse(products);
-                // Refresh products in background
-                fetchProducts();
+            try {
+                let products = localStorage.getItem('cafeProducts');
+                if (!products) {
+                    return await fetchProducts();
+                } else {
+                    products = JSON.parse(products);
+                    // Refresh products in background
+                    fetchProducts().catch(console.error);
+                    return products;
+                }
+            } catch (error) {
+                console.error('Error getting products:', error);
+                return await fetchProducts();
             }
-            return products;
         }
 
         // Display menu items
         async function displayMenuItems(category = 'all') {
-            const menuGrid = document.getElementById('menuGrid');
-            const products = await getProducts();
-            menuGrid.innerHTML = '';
+            try {
+                const menuGrid = document.getElementById('menuGrid');
+                const products = await getProducts();
+                menuGrid.innerHTML = '';
 
-            Object.entries(products).forEach(([productCategory, items]) => {
-                if (category === 'all' || category === productCategory) {
-                    items.forEach(item => {
-                        const menuItem = document.createElement('div');
-                        menuItem.className = 'menu-item';
-                        
-                        menuItem.innerHTML = `
-                            ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
-                            <div class="menu-item-header">
-                                <h3 class="menu-item-title">${item.name}</h3>
-                                <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
-                            </div>
-                            <div class="menu-item-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)">-</button>
-                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item._id}">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)">+</button>
+                Object.entries(products).forEach(([productCategory, items]) => {
+                    if (category === 'all' || category === productCategory) {
+                        items.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            
+                            menuItem.innerHTML = `
+                                ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
+                                <div class="menu-item-header">
+                                    <h3 class="menu-item-title">${item.name}</h3>
+                                    <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
                                 </div>
-                                <button class="add-to-cart" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
-                                    <i class="fas fa-plus"></i> Add to Cart
-                                </button>
-                            </div>
-                        `;
-                        menuGrid.appendChild(menuItem);
-                    });
-                }
-            });
+                                <div class="menu-item-actions">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)">-</button>
+                                        <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item._id}">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)">+</button>
+                                    </div>
+                                    <button class="add-to-cart" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
+                                        <i class="fas fa-plus"></i> Add to Cart
+                                    </button>
+                                </div>
+                            `;
+                            menuGrid.appendChild(menuItem);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error displaying menu items:', error);
+                showToast('Failed to display menu items', 'error');
+            }
         }
 
         // Update quantity
@@ -971,62 +991,73 @@
         }
 
         // Add to cart
-        function addToCart(itemId) {
-            const products = getProducts();
-            let product = null;
-            
-            // Find the product
-            for (const category in products) {
-                const found = products[category].find(p => p.id === parseInt(itemId));
-                if (found) {
-                    product = found;
-                    break;
+        async function addToCart(itemId) {
+            try {
+                const products = await getProducts();
+                let product = null;
+                
+                // Find the product
+                for (const category in products) {
+                    const found = products[category].find(p => p._id === itemId);
+                    if (found) {
+                        product = found;
+                        break;
+                    }
                 }
-            }
 
-            if (product && product.available) {
-                const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
-                
-                // Check if item already in cart
-                const existingItem = cart.find(item => item.id === product.id);
-                if (existingItem) {
-                    existingItem.quantity += quantity;
-                } else {
-                    cart.push({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: quantity
-                    });
+                if (product && product.available) {
+                    const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
+                    
+                    // Check if item already in cart
+                    const existingItem = cart.find(item => item._id === product._id);
+                    if (existingItem) {
+                        existingItem.quantity += quantity;
+                    } else {
+                        cart.push({
+                            _id: product._id,
+                            name: product.name,
+                            price: product.price,
+                            quantity: quantity
+                        });
+                    }
+                    
+                    updateCartCount();
+                    showToast('Item added to cart!');
                 }
-                
-                updateCartCount();
-                showToast('Item added to cart!');
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showToast('Failed to add item to cart', 'error');
             }
         }
 
         // Show toast message
-        function showToast(message) {
+        function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.style.cssText = `
                 position: fixed;
                 bottom: 100px;
                 right: 20px;
-                background: var(--success-color);
+                background: ${type === 'success' ? 'var(--success-color)' : 'var(--secondary-color)'};
                 color: white;
                 padding: 1rem 2rem;
                 border-radius: var(--border-radius);
                 box-shadow: var(--shadow);
                 animation: slideIn 0.3s ease;
                 z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             `;
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${message}
+            `;
             document.body.appendChild(toast);
             
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
-            }, 2000);
+            }, 3000);
         }
 
         // Update cart count
@@ -1071,7 +1102,7 @@
                         <div class="cart-item-price">₹${item.price.toFixed(2)} x ${item.quantity}</div>
                     </div>
                     <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
-                    <button class="quantity-btn" onclick="removeFromCart(${item.id})">
+                    <button class="quantity-btn" onclick="removeFromCart(${item._id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 `;
@@ -1083,7 +1114,7 @@
 
         // Remove from cart
         function removeFromCart(itemId) {
-            cart = cart.filter(item => item.id !== itemId);
+            cart = cart.filter(item => item._id !== itemId);
             updateCartCount();
             displayCartItems();
             
@@ -1247,16 +1278,27 @@
             }, { once: true });
         }
 
-        // Update the initialization
-        window.addEventListener('load', () => {
-            getTableNumber();
-            displayMenuItems('all');
-            setupCategoryTabs();
-            updateScrollArrows();
-            setupMobileOptimizations();
-            
-            document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
-            window.addEventListener('resize', updateScrollArrows);
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                getTableNumber();
+                await displayMenuItems('all');
+                setupCategoryTabs();
+                updateScrollArrows();
+                setupMobileOptimizations();
+                
+                // Add scroll event listener
+                const categoryScroll = document.getElementById('categoryScroll');
+                if (categoryScroll) {
+                    categoryScroll.addEventListener('scroll', updateScrollArrows);
+                }
+                
+                // Add resize event listener
+                window.addEventListener('resize', updateScrollArrows);
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                showToast('Failed to initialize page', 'error');
+            }
         });
     </script>
 </body>

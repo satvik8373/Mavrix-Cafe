@@ -1226,36 +1226,223 @@
             }
         }
 
-        // Fetch menu items
-        async function getMenuItems() {
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }, 100);
+        }
+
+        // Display orders
+        async function displayOrders() {
             try {
-                const response = await fetch(`${API_URL}/menu`);
-                if (!response.ok) throw new Error('Failed to fetch menu items');
-                return await response.json();
+                const orders = await getOrders();
+                const ordersGrid = document.getElementById('ordersGrid');
+                ordersGrid.innerHTML = '';
+
+                if (orders.length === 0) {
+                    ordersGrid.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-inbox"></i>
+                            <p>No orders found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                orders.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = `order-card ${order.status}`;
+                    orderCard.innerHTML = `
+                        <div class="order-header">
+                            <h3>Table ${order.tableNumber}</h3>
+                            <span class="status-badge status-${order.status}">${order.status}</span>
+                        </div>
+                        <div class="order-info">
+                            <p><strong>Customer:</strong> ${order.customerName}</p>
+                            <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                            <p><strong>Time:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="order-items">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.name} x ${item.quantity}</span>
+                                    <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="order-total">
+                            <span>Total:</span>
+                            <span>₹${order.totalAmount.toFixed(2)}</span>
+                        </div>
+                        ${order.status === 'pending' ? `
+                            <button class="complete-btn" onclick="completeOrder('${order._id}')">
+                                <i class="fas fa-check"></i> Complete Order
+                            </button>
+                        ` : ''}
+                    `;
+                    ordersGrid.appendChild(orderCard);
+                });
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error fetching menu items', 'error');
-                return [];
+                console.error('Error displaying orders:', error);
+                showToast('Error displaying orders', 'error');
             }
         }
 
-        // Fetch orders
-        async function getOrders() {
+        // Display products
+        async function displayProducts() {
             try {
-                const response = await fetch(`${API_URL}/orders`);
-                if (!response.ok) throw new Error('Failed to fetch orders');
-                return await response.json();
+                const products = await getMenuItems();
+                const productGrid = document.getElementById('productGrid');
+                productGrid.innerHTML = '';
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <div class="product-header">
+                            <h3>${product.name}</h3>
+                            <span class="product-price">₹${product.price.toFixed(2)}</span>
+                        </div>
+                        <div class="product-category">
+                            <i class="fas ${getCategoryIcon(product.category)}"></i>
+                            ${product.category}
+                        </div>
+                        <div class="product-actions">
+                            <button class="action-btn edit-btn" onclick="editProduct('${product._id}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="action-btn toggle-btn ${!product.available ? 'unavailable' : ''}" 
+                                onclick="toggleAvailability('${product._id}')">
+                                <i class="fas ${product.available ? 'fa-check' : 'fa-times'}"></i>
+                                ${product.available ? 'Available' : 'Unavailable'}
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteProduct('${product._id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    productGrid.appendChild(productCard);
+                });
             } catch (error) {
-                console.error('Error:', error);
-                showToast('Error fetching orders', 'error');
-                return [];
+                console.error('Error displaying products:', error);
+                showToast('Error displaying products', 'error');
             }
         }
 
-        // ... rest of the JavaScript code ...
+        // Update dashboard statistics
+        async function updateStats() {
+            try {
+                const orders = await getOrders();
+                const pendingOrders = orders.filter(order => order.status === 'pending');
+                const completedToday = orders.filter(order => {
+                    return order.status === 'completed' && 
+                        new Date(order.timestamp).toDateString() === new Date().toDateString();
+                });
+
+                document.getElementById('pendingOrdersCount').textContent = pendingOrders.length;
+                document.getElementById('completedOrdersCount').textContent = completedToday.length;
+                
+                const products = await getMenuItems();
+                document.getElementById('totalProductsCount').textContent = products.length;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+                showToast('Error updating statistics', 'error');
+            }
+        }
+
+        // Setup auto-refresh
+        function setupAutoRefresh() {
+            setInterval(async () => {
+                const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                if (activeTab === 'orders') {
+                    await displayOrders();
+                }
+                await updateStats();
+            }, 30000); // Refresh every 30 seconds
+        }
+
+        // Setup filter buttons
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    await displayOrders(button.dataset.filter);
+                });
+            });
+        }
+
+        // Helper function for category icons
+        function getCategoryIcon(category) {
+            const icons = {
+                drinks: 'fa-coffee',
+                food: 'fa-utensils',
+                desserts: 'fa-ice-cream'
+            };
+            return icons[category] || 'fa-box';
+        }
 
         // Initialize when the page loads
         document.addEventListener('DOMContentLoaded', initializeAdmin);
+
+        // Make functions available globally
+        window.completeOrder = async function(orderId) {
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}/complete`, {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Failed to complete order');
+                await displayOrders();
+                showToast('Order completed successfully');
+            } catch (error) {
+                console.error('Error completing order:', error);
+                showToast('Error completing order', 'error');
+            }
+        };
+
+        window.editProduct = function(productId) {
+            // Implementation for editing product
+        };
+
+        window.toggleAvailability = async function(productId) {
+            try {
+                const response = await fetch(`${API_URL}/menu/${productId}/toggle`, {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Failed to toggle availability');
+                await displayProducts();
+                showToast('Product availability updated');
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                showToast('Error updating product', 'error');
+            }
+        };
+
+        window.deleteProduct = async function(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            try {
+                const response = await fetch(`${API_URL}/menu/${productId}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete product');
+                await displayProducts();
+                showToast('Product deleted successfully');
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showToast('Error deleting product', 'error');
+            }
+        };
     </script>
 </body>
 </html> 

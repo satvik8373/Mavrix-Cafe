@@ -123,49 +123,76 @@
             }
         }
 
-        // Get products from localStorage
-        function getProducts() {
-            const products = localStorage.getItem('cafeProducts');
-            return products ? JSON.parse(products) : {
-                drinks: [],
-                food: [],
-                desserts: []
-            };
+        // Get products from API
+        async function getProducts() {
+            try {
+                const response = await fetch(`${API_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                const menuItems = await response.json();
+                
+                // Group products by category
+                return menuItems.reduce((acc, item) => {
+                    if (!acc[item.category]) {
+                        acc[item.category] = [];
+                    }
+                    acc[item.category].push({
+                        id: item._id,
+                        name: item.name,
+                        price: item.price,
+                        category: item.category,
+                        description: item.description,
+                        available: item.available
+                    });
+                    return acc;
+                }, { drinks: [], food: [], desserts: [] });
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                showToast('Error loading menu items', 'error');
+                return { drinks: [], food: [], desserts: [] };
+            }
         }
 
         // Display menu items
-        function displayMenuItems(category = 'all') {
+        async function displayMenuItems(category = 'all') {
             const menuGrid = document.getElementById('menuGrid');
-            const products = getProducts();
-            menuGrid.innerHTML = '';
+            menuGrid.innerHTML = '<div class="loading-text">Loading menu items...</div>';
+            
+            try {
+                const products = await getProducts();
+                menuGrid.innerHTML = '';
 
-            Object.entries(products).forEach(([productCategory, items]) => {
-                if (category === 'all' || category === productCategory) {
-                    items.forEach(item => {
-                        const menuItem = document.createElement('div');
-                        menuItem.className = 'menu-item';
-                        
-                        menuItem.innerHTML = `
-                            ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
-                            <div class="menu-item-header">
-                                <h3 class="menu-item-title">${item.name}</h3>
-                                <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
-                            </div>
-                            <div class="menu-item-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item.id}">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                Object.entries(products).forEach(([productCategory, items]) => {
+                    if (category === 'all' || category === productCategory) {
+                        items.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            
+                            menuItem.innerHTML = `
+                                ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
+                                <div class="menu-item-header">
+                                    <h3 class="menu-item-title">${item.name}</h3>
+                                    <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
                                 </div>
-                                <button class="add-to-cart" onclick="addToCart('${item.id}')" ${!item.available ? 'disabled' : ''}>
-                                    <i class="fas fa-plus"></i> Add to Cart
-                                </button>
-                            </div>
-                        `;
-                        menuGrid.appendChild(menuItem);
-                    });
-                }
-            });
+                                <p class="menu-item-description">${item.description || ''}</p>
+                                <div class="menu-item-actions">
+                                    <div class="quantity-control">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                                        <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item.id}">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                                    </div>
+                                    <button class="add-to-cart" onclick="addToCart('${item.id}')" ${!item.available ? 'disabled' : ''}>
+                                        <i class="fas fa-plus"></i> Add to Cart
+                                    </button>
+                                </div>
+                            `;
+                            menuGrid.appendChild(menuItem);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error displaying menu items:', error);
+                menuGrid.innerHTML = '<div class="error-text">Failed to load menu items. Please try again later.</div>';
+            }
         }
 
         // Update quantity
@@ -299,33 +326,49 @@
         }
 
         // Submit order
-        function submitOrder(event) {
+        async function submitOrder(event) {
             event.preventDefault();
             
             if (!tableNumber) {
-                showToast('Invalid table number!');
+                showToast('Invalid table number!', 'error');
                 return;
             }
             
             const customerName = document.getElementById('customerName').value;
             const customerPhone = document.getElementById('customerPhone').value;
             
-            const order = {
-                id: Date.now().toString(),
-                tableNumber,
+            // Prepare order data
+            const orderData = {
+                tableNumber: parseInt(tableNumber),
                 customerName,
-                customerPhone,
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                status: 'pending',
-                timestamp: new Date().toISOString()
+                phoneNumber: customerPhone,
+                items: cart.map(item => ({
+                    itemId: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                })),
+                totalAmount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                status: 'pending'
             };
 
             // Show loading animation
             document.getElementById('loadingOverlay').style.display = 'block';
             
-            // Simulate order processing with cooking animation
-            setTimeout(() => {
+            try {
+                // Send order to server
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit order');
+                }
+
                 // Show completed state
                 const coffeeCup = document.getElementById('coffeeCup');
                 const coffeeSmoke = document.getElementById('coffeeSmoke');
@@ -341,11 +384,6 @@
                 loadingText.textContent = 'Order Ready!';
                 loadingText.style.color = '#27ae60';
 
-                // Save order
-                const orders = JSON.parse(localStorage.getItem('cafeOrders') || '[]');
-                orders.push(order);
-                localStorage.setItem('cafeOrders', JSON.stringify(orders));
-                
                 // Wait a moment to show completion state
                 setTimeout(() => {
                     // Reset animation states
@@ -366,8 +404,12 @@
                     
                     // Show success message
                     showToast('Order placed successfully!');
-                }, 1500); // Show completion state for 1.5 seconds
-            }, 2000); // Initial preparation animation for 2 seconds
+                }, 1500);
+            } catch (error) {
+                console.error('Error submitting order:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Failed to submit order. Please try again.', 'error');
+            }
         }
 
         // Add category scrolling functionality
@@ -408,10 +450,10 @@
         function setupCategoryTabs() {
             const tabs = document.querySelectorAll('.category-tab');
             tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
+                tab.addEventListener('click', async () => {
                     tabs.forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    displayMenuItems(tab.dataset.category);
+                    await displayMenuItems(tab.dataset.category);
                 });
             });
         }
@@ -453,61 +495,30 @@
             }, { once: true });
         }
 
-        // Update the initialization
-        window.addEventListener('load', () => {
-            getTableNumber();
-            displayMenuItems();
-            setupCategoryTabs();
-            updateScrollArrows();
-            setupMobileOptimizations();
-            
-            document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
-            window.addEventListener('resize', updateScrollArrows);
-        });
-
-        // Initialize menu
+        // Initialize when the page loads
         async function initializeMenu() {
             try {
-                const menuItems = await getMenuItems();
-                displayMenuItems('all', menuItems);
-                setupFilterButtons();
+                getTableNumber();
+                await displayMenuItems();
+                setupCategoryTabs();
+                updateScrollArrows();
+                setupMobileOptimizations();
+                
+                document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
+                window.addEventListener('resize', updateScrollArrows);
             } catch (error) {
                 console.error('Error initializing menu:', error);
-                showToast('Error loading menu', 'error');
+                showToast('Error initializing menu', 'error');
             }
         }
 
-        // Fetch menu items
-        async function getMenuItems() {
-            try {
-                const response = await fetch(`${API_URL}/menu`);
-                if (!response.ok) throw new Error('Failed to fetch menu items');
-                return await response.json();
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error fetching menu items', 'error');
-                return [];
-            }
-        }
-
-        // Save order
-        async function saveOrder(orderData) {
-            try {
-                const response = await fetch(`${API_URL}/orders`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(orderData)
-                });
-                if (!response.ok) throw new Error('Failed to save order');
-                return await response.json();
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Error saving order', 'error');
-                throw error;
-            }
-        }
+        // Make functions available globally
+        window.updateQuantity = updateQuantity;
+        window.addToCart = addToCart;
+        window.openOrderModal = openOrderModal;
+        window.closeOrderModal = closeOrderModal;
+        window.scrollCategories = scrollCategories;
+        window.submitOrder = submitOrder;
 
         // Initialize when the page loads
         document.addEventListener('DOMContentLoaded', initializeMenu);

@@ -870,8 +870,10 @@
             align-items: center;
             gap: 12px;
             transform: translateX(120%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10000;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .toast.show {
@@ -880,44 +882,33 @@
 
         .toast i {
             font-size: 20px;
+            flex-shrink: 0;
         }
 
         .toast-success {
-            border-left: 4px solid var(--success-color);
-        }
-
-        .toast-success i {
-            color: var(--success-color);
+            border-left: 4px solid #2ecc71;
         }
 
         .toast-error {
-            border-left: 4px solid var(--danger-color);
-        }
-
-        .toast-error i {
-            color: var(--danger-color);
+            border-left: 4px solid #e74c3c;
         }
 
         .toast-warning {
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .toast-warning i {
-            color: var(--warning-color);
+            border-left: 4px solid #f1c40f;
         }
 
         .toast-info {
-            border-left: 4px solid #2196F3;
+            border-left: 4px solid #3498db;
         }
 
-        .toast-info i {
-            color: #2196F3;
-        }
+        .toast-success i { color: #2ecc71; }
+        .toast-error i { color: #e74c3c; }
+        .toast-warning i { color: #f1c40f; }
+        .toast-info i { color: #3498db; }
 
         .toast-message {
             flex: 1;
-            font-size: 14px;
-            line-height: 1.4;
+            font-weight: 500;
         }
 
         .toast-close {
@@ -928,6 +919,7 @@
             cursor: pointer;
             padding: 0;
             line-height: 1;
+            transition: color 0.2s ease;
         }
 
         .toast-close:hover {
@@ -1177,6 +1169,10 @@
 
         // Toast Notification System
         function showToast(message, type = 'success') {
+            // Remove any existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             
@@ -1197,10 +1193,26 @@
                     break;
             }
             
-            // Create message container
+            // Create message container with formatted message
             const messageDiv = document.createElement('div');
             messageDiv.className = 'toast-message';
-            messageDiv.textContent = message;
+            
+            // Format the error message to be more professional
+            if (type === 'error') {
+                if (message.includes('Cannot GET')) {
+                    messageDiv.textContent = 'Product not found. It may have been deleted or moved.';
+                } else if (message.includes('Failed to fetch')) {
+                    messageDiv.textContent = 'Unable to connect to server. Please check your connection.';
+                } else if (message.includes('NetworkError')) {
+                    messageDiv.textContent = 'Network error occurred. Please try again.';
+                } else if (message.includes('required')) {
+                    messageDiv.textContent = message.charAt(0).toUpperCase() + message.slice(1);
+                } else {
+                    messageDiv.textContent = message;
+                }
+            } else {
+                messageDiv.textContent = message;
+            }
             
             // Add close button
             const closeBtn = document.createElement('button');
@@ -1219,11 +1231,11 @@
                 toast.classList.add('show');
             });
             
-            // Auto dismiss after 5 seconds
+            // Auto dismiss after 4 seconds for success, 6 seconds for errors
             const timeout = setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
-            }, 5000);
+            }, type === 'error' ? 6000 : 4000);
             
             // Clear timeout if manually closed
             closeBtn.onclick = () => {
@@ -1243,26 +1255,43 @@
                 const productsContainer = document.getElementById('productGrid');
                 productsContainer.innerHTML = '';
                 
+                if (!Array.isArray(products) || products.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="no-products">
+                            <i class="fas fa-box-open"></i>
+                            <p>No products available</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 products.forEach(product => {
                     const productCard = createProductCard(product);
-                    productsContainer.appendChild(productCard);
+                    if (productCard) {
+                        productsContainer.appendChild(productCard);
+                    }
                 });
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast('Error loading products', 'error');
+                showToast('Error loading products: ' + error.message, 'error');
             }
         }
 
         // Create product card
         function createProductCard(product) {
+            if (!product || !product._id) {
+                console.error('Invalid product data:', product);
+                return null;
+            }
+
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="product-header">
-                    <h3>${product.name}</h3>
-                    <span class="product-price">₹${product.price.toFixed(2)}</span>
+                    <h3>${escapeHtml(product.name)}</h3>
+                    <span class="product-price">₹${(product.price || 0).toFixed(2)}</span>
                 </div>
-                <span class="product-category">${product.category}</span>
+                <span class="product-category">${escapeHtml(product.category)}</span>
                 <div class="product-actions">
                     <button onclick="editProduct('${product._id}')" class="action-btn edit-btn">
                         <i class="fas fa-edit"></i> Edit
@@ -1708,30 +1737,75 @@
         // Product Management Functions
         async function editProduct(productId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Failed to load product details');
+                // Show loading state
+                showToast('Loading product details...', 'info');
+                
+                // Validate product ID
+                if (!productId || typeof productId !== 'string') {
+                    throw new Error('Invalid product ID');
                 }
+
+                // Clean the product ID (remove any invalid characters)
+                const cleanProductId = productId.trim().replace(/[^a-zA-Z0-9]/g, '');
+                
+                const response = await fetch(`${API_BASE_URL}/menu/${cleanProductId}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Product not found or may have been deleted');
+                    } else if (response.status === 400) {
+                        throw new Error('Invalid product ID format');
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Unable to load product details');
+                    }
+                }
+
                 const product = await response.json();
                 
-                // Update form
-                document.getElementById('productId').value = product._id;
-                document.getElementById('productName').value = product.name;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productCategory').value = product.category;
-                
-                // Update form UI
-                document.getElementById('formTitle').textContent = 'Edit Product';
-                document.getElementById('submitButtonText').textContent = 'Update Product';
-                document.getElementById('cancelButton').style.display = 'block';
-                
-                // Switch to products tab
-                document.querySelector('[data-tab="products"]').click();
-                showToast('Product loaded successfully', 'success');
+                if (!product || !product._id) {
+                    throw new Error('Invalid product data received');
+                }
+
+                // Switch to products tab first
+                const productsTab = document.querySelector('[data-tab="products"]');
+                if (productsTab) {
+                    productsTab.click();
+                }
+
+                // Scroll to the form
+                const productForm = document.getElementById('productForm');
+                if (productForm) {
+                    productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // Update form with a slight delay to ensure smooth transition
+                setTimeout(() => {
+                    // Update form fields
+                    document.getElementById('productId').value = product._id;
+                    document.getElementById('productName').value = product.name || '';
+                    document.getElementById('productPrice').value = product.price || '';
+                    document.getElementById('productCategory').value = product.category || '';
+                    
+                    // Update form UI
+                    document.getElementById('formTitle').textContent = 'Edit Product';
+                    document.getElementById('submitButtonText').textContent = 'Update Product';
+                    
+                    const cancelButton = document.getElementById('cancelButton');
+                    if (cancelButton) {
+                        cancelButton.style.display = 'block';
+                    }
+
+                    // Show success message
+                    showToast(`"${product.name}" loaded for editing`, 'success');
+                }, 300);
+
             } catch (error) {
                 console.error('Error editing product:', error);
-                showToast(`Error loading product: ${error.message}`, 'error');
+                showToast(error.message, 'error');
+                
+                // Reset form on error
+                resetProductForm();
             }
         }
 
@@ -1797,10 +1871,19 @@
                     available: true
                 };
                 
-                // Validate input
-                if (!productData.name) throw new Error('Product name is required');
-                if (isNaN(productData.price) || productData.price <= 0) throw new Error('Please enter a valid price');
-                if (!productData.category) throw new Error('Please select a category');
+                // Enhanced validation with specific messages
+                if (!productData.name) {
+                    throw new Error('Please enter a product name');
+                }
+                if (productData.name.length < 2) {
+                    throw new Error('Product name must be at least 2 characters long');
+                }
+                if (isNaN(productData.price) || productData.price <= 0) {
+                    throw new Error('Please enter a valid price greater than 0');
+                }
+                if (!productData.category) {
+                    throw new Error('Please select a product category');
+                }
                 
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
@@ -1816,13 +1899,13 @@
                 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Failed to save product');
+                    throw new Error(errorData.message || 'Unable to save product. Please try again.');
                 }
                 
                 showToast(
                     productId 
-                        ? `Product "${productData.name}" updated successfully` 
-                        : `New product "${productData.name}" added successfully`, 
+                        ? `"${productData.name}" has been updated successfully` 
+                        : `"${productData.name}" has been added successfully`, 
                     'success'
                 );
                 
@@ -1836,11 +1919,29 @@
         }
 
         function resetProductForm() {
-            document.getElementById('productForm').reset();
-            document.getElementById('productId').value = '';
-            document.getElementById('formTitle').textContent = 'Add New Product';
-            document.getElementById('submitButtonText').textContent = 'Add Product';
-            document.getElementById('cancelButton').style.display = 'none';
+            const form = document.getElementById('productForm');
+            if (form) {
+                form.reset();
+                document.getElementById('productId').value = '';
+                document.getElementById('formTitle').textContent = 'Add New Product';
+                document.getElementById('submitButtonText').textContent = 'Add Product';
+                
+                const cancelButton = document.getElementById('cancelButton');
+                if (cancelButton) {
+                    cancelButton.style.display = 'none';
+                }
+            }
+        }
+
+        // Helper function to escape HTML and prevent XSS
+        function escapeHtml(unsafe) {
+            if (typeof unsafe !== 'string') return '';
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>

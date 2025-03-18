@@ -1208,7 +1208,9 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : `https://${window.location.hostname}/api`;
 
         // Fetch menu items from MongoDB
         async function getMenuItems() {
@@ -1496,52 +1498,77 @@
             document.getElementById('cancelButton').style.display = 'none';
         }
 
-        // Display orders from MongoDB
+        // Display orders with proper error handling and loading states
         async function displayOrders(filter = 'all') {
+            const ordersContainer = document.getElementById('ordersGrid');
+            ordersContainer.innerHTML = '<div class="loading-text">Loading orders...</div>';
+            
             try {
                 const response = await fetch(`${API_URL}/orders`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
                 const orders = await response.json();
                 
                 if (!Array.isArray(orders)) {
-                    console.error('Orders data is not an array:', orders);
-                    return;
+                    throw new Error('Orders data is not an array');
                 }
 
-                const ordersContainer = document.getElementById('ordersGrid');
-                ordersContainer.innerHTML = '';
+                // Sort orders by timestamp, most recent first
+                const sortedOrders = orders.sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
 
-                const filteredOrders = orders.filter(order => {
+                const filteredOrders = sortedOrders.filter(order => {
                     if (filter === 'all') return true;
                     if (filter === 'pending') return order.status === 'pending';
                     if (filter === 'completed') return order.status === 'completed';
                     return true;
                 });
 
+                if (filteredOrders.length === 0) {
+                    ordersContainer.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>No ${filter === 'all' ? '' : filter} orders found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                ordersContainer.innerHTML = '';
                 filteredOrders.forEach(order => {
+                    const orderDate = new Date(order.timestamp);
                     const orderCard = document.createElement('div');
-                    orderCard.className = 'order-card';
+                    orderCard.className = `order-card ${order.status}`;
                     orderCard.innerHTML = `
                         <div class="order-header">
-                            <h3>Order #${order._id}</h3>
-                            <span class="status ${order.status}">${order.status}</span>
+                            <h3>Table ${order.tableNumber}</h3>
+                            <span class="status-badge status-${order.status}">
+                                ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                            </span>
                         </div>
-                        <div class="order-details">
-                            <p><strong>Table:</strong> ${order.tableNumber}</p>
-                            <p><strong>Customer:</strong> ${order.customerName}</p>
-                            <p><strong>Phone:</strong> ${order.phoneNumber}</p>
-                            <p><strong>Total:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+                        <div class="order-info">
+                            <p><i class="fas fa-user"></i> ${order.customerName}</p>
+                            <p><i class="fas fa-phone"></i> ${order.phoneNumber}</p>
+                            <p><i class="fas fa-clock"></i> ${orderDate.toLocaleTimeString()}</p>
+                            <p><i class="fas fa-calendar"></i> ${orderDate.toLocaleDateString()}</p>
                         </div>
                         <div class="order-items">
-                            <h4>Items:</h4>
-                            <ul>
-                                ${order.items.map(item => `
-                                    <li>${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}</li>
-                                `).join('')}
-                            </ul>
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.name} × ${item.quantity}</span>
+                                    <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                            <div class="order-total">
+                                <span>Total Amount:</span>
+                                <span>₹${order.totalAmount.toFixed(2)}</span>
+                            </div>
                         </div>
                         ${order.status === 'pending' ? `
-                            <button onclick="completeOrder('${order._id}')" class="complete-btn">
-                                Complete Order
+                            <button onclick="completeOrder('${order._id}')" class="action-btn complete-btn">
+                                <i class="fas fa-check"></i> Complete Order
                             </button>
                         ` : ''}
                     `;
@@ -1549,6 +1576,12 @@
                 });
             } catch (error) {
                 console.error('Error displaying orders:', error);
+                ordersContainer.innerHTML = `
+                    <div class="error-text">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load orders. Please try again later.</p>
+                    </div>
+                `;
             }
         }
 
@@ -1760,32 +1793,24 @@
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
-                // Setup event listeners first
-                setupFilterButtons();
-                
-                // Initialize all data
                 await Promise.all([
-                    displayOrders('all'),
-                    displayProducts(),
+                    displayOrders(),
                     updateStats(),
                     updateDashboard('day')
                 ]);
-
-                // Setup auto-refresh
+                setupFilterButtons();
+                
+                // Set up auto-refresh
                 setInterval(async () => {
                     const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-                    if (activeTab === 'dashboard') {
-                        await updateDashboard('day');
-                    } else if (activeTab === 'orders') {
-                        const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
-                        await displayOrders(activeFilter);
+                    if (activeTab === 'orders') {
+                        await displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
                     }
                     await updateStats();
-                }, 30000);
-
+                    await updateDashboard('day');
+                }, 30000); // Refresh every 30 seconds
             } catch (error) {
-                console.error('Error initializing admin interface:', error);
-                showToast('Error initializing admin interface', 'error');
+                console.error('Error initializing admin dashboard:', error);
             }
         }
 
@@ -1980,14 +2005,27 @@
             }
         }
 
-        // Add new refresh handling function
+        // Handle refresh button click
         async function handleRefresh() {
             const refreshButton = document.getElementById('refreshButton');
-            refreshButton.classList.add('refreshing');
-            await refreshData();
-            setTimeout(() => {
-                refreshButton.classList.remove('refreshing');
-            }, 1000);
+            refreshButton.disabled = true;
+            refreshButton.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Refreshing...';
+            
+            try {
+                const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                if (activeTab === 'orders') {
+                    await displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
+                }
+                await updateStats();
+                await updateDashboard('day');
+                showToast('Data refreshed successfully', 'success');
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                showToast('Failed to refresh data', 'error');
+            } finally {
+                refreshButton.disabled = false;
+                refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
+            }
         }
     </script>
 </body>

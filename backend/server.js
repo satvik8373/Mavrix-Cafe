@@ -12,9 +12,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://mavrix-cafe.onrender.com']
-    : ['http://localhost:3000'],
+  origin: true, // Allow all origins
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 };
@@ -138,6 +136,23 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Something went wrong!',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Cannot ${req.method} ${req.url}`
   });
 });
 

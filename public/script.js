@@ -1,152 +1,10 @@
-// API Configuration
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000/api'
-  : 'https://mavrix-cafe-api.onrender.com/api';
-
-// API Functions
-async function fetchMenuItems() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/menu`);
-    if (!response.ok) throw new Error('Failed to fetch menu items');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error fetching menu items', 'error');
-    return [];
-  }
-}
-
-async function submitOrder(orderData) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderData)
-    });
-    if (!response.ok) throw new Error('Failed to submit order');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error submitting order', 'error');
-    throw error;
-  }
-}
-
-// Admin Functions
-async function fetchOrders() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/orders`);
-    if (!response.ok) throw new Error('Failed to fetch orders');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error fetching orders', 'error');
-    return [];
-  }
-}
-
-async function updateOrderStatus(orderId, status) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status })
-    });
-    if (!response.ok) throw new Error('Failed to update order status');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error updating order status', 'error');
-    throw error;
-  }
-}
-
-async function addMenuItem(menuItem) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/menu`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(menuItem)
-    });
-    if (!response.ok) throw new Error('Failed to add menu item');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error adding menu item', 'error');
-    throw error;
-  }
-}
-
-async function updateMenuItem(itemId, menuItem) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/menu/${itemId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(menuItem)
-    });
-    if (!response.ok) throw new Error('Failed to update menu item');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error updating menu item', 'error');
-    throw error;
-  }
-}
-
-async function deleteMenuItem(itemId) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/menu/${itemId}`, {
-      method: 'DELETE'
-    });
-    if (!response.ok) throw new Error('Failed to delete menu item');
-    return await response.json();
-  } catch (error) {
-    console.error('Error:', error);
-    showToast('Error deleting menu item', 'error');
-    throw error;
-  }
-}
-
-// Toast Notification
-function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }, 100);
-}
-
-// Export functions
-window.api = {
-  fetchMenuItems,
-  submitOrder,
-  fetchOrders,
-  updateOrderStatus,
-  addMenuItem,
-  updateMenuItem,
-  deleteMenuItem,
-  showToast
-};
+// API URL
+const API_URL = 'http://localhost:3000/api';
 
 // Fetch menu items from MongoDB
 async function getMenuItems() {
     try {
-        const response = await fetch(`${API_BASE_URL}/menu`);
+        const response = await fetch(`${API_URL}/menu`);
         const menuItems = await response.json();
         return menuItems;
     } catch (error) {
@@ -158,7 +16,7 @@ async function getMenuItems() {
 // Save order to MongoDB
 async function saveOrder(orderData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/orders`, {
+        const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -2,7 +2,7 @@ services:
   - type: web
     name: mavrix-cafe
     env: node
-    buildCommand: cd frontend && npm install
+    buildCommand: cd frontend && rm -f yarn.lock && npm install
     startCommand: cd frontend && npm start
     envVars:
       - key: NODE_ENV
@@ -13,7 +13,7 @@ services:
   - type: web
     name: mavrix-cafe-api
     env: node
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && rm -f yarn.lock && npm install
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV

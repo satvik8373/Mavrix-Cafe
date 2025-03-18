@@ -4,4 +4,8 @@ const config = {
     : 'https://mavrix-cafe-api.onrender.com/api'
 };
 
-export default config; 
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = config;
+} else {
+  window.config = config;
+} 

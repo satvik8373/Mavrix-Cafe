@@ -937,6 +937,46 @@
                 transform: translate(-50%, 0);
             }
         }
+
+        /* New styles for form validation */
+        .form-group input.error,
+        .form-group select.error {
+            border-color: #e74c3c;
+            background-color: #fff8f8;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .product-form {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .product-form:focus-within {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
     </style>
 </head>
 <body>
@@ -1255,53 +1295,36 @@
                 const productsContainer = document.getElementById('productGrid');
                 productsContainer.innerHTML = '';
                 
-                if (!Array.isArray(products) || products.length === 0) {
-                    productsContainer.innerHTML = `
-                        <div class="no-products">
-                            <i class="fas fa-box-open"></i>
-                            <p>No products available</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
                 products.forEach(product => {
                     const productCard = createProductCard(product);
-                    if (productCard) {
-                        productsContainer.appendChild(productCard);
-                    }
+                    productsContainer.appendChild(productCard);
                 });
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast('Error loading products: ' + error.message, 'error');
+                showToast('Error loading products', 'error');
             }
         }
 
         // Create product card
         function createProductCard(product) {
-            if (!product || !product._id) {
-                console.error('Invalid product data:', product);
-                return null;
-            }
-
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
                 <div class="product-header">
-                    <h3>${escapeHtml(product.name)}</h3>
-                    <span class="product-price">₹${(product.price || 0).toFixed(2)}</span>
+                    <h3>${product.name}</h3>
+                    <span class="product-price">₹${product.price.toFixed(2)}</span>
                 </div>
-                <span class="product-category">${escapeHtml(product.category)}</span>
+                <span class="product-category">${product.category}</span>
                 <div class="product-actions">
-                    <button onclick="editProduct('${product._id}')" class="action-btn edit-btn">
+                    <button onclick="editProduct('${product._id.toString()}')" class="action-btn edit-btn">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button onclick="toggleAvailability('${product._id}', ${!product.available})" 
+                    <button onclick="toggleAvailability('${product._id.toString()}', ${!product.available})" 
                         class="action-btn toggle-btn ${product.available ? '' : 'unavailable'}">
                         <i class="fas ${product.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
                         ${product.available ? 'Available' : 'Unavailable'}
                     </button>
-                    <button onclick="deleteProductConfirm('${product._id}')" class="action-btn delete-btn">
+                    <button onclick="deleteProductConfirm('${product._id.toString()}')" class="action-btn delete-btn">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1737,28 +1760,21 @@
         // Product Management Functions
         async function editProduct(productId) {
             try {
-                // Show loading state
-                showToast('Loading product details...', 'info');
-                
-                // Validate product ID
-                if (!productId || typeof productId !== 'string') {
+                if (!productId) {
                     throw new Error('Invalid product ID');
                 }
 
-                // Clean the product ID (remove any invalid characters)
-                const cleanProductId = productId.trim().replace(/[^a-zA-Z0-9]/g, '');
-                
-                const response = await fetch(`${API_BASE_URL}/menu/${cleanProductId}`);
+                // Switch to products tab first
+                document.querySelector('[data-tab="products"]').click();
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId.toString()}`);
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        throw new Error('Product not found or may have been deleted');
-                    } else if (response.status === 400) {
-                        throw new Error('Invalid product ID format');
-                    } else {
-                        const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.message || 'Unable to load product details');
+                        throw new Error('Product not found or may have been deleted. Please refresh the page.');
                     }
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Unable to load product details. Please try again.');
                 }
 
                 const product = await response.json();
@@ -1767,44 +1783,34 @@
                     throw new Error('Invalid product data received');
                 }
 
-                // Switch to products tab first
-                const productsTab = document.querySelector('[data-tab="products"]');
-                if (productsTab) {
-                    productsTab.click();
-                }
-
-                // Scroll to the form
-                const productForm = document.getElementById('productForm');
-                if (productForm) {
-                    productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-
-                // Update form with a slight delay to ensure smooth transition
+                // Scroll form into view
+                const productForm = document.querySelector('.product-form');
+                productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Update form with a slight delay to ensure smooth scrolling
                 setTimeout(() => {
-                    // Update form fields
-                    document.getElementById('productId').value = product._id;
+                    // Update form
+                    document.getElementById('productId').value = product._id.toString();
                     document.getElementById('productName').value = product.name || '';
                     document.getElementById('productPrice').value = product.price || '';
                     document.getElementById('productCategory').value = product.category || '';
                     
                     // Update form UI
-                    document.getElementById('formTitle').textContent = 'Edit Product';
+                    document.getElementById('formTitle').textContent = `Edit Product: ${product.name}`;
                     document.getElementById('submitButtonText').textContent = 'Update Product';
+                    document.getElementById('cancelButton').style.display = 'block';
                     
-                    const cancelButton = document.getElementById('cancelButton');
-                    if (cancelButton) {
-                        cancelButton.style.display = 'block';
-                    }
-
-                    // Show success message
-                    showToast(`"${product.name}" loaded for editing`, 'success');
+                    // Focus on the name field
+                    document.getElementById('productName').focus();
+                    
+                    showToast('Product loaded for editing', 'info');
                 }, 300);
 
             } catch (error) {
                 console.error('Error editing product:', error);
                 showToast(error.message, 'error');
                 
-                // Reset form on error
+                // Reset form in case of error
                 resetProductForm();
             }
         }
@@ -1920,28 +1926,21 @@
 
         function resetProductForm() {
             const form = document.getElementById('productForm');
-            if (form) {
-                form.reset();
-                document.getElementById('productId').value = '';
-                document.getElementById('formTitle').textContent = 'Add New Product';
-                document.getElementById('submitButtonText').textContent = 'Add Product';
-                
-                const cancelButton = document.getElementById('cancelButton');
-                if (cancelButton) {
-                    cancelButton.style.display = 'none';
+            form.reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('submitButtonText').textContent = 'Add Product';
+            document.getElementById('cancelButton').style.display = 'none';
+            
+            // Remove any validation styling
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.classList.remove('error');
+                const errorSpan = input.parentElement.querySelector('.error-message');
+                if (errorSpan) {
+                    errorSpan.remove();
                 }
-            }
-        }
-
-        // Helper function to escape HTML and prevent XSS
-        function escapeHtml(unsafe) {
-            if (typeof unsafe !== 'string') return '';
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            });
         }
     </script>
 </body>

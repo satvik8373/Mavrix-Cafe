@@ -859,96 +859,180 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            min-width: 250px;
-            max-width: 350px;
-            background: white;
-            color: #333;
-            padding: 12px 15px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transform: translateX(120%);
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            z-index: 10000;
-            font-size: 13px;
-            line-height: 1.4;
-            border-left: 4px solid transparent;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .toast.show {
-            transform: translateX(0);
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .toast i {
-            font-size: 16px;
-            flex-shrink: 0;
+        .toast.success {
+            background-color: #4CAF50;
         }
 
-        .toast-message {
-            flex: 1;
-            margin-right: 5px;
+        .toast.error {
+            background-color: #f44336;
         }
 
-        .toast-close {
-            background: none;
+        .toast.info {
+            background-color: #2196F3;
+        }
+
+        /* Order Card Styles */
+        .order-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .order-card .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .order-card .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .order-card .status.pending {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .order-card .status.completed {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .order-card .complete-btn {
+            background-color: #4CAF50;
+            color: white;
             border: none;
-            color: #999;
-            font-size: 18px;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            margin-left: auto;
+            margin-top: 1rem;
         }
 
-        .toast-close:hover {
-            color: #666;
+        .order-card .complete-btn:hover {
+            background-color: #45a049;
         }
 
-        .toast-success {
-            border-left-color: var(--success-color);
+        /* Product Card Styles */
+        .product-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .toast-success i {
-            color: var(--success-color);
+        .product-card .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
 
-        .toast-error {
-            border-left-color: var(--danger-color);
+        .product-card .product-actions {
+            display: flex;
+            gap: 0.5rem;
         }
 
-        .toast-error i {
-            color: var(--danger-color);
+        .product-card .edit-btn,
+        .product-card .delete-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
         }
 
-        .toast-warning {
-            border-left-color: var(--warning-color);
+        .product-card .edit-btn {
+            background-color: #2196F3;
+            color: white;
         }
 
-        .toast-warning i {
-            color: var(--warning-color);
+        .product-card .delete-btn {
+            background-color: #f44336;
+            color: white;
         }
 
-        .toast-info {
-            border-left-color: #2196F3;
+        .product-card .availability-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
-        .toast-info i {
-            color: #2196F3;
+        /* Validation Message Styles */
+        .validation-message {
+            display: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
         }
 
-        @media (max-width: 480px) {
-            .toast {
-                width: calc(100% - 40px);
-                left: 20px;
-                right: 20px;
-                transform: translateY(-100%);
-            }
-            
-            .toast.show {
-                transform: translateY(0);
-            }
+        .validation-message.show {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .validation-message.error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .validation-message.success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .validation-message i {
+            font-size: 1.1rem;
+        }
+
+        /* Update Product Form Styles */
+        .product-form {
+            position: relative;
+        }
+
+        .form-validation-container {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 0 2rem;
         }
     </style>
 </head>
@@ -1167,6 +1251,9 @@
                             </button>
                         </div>
                     </form>
+                    <div class="form-validation-container">
+                        <div id="validationMessage" class="validation-message"></div>
+                    </div>
                 </div>
 
                 <div class="product-grid" id="productGrid"></div>
@@ -1180,65 +1267,20 @@
             ? 'http://localhost:3000/api'
             : 'https://mavrix-cafe-api.onrender.com/api';
 
-        // Toast Notification System
+        // Toast Notification
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
-            // Create icon based on type
-            const icon = document.createElement('i');
-            switch(type) {
-                case 'success':
-                    icon.className = 'fas fa-check-circle';
-                    break;
-                case 'error':
-                    icon.className = 'fas fa-exclamation-circle';
-                    break;
-                case 'warning':
-                    icon.className = 'fas fa-exclamation-triangle';
-                    break;
-                case 'info':
-                    icon.className = 'fas fa-info-circle';
-                    break;
-            }
-            
-            // Create message container
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'toast-message';
-            messageDiv.textContent = message;
-            
-            // Add close button
-            const closeBtn = document.createElement('button');
-            closeBtn.className = 'toast-close';
-            closeBtn.innerHTML = '&times;';
-            
-            // Assemble toast
-            toast.appendChild(icon);
-            toast.appendChild(messageDiv);
-            toast.appendChild(closeBtn);
-            
-            // Position toast based on existing toasts
-            const existingToasts = document.querySelectorAll('.toast');
-            const offset = existingToasts.length * 60;
-            toast.style.top = `${20 + offset}px`;
-            
+            toast.textContent = message;
             document.body.appendChild(toast);
             
-            // Show animation
-            requestAnimationFrame(() => {
+            setTimeout(() => {
                 toast.classList.add('show');
-            });
-            
-            // Auto dismiss after 5 seconds
-            const timeout = setTimeout(() => {
-                removeToast(toast);
-            }, 5000);
-            
-            // Clear timeout if manually closed
-            closeBtn.onclick = () => {
-                clearTimeout(timeout);
-                removeToast(toast);
-            };
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }, 100);
         }
 
         // Fetch menu items
@@ -1717,42 +1759,25 @@
         async function editProduct(productId) {
             try {
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Failed to load product details');
-                }
+                if (!response.ok) throw new Error('Failed to fetch product');
                 const product = await response.json();
                 
-                // Switch to products tab first
-                const productsTab = document.querySelector('[data-tab="products"]');
-                if (productsTab) {
-                    productsTab.click();
-                }
+                // Update form
+                document.getElementById('productId').value = product._id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productCategory').value = product.category;
                 
-                // Scroll to form
-                const productForm = document.querySelector('.product-form');
-                if (productForm) {
-                    productForm.scrollIntoView({ behavior: 'smooth' });
-                }
+                // Update form UI
+                document.getElementById('formTitle').textContent = 'Edit Product';
+                document.getElementById('submitButtonText').textContent = 'Update Product';
+                document.getElementById('cancelButton').style.display = 'block';
                 
-                // Update form with a slight delay to ensure tab switch is complete
-                setTimeout(() => {
-                    // Update form fields
-                    document.getElementById('productId').value = product._id;
-                    document.getElementById('productName').value = product.name || '';
-                    document.getElementById('productPrice').value = product.price || '';
-                    document.getElementById('productCategory').value = product.category || '';
-                    
-                    // Update form UI
-                    document.getElementById('formTitle').textContent = 'Edit Product';
-                    document.getElementById('submitButtonText').textContent = 'Update Product';
-                    document.getElementById('cancelButton').style.display = 'block';
-                    
-                    showToast('Product loaded for editing', 'info');
-                }, 100);
+                // Switch to products tab
+                document.querySelector('[data-tab="products"]').click();
             } catch (error) {
                 console.error('Error editing product:', error);
-                showToast(`Error loading product: ${error.message}`, 'error');
+                showValidation('Error loading product details', 'error');
             }
         }
 
@@ -1766,17 +1791,14 @@
                     body: JSON.stringify({ available: newAvailability })
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Failed to update product availability');
-                }
+                if (!response.ok) throw new Error('Failed to update product availability');
                 
-                showToast(`Product is now ${newAvailability ? 'available' : 'unavailable'} for ordering`, 'success');
-                await displayProducts();
-                await updateStats();
+                showValidation(`Product ${newAvailability ? 'available' : 'unavailable'}`, 'success');
+                displayProducts();
+                updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
-                showToast(`Failed to update availability: ${error.message}`, 'error');
+                showValidation('Error updating product availability', 'error');
             }
         }
 
@@ -1792,43 +1814,29 @@
                     method: 'DELETE'
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Failed to delete product');
-                }
+                if (!response.ok) throw new Error('Failed to delete product');
                 
-                showToast('Product successfully deleted', 'success');
-                await displayProducts();
-                await updateStats();
+                showValidation('Product deleted successfully', 'success');
+                displayProducts();
+                updateStats();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showToast(`Failed to delete product: ${error.message}`, 'error');
+                showValidation('Error deleting product', 'error');
             }
         }
 
         async function handleProductSubmit(event) {
             event.preventDefault();
             
+            const productId = document.getElementById('productId').value;
+            const productData = {
+                name: document.getElementById('productName').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                available: true
+            };
+            
             try {
-                const productId = document.getElementById('productId').value;
-                const productData = {
-                    name: document.getElementById('productName').value.trim(),
-                    price: parseFloat(document.getElementById('productPrice').value),
-                    category: document.getElementById('productCategory').value,
-                    available: true
-                };
-                
-                // Enhanced validation
-                const validationErrors = [];
-                if (!productData.name) validationErrors.push('Product name is required');
-                if (productData.name.length < 3) validationErrors.push('Product name must be at least 3 characters');
-                if (isNaN(productData.price) || productData.price <= 0) validationErrors.push('Please enter a valid price');
-                if (!productData.category) validationErrors.push('Please select a category');
-                
-                if (validationErrors.length > 0) {
-                    throw new Error(validationErrors.join('\n'));
-                }
-                
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
                     : `${API_BASE_URL}/menu`;
@@ -1841,27 +1849,15 @@
                     body: JSON.stringify(productData)
                 });
                 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Failed to ${productId ? 'update' : 'add'} product`);
-                }
+                if (!response.ok) throw new Error('Failed to save product');
                 
-                showToast(
-                    productId 
-                        ? `Product "${productData.name}" updated successfully` 
-                        : `New product "${productData.name}" added successfully`, 
-                    'success'
-                );
-                
+                showValidation(`Product ${productId ? 'updated' : 'added'} successfully`, 'success');
                 resetProductForm();
-                await displayProducts();
-                await updateStats();
+                displayProducts();
+                updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                const errorMessages = error.message.split('\n');
-                errorMessages.forEach(message => {
-                    showToast(message, 'error');
-                });
+                showValidation('Error saving product', 'error');
             }
         }
 
@@ -1873,17 +1869,19 @@
             document.getElementById('cancelButton').style.display = 'none';
         }
 
-        // Add toast removal function
-        function removeToast(toast) {
-            toast.classList.remove('show');
+        // Replace showToast function with showValidation
+        function showValidation(message, type = 'success') {
+            const validationMessage = document.getElementById('validationMessage');
+            validationMessage.className = `validation-message ${type}`;
+            validationMessage.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${message}
+            `;
+            validationMessage.classList.add('show');
+            
             setTimeout(() => {
-                toast.remove();
-                // Reposition remaining toasts
-                const toasts = document.querySelectorAll('.toast');
-                toasts.forEach((t, index) => {
-                    t.style.top = `${20 + (index * 60)}px`;
-                });
-            }, 300);
+                validationMessage.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>

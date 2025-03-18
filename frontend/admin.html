@@ -977,60 +977,6 @@
         .product-form:focus-within {
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
-
-        /* New styles for error states */
-        .no-products,
-        .error-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 3rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .no-products i,
-        .error-state i {
-            font-size: 3rem;
-            color: #7f8c8d;
-            margin-bottom: 1rem;
-        }
-
-        .error-state i {
-            color: #e74c3c;
-        }
-
-        .no-products p,
-        .error-state p {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-            margin: 0.5rem 0;
-        }
-
-        .retry-btn {
-            margin-top: 1rem;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .retry-btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .retry-btn i {
-            font-size: 1rem;
-            color: white;
-            margin: 0;
-        }
     </style>
 </head>
 <body>
@@ -1339,67 +1285,23 @@
             };
         }
 
-        // Fetch menu items with better error handling
+        // Fetch menu items
         async function displayProducts() {
             try {
-                showToast('Loading products...', 'info');
-                
                 const response = await fetch(`${API_BASE_URL}/menu`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch menu items. Please check your connection.');
-                }
-                
+                if (!response.ok) throw new Error('Failed to fetch menu items');
                 const products = await response.json();
                 
-                if (!Array.isArray(products)) {
-                    throw new Error('Invalid data received from server');
-                }
-                
                 const productsContainer = document.getElementById('productGrid');
-                if (!productsContainer) {
-                    throw new Error('Products container not found');
-                }
-                
                 productsContainer.innerHTML = '';
                 
-                if (products.length === 0) {
-                    productsContainer.innerHTML = `
-                        <div class="no-products">
-                            <i class="fas fa-box-open"></i>
-                            <p>No products available</p>
-                            <button onclick="handleAddProduct()" class="retry-btn">
-                                <i class="fas fa-plus"></i> Add First Product
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-                
                 products.forEach(product => {
-                    if (product && product._id) {
-                        const productCard = createProductCard(product);
-                        productsContainer.appendChild(productCard);
-                    }
+                    const productCard = createProductCard(product);
+                    productsContainer.appendChild(productCard);
                 });
-                
-                showToast(`${products.length} products loaded successfully`, 'success');
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast(error.message, 'error');
-                
-                // Show error state in grid
-                const productsContainer = document.getElementById('productGrid');
-                if (productsContainer) {
-                    productsContainer.innerHTML = `
-                        <div class="error-state">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <p>Error loading products</p>
-                            <button onclick="displayProducts()" class="retry-btn">
-                                <i class="fas fa-sync-alt"></i> Retry
-                            </button>
-                        </div>
-                    `;
-                }
+                showToast('Error loading products', 'error');
             }
         }
 
@@ -1859,17 +1761,19 @@
         async function editProduct(productId) {
             try {
                 if (!productId) {
-                    showToast('Invalid product ID', 'error');
-                    return;
+                    throw new Error('Invalid product ID');
+                }
+
+                // Switch to products tab first
+                const productsTab = document.querySelector('[data-tab="products"]');
+                if (productsTab) {
+                    productsTab.click();
                 }
 
                 // Show loading state
                 showToast('Loading product details...', 'info');
 
-                // Switch to products tab first
-                document.querySelector('[data-tab="products"]').click();
-
-                const response = await fetch(`${API_BASE_URL}/menu/${productId.toString()}`);
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
                 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -1883,7 +1787,7 @@
                 const product = await response.json();
                 
                 if (!product || !product._id) {
-                    throw new Error('Invalid product data received from server');
+                    throw new Error('Invalid product data received');
                 }
 
                 // Scroll form into view
@@ -1894,39 +1798,36 @@
                 
                 // Update form with a slight delay to ensure smooth scrolling
                 setTimeout(() => {
-                    try {
-                        // Update form
-                        const idField = document.getElementById('productId');
-                        const nameField = document.getElementById('productName');
-                        const priceField = document.getElementById('productPrice');
-                        const categoryField = document.getElementById('productCategory');
-                        const formTitle = document.getElementById('formTitle');
-                        const submitButton = document.getElementById('submitButtonText');
-                        const cancelButton = document.getElementById('cancelButton');
-
-                        if (!idField || !nameField || !priceField || !categoryField) {
-                            throw new Error('Form elements not found');
+                    // Update form fields safely
+                    const updateField = (id, value) => {
+                        const field = document.getElementById(id);
+                        if (field) {
+                            field.value = value;
                         }
+                    };
 
-                        idField.value = product._id.toString();
-                        nameField.value = product.name || '';
-                        priceField.value = product.price || '';
-                        categoryField.value = product.category || '';
-                        
-                        // Update form UI
-                        if (formTitle) formTitle.textContent = `Edit Product: ${product.name}`;
-                        if (submitButton) submitButton.textContent = 'Update Product';
-                        if (cancelButton) cancelButton.style.display = 'block';
-                        
-                        // Focus on the name field
+                    updateField('productId', product._id);
+                    updateField('productName', product.name || '');
+                    updateField('productPrice', product.price || '');
+                    updateField('productCategory', product.category || '');
+                    
+                    // Update form UI
+                    const formTitle = document.getElementById('formTitle');
+                    const submitButton = document.getElementById('submitButtonText');
+                    const cancelButton = document.getElementById('cancelButton');
+                    
+                    if (formTitle) formTitle.textContent = `Edit Product: ${product.name}`;
+                    if (submitButton) submitButton.textContent = 'Update Product';
+                    if (cancelButton) cancelButton.style.display = 'block';
+                    
+                    // Focus on the name field
+                    const nameField = document.getElementById('productName');
+                    if (nameField) {
                         nameField.focus();
-                        
-                        showToast('Product loaded for editing', 'success');
-                    } catch (error) {
-                        console.error('Error updating form:', error);
-                        showToast('Error updating form fields. Please try again.', 'error');
-                        resetProductForm();
+                        nameField.select();
                     }
+                    
+                    showToast('Product loaded for editing', 'success');
                 }, 300);
 
             } catch (error) {
@@ -1990,27 +1891,66 @@
             event.preventDefault();
             
             try {
-                const productId = document.getElementById('productId').value;
+                // Get form elements
+                const form = event.target;
+                const productId = document.getElementById('productId')?.value;
+                const nameField = document.getElementById('productName');
+                const priceField = document.getElementById('productPrice');
+                const categoryField = document.getElementById('productCategory');
+
+                if (!nameField || !priceField || !categoryField) {
+                    throw new Error('Form fields not found. Please refresh the page.');
+                }
+
                 const productData = {
-                    name: document.getElementById('productName').value.trim(),
-                    price: parseFloat(document.getElementById('productPrice').value),
-                    category: document.getElementById('productCategory').value,
+                    name: nameField.value.trim(),
+                    price: parseFloat(priceField.value),
+                    category: categoryField.value,
                     available: true
                 };
                 
-                // Enhanced validation with specific messages
+                // Clear previous validation errors
+                const clearErrors = () => {
+                    form.querySelectorAll('.error-message').forEach(err => err.remove());
+                    form.querySelectorAll('.error').forEach(field => field.classList.remove('error'));
+                };
+                clearErrors();
+
+                // Validate with visual feedback
+                const addError = (field, message) => {
+                    field.classList.add('error');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    errorDiv.textContent = message;
+                    field.parentElement.appendChild(errorDiv);
+                };
+
+                let hasErrors = false;
+
                 if (!productData.name) {
-                    throw new Error('Please enter a product name');
+                    addError(nameField, 'Please enter a product name');
+                    hasErrors = true;
+                } else if (productData.name.length < 2) {
+                    addError(nameField, 'Product name must be at least 2 characters long');
+                    hasErrors = true;
                 }
-                if (productData.name.length < 2) {
-                    throw new Error('Product name must be at least 2 characters long');
-                }
+
                 if (isNaN(productData.price) || productData.price <= 0) {
-                    throw new Error('Please enter a valid price greater than 0');
+                    addError(priceField, 'Please enter a valid price greater than 0');
+                    hasErrors = true;
                 }
+
                 if (!productData.category) {
-                    throw new Error('Please select a product category');
+                    addError(categoryField, 'Please select a product category');
+                    hasErrors = true;
                 }
+
+                if (hasErrors) {
+                    return;
+                }
+
+                // Show loading state
+                showToast('Saving product...', 'info');
                 
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
@@ -2047,33 +1987,27 @@
 
         function resetProductForm() {
             const form = document.getElementById('productForm');
-            form.reset();
-            document.getElementById('productId').value = '';
-            document.getElementById('formTitle').textContent = 'Add New Product';
-            document.getElementById('submitButtonText').textContent = 'Add Product';
-            document.getElementById('cancelButton').style.display = 'none';
-            
-            // Remove any validation styling
-            const inputs = form.querySelectorAll('input, select');
-            inputs.forEach(input => {
-                input.classList.remove('error');
-                const errorSpan = input.parentElement.querySelector('.error-message');
-                if (errorSpan) {
-                    errorSpan.remove();
-                }
-            });
-        }
+            if (!form) return;
 
-        // Helper function to switch to products tab and show add product form
-        function handleAddProduct() {
-            const productsTab = document.querySelector('[data-tab="products"]');
-            if (productsTab) {
-                productsTab.click();
-                const nameField = document.getElementById('productName');
-                if (nameField) {
-                    nameField.focus();
-                }
-            }
+            // Reset form and hidden fields
+            form.reset();
+            const productId = document.getElementById('productId');
+            if (productId) productId.value = '';
+
+            // Update UI elements
+            const formTitle = document.getElementById('formTitle');
+            const submitButton = document.getElementById('submitButtonText');
+            const cancelButton = document.getElementById('cancelButton');
+
+            if (formTitle) formTitle.textContent = 'Add New Product';
+            if (submitButton) submitButton.textContent = 'Add Product';
+            if (cancelButton) cancelButton.style.display = 'none';
+            
+            // Remove validation styling
+            form.querySelectorAll('input, select').forEach(input => {
+                input.classList.remove('error');
+            });
+            form.querySelectorAll('.error-message').forEach(err => err.remove());
         }
     </script>
 </body>

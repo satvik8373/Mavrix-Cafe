@@ -1,0 +1,22 @@
+{
+  "name": "mavrix-cafe",
+  "version": "1.0.0",
+  "description": "Mavrix Cafe Digital Menu with QR Codes",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve .",
+    "deploy": "gh-pages -d ."
+  },
+  "keywords": [
+    "cafe",
+    "menu",
+    "qr-code",
+    "digital-menu"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gh-pages": "^3.2.3",
+    "serve": "^13.0.2"
+  }
+} 

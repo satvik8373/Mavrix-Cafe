@@ -859,129 +859,91 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 1rem 2rem;
-            border-radius: 4px;
-            background-color: #333;
-            color: white;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.3s ease;
-            z-index: 1000;
+            min-width: 300px;
+            max-width: 400px;
+            background: white;
+            color: #333;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 10000;
         }
 
         .toast.show {
-            opacity: 1;
-            transform: translateY(0);
+            transform: translateX(0);
         }
 
-        .toast.success {
-            background-color: #4CAF50;
+        .toast i {
+            font-size: 20px;
         }
 
-        .toast.error {
-            background-color: #f44336;
+        .toast-success {
+            border-left: 4px solid var(--success-color);
         }
 
-        .toast.info {
-            background-color: #2196F3;
+        .toast-success i {
+            color: var(--success-color);
         }
 
-        /* Order Card Styles */
-        .order-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .toast-error {
+            border-left: 4px solid var(--danger-color);
         }
 
-        .order-card .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .toast-error i {
+            color: var(--danger-color);
         }
 
-        .order-card .status {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
+        .toast-warning {
+            border-left: 4px solid var(--warning-color);
         }
 
-        .order-card .status.pending {
-            background-color: #ff9800;
-            color: white;
+        .toast-warning i {
+            color: var(--warning-color);
         }
 
-        .order-card .status.completed {
-            background-color: #4CAF50;
-            color: white;
+        .toast-info {
+            border-left: 4px solid #2196F3;
         }
 
-        .order-card .complete-btn {
-            background-color: #4CAF50;
-            color: white;
+        .toast-info i {
+            color: #2196F3;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            color: #999;
+            font-size: 20px;
             cursor: pointer;
-            margin-top: 1rem;
+            padding: 0;
+            line-height: 1;
         }
 
-        .order-card .complete-btn:hover {
-            background-color: #45a049;
+        .toast-close:hover {
+            color: #666;
         }
 
-        /* Product Card Styles */
-        .product-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .product-card .product-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .product-card .product-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .product-card .edit-btn,
-        .product-card .delete-btn {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .product-card .edit-btn {
-            background-color: #2196F3;
-            color: white;
-        }
-
-        .product-card .delete-btn {
-            background-color: #f44336;
-            color: white;
-        }
-
-        .product-card .availability-toggle {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
+        @media (max-width: 480px) {
+            .toast {
+                width: 90%;
+                left: 50%;
+                transform: translate(-50%, -100%);
+            }
+            
+            .toast.show {
+                transform: translate(-50%, 0);
+            }
         }
     </style>
 </head>
@@ -1213,20 +1175,62 @@
             ? 'http://localhost:3000/api'
             : 'https://mavrix-cafe-api.onrender.com/api';
 
-        // Toast Notification
+        // Toast Notification System
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.textContent = message;
+            
+            // Create icon based on type
+            const icon = document.createElement('i');
+            switch(type) {
+                case 'success':
+                    icon.className = 'fas fa-check-circle';
+                    break;
+                case 'error':
+                    icon.className = 'fas fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    icon.className = 'fas fa-exclamation-triangle';
+                    break;
+                case 'info':
+                    icon.className = 'fas fa-info-circle';
+                    break;
+            }
+            
+            // Create message container
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'toast-message';
+            messageDiv.textContent = message;
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'toast-close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => toast.remove();
+            
+            // Assemble toast
+            toast.appendChild(icon);
+            toast.appendChild(messageDiv);
+            toast.appendChild(closeBtn);
             document.body.appendChild(toast);
             
-            setTimeout(() => {
+            // Show animation
+            requestAnimationFrame(() => {
                 toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }, 100);
+            });
+            
+            // Auto dismiss after 5 seconds
+            const timeout = setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+            
+            // Clear timeout if manually closed
+            closeBtn.onclick = () => {
+                clearTimeout(timeout);
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            };
         }
 
         // Fetch menu items
@@ -1705,7 +1709,10 @@
         async function editProduct(productId) {
             try {
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
-                if (!response.ok) throw new Error('Failed to fetch product');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to load product details');
+                }
                 const product = await response.json();
                 
                 // Update form
@@ -1721,9 +1728,10 @@
                 
                 // Switch to products tab
                 document.querySelector('[data-tab="products"]').click();
+                showToast('Product loaded successfully', 'success');
             } catch (error) {
                 console.error('Error editing product:', error);
-                showToast('Error loading product details', 'error');
+                showToast(`Error loading product: ${error.message}`, 'error');
             }
         }
 
@@ -1737,14 +1745,17 @@
                     body: JSON.stringify({ available: newAvailability })
                 });
                 
-                if (!response.ok) throw new Error('Failed to update product availability');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to update product availability');
+                }
                 
-                showToast(`Product ${newAvailability ? 'available' : 'unavailable'}`);
-                displayProducts();
-                updateStats();
+                showToast(`Product is now ${newAvailability ? 'available' : 'unavailable'} for ordering`, 'success');
+                await displayProducts();
+                await updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
-                showToast('Error updating product availability', 'error');
+                showToast(`Failed to update availability: ${error.message}`, 'error');
             }
         }
 
@@ -1760,29 +1771,37 @@
                     method: 'DELETE'
                 });
                 
-                if (!response.ok) throw new Error('Failed to delete product');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to delete product');
+                }
                 
-                showToast('Product deleted successfully');
-                displayProducts();
-                updateStats();
+                showToast('Product successfully deleted', 'success');
+                await displayProducts();
+                await updateStats();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showToast('Error deleting product', 'error');
+                showToast(`Failed to delete product: ${error.message}`, 'error');
             }
         }
 
         async function handleProductSubmit(event) {
             event.preventDefault();
             
-            const productId = document.getElementById('productId').value;
-            const productData = {
-                name: document.getElementById('productName').value,
-                price: parseFloat(document.getElementById('productPrice').value),
-                category: document.getElementById('productCategory').value,
-                available: true
-            };
-            
             try {
+                const productId = document.getElementById('productId').value;
+                const productData = {
+                    name: document.getElementById('productName').value.trim(),
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    category: document.getElementById('productCategory').value,
+                    available: true
+                };
+                
+                // Validate input
+                if (!productData.name) throw new Error('Product name is required');
+                if (isNaN(productData.price) || productData.price <= 0) throw new Error('Please enter a valid price');
+                if (!productData.category) throw new Error('Please select a category');
+                
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
                     : `${API_BASE_URL}/menu`;
@@ -1795,15 +1814,24 @@
                     body: JSON.stringify(productData)
                 });
                 
-                if (!response.ok) throw new Error('Failed to save product');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Failed to save product');
+                }
                 
-                showToast(`Product ${productId ? 'updated' : 'added'} successfully`);
+                showToast(
+                    productId 
+                        ? `Product "${productData.name}" updated successfully` 
+                        : `New product "${productData.name}" added successfully`, 
+                    'success'
+                );
+                
                 resetProductForm();
-                displayProducts();
-                updateStats();
+                await displayProducts();
+                await updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showToast('Error saving product', 'error');
+                showToast(error.message, 'error');
             }
         }
 

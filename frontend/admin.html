@@ -1474,26 +1474,24 @@
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
+                // First display products and orders
                 await Promise.all([
                     displayProducts(),
                     displayOrders()
                 ]);
                 
+                // Then update stats after a short delay to ensure DOM elements are ready
                 setTimeout(async () => {
-                    await Promise.all([
-                        updateStats(),
-                        updateDashboard('day')
-                    ]);
+                    await updateStats();
                     
-                    // Set up auto-refresh with proper tab checking
+                    // Set up auto-refresh
                     setInterval(() => {
                         const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
                         if (activeTab === 'dashboard') {
                             updateStats();
-                            updateDashboard(/* ... */);
                         }
                         displayOrders();
-                    }, 30000);
+                    }, 30000); // Refresh every 30 seconds
                 }, 500);
             } catch (error) {
                 console.error('Error initializing admin dashboard:', error);
@@ -1531,6 +1529,7 @@
             });
 
             // Update dashboard data
+            updateStats();
             displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
         }
 
@@ -1671,16 +1670,12 @@
                 });
 
                 // Refresh content based on active tab
-                switch(tabId) {
-                    case 'dashboard':
-                        updateDashboard(document.querySelector('.time-filter button.active').dataset.timeframe || 'day');
-                        break;
-                    case 'orders':
-                        displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
-                        break;
-                    case 'products':
-                        displayProducts();
-                        break;
+                if (tabId === 'dashboard') {
+                    updateStats();
+                } else if (tabId === 'orders') {
+                    displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
+                } else if (tabId === 'products') {
+                    displayProducts();
                 }
             });
         });
@@ -1724,8 +1719,8 @@
                 document.getElementById('submitButtonText').textContent = 'Update Product';
                 document.getElementById('cancelButton').style.display = 'block';
                 
-                // Scroll to form
-                document.querySelector('.product-form').scrollIntoView({ behavior: 'smooth' });
+                // Switch to products tab
+                document.querySelector('[data-tab="products"]').click();
             } catch (error) {
                 console.error('Error editing product:', error);
                 showToast('Error loading product details', 'error');
@@ -1744,29 +1739,35 @@
                 
                 if (!response.ok) throw new Error('Failed to update product availability');
                 
-                showToast(`Product ${newAvailability ? 'enabled' : 'disabled'} successfully`);
+                showToast(`Product ${newAvailability ? 'available' : 'unavailable'}`);
                 displayProducts();
+                updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
                 showToast('Error updating product availability', 'error');
             }
         }
 
-        async function deleteProductConfirm(productId) {
+        function deleteProductConfirm(productId) {
             if (confirm('Are you sure you want to delete this product?')) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (!response.ok) throw new Error('Failed to delete product');
-                    
-                    showToast('Product deleted successfully');
-                    displayProducts();
-                } catch (error) {
-                    console.error('Error deleting product:', error);
-                    showToast('Error deleting product', 'error');
-                }
+                deleteProduct(productId);
+            }
+        }
+
+        async function deleteProduct(productId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete product');
+                
+                showToast('Product deleted successfully');
+                displayProducts();
+                updateStats();
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showToast('Error deleting product', 'error');
             }
         }
 
@@ -1799,6 +1800,7 @@
                 showToast(`Product ${productId ? 'updated' : 'added'} successfully`);
                 resetProductForm();
                 displayProducts();
+                updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
                 showToast('Error saving product', 'error');
@@ -1812,7 +1814,6 @@
             document.getElementById('submitButtonText').textContent = 'Add Product';
             document.getElementById('cancelButton').style.display = 'none';
         }
-
     </script>
 </body>
 </html> 

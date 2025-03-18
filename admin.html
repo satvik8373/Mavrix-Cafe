@@ -715,207 +715,481 @@
         .time-filter button:hover:not(.active) {
             background: #e9ecef;
         }
+
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--coffee-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+        }
+
+        .nav-links a:hover {
+            background: var(--coffee-light);
+            color: white;
+        }
+
+        .nav-links a.active {
+            background: var(--coffee-medium);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Add new styles for login screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .pin-input {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pin-digit {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .pin-digit:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+        }
+
+        .pin-digit.filled {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pin-digit.error {
+            border-color: var(--danger-color);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <header class="admin-header">
-            <h1><i class="fas fa-coffee"></i> Mavrix Cafe Admin</h1>
-            <div class="header-actions">
-                <button class="action-btn" id="refreshButton" onclick="handleRefresh()">
-                    <i class="fas fa-sync-alt"></i> Refresh Data
-                </button>
+    <!-- Add login screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1><i class="fas fa-lock"></i> Admin Access</h1>
+                <p>Enter 6-digit PIN to access admin dashboard</p>
             </div>
-        </header>
-
-        <div class="quick-stats">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Pending Orders</h3>
-                    <p id="pendingOrdersCount">0</p>
-                </div>
+            <div class="pin-input">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Completed Today</h3>
-                    <p id="completedOrdersCount">0</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-utensils"></i>
-                </div>
-                <div class="stat-info">
-                    <h3>Total Products</h3>
-                    <p id="totalProductsCount">0</p>
-                </div>
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i> Invalid PIN. Please try again.
             </div>
         </div>
+    </div>
 
-        <div class="admin-tabs">
-            <button class="tab-btn active" data-tab="dashboard">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </button>
-            <button class="tab-btn" data-tab="orders">
-                <i class="fas fa-list-alt"></i> Orders
-            </button>
-            <button class="tab-btn" data-tab="products">
-                <i class="fas fa-box"></i> Products
-            </button>
-        </div>
-
-        <div id="dashboardTab" class="tab-content active">
-            <div class="time-filter">
-                <button onclick="updateTimeFrame('day')" class="active">Today</button>
-                <button onclick="updateTimeFrame('week')">This Week</button>
-                <button onclick="updateTimeFrame('month')">This Month</button>
-                <button onclick="updateTimeFrame('year')">This Year</button>
+    <!-- Wrap existing content in admin-content div -->
+    <div class="admin-content" id="adminContent">
+        <nav class="nav-menu">
+            <a href="https://mavrix-cafe.vercel.app/" class="nav-logo">
+                <i class="fas fa-coffee"></i>
+                Mavrix Cafe
+            </a>
+            <div class="nav-links">
+                <a href="https://mavrix-cafe.vercel.app/">Menu</a>
+                <a href="https://mavrix-cafe.vercel.app/admin.html" class="active">Admin</a>
+                <a href="https://mavrix-cafe.vercel.app/qr-generator.html">QR Generator</a>
             </div>
+        </nav>
 
-            <div class="dashboard-container">
-                <div class="stat-card revenue">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-title">Total Revenue</div>
-                            <div class="stat-value">₹<span id="revenueValue">0</span></div>
-                            <div class="stat-change positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="revenueChange">0%</span> vs last period
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-rupee-sign"></i>
-                        </div>
+        <div class="admin-container">
+            <header class="admin-header">
+                <h1><i class="fas fa-coffee"></i> Mavrix Cafe Admin</h1>
+                <div class="header-actions">
+                    <button class="action-btn" id="refreshButton" onclick="handleRefresh()">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+            </header>
+
+            <div class="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Pending Orders</h3>
+                        <p id="pendingOrdersCount">0</p>
                     </div>
                 </div>
-
-                <div class="stat-card visits">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-title">QR Scans</div>
-                            <div class="stat-value" id="scansValue">0</div>
-                            <div class="stat-change positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="scansChange">0%</span> vs last period
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-qrcode"></i>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Completed Today</h3>
+                        <p id="completedOrdersCount">0</p>
                     </div>
                 </div>
-
-                <div class="stat-card orders">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-title">Total Orders</div>
-                            <div class="stat-value" id="ordersValue">0</div>
-                            <div class="stat-change positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="ordersChange">0%</span> vs last period
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-utensils"></i>
                     </div>
-                </div>
-
-                <div class="stat-card customers">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-title">Unique Customers</div>
-                            <div class="stat-value" id="customersValue">0</div>
-                            <div class="stat-change positive">
-                                <i class="fas fa-arrow-up"></i>
-                                <span id="customersChange">0%</span> vs last period
-                            </div>
-                        </div>
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
+                    <div class="stat-info">
+                        <h3>Total Products</h3>
+                        <p id="totalProductsCount">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="chart-container">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">Top Selling Products</div>
-                    </div>
-                    <div class="top-items" id="topProducts"></div>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">Most Frequent Customers</div>
-                    </div>
-                    <div class="top-items" id="topCustomers"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="ordersTab" class="tab-content">
-            <div class="filter-section">
-                <button class="filter-btn active" data-filter="all">
-                    <i class="fas fa-th-list"></i> All Orders
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
                 </button>
-                <button class="filter-btn" data-filter="pending">
-                    <i class="fas fa-clock"></i> Pending
+                <button class="tab-btn" data-tab="orders">
+                    <i class="fas fa-list-alt"></i> Orders
                 </button>
-                <button class="filter-btn" data-filter="completed">
-                    <i class="fas fa-check-circle"></i> Completed
+                <button class="tab-btn" data-tab="products">
+                    <i class="fas fa-box"></i> Products
                 </button>
             </div>
-            <div class="orders-grid" id="ordersGrid"></div>
-        </div>
 
-        <div id="productsTab" class="tab-content">
-            <div class="product-form">
-                <h2><i class="fas fa-box"></i> <span id="formTitle">Add New Product</span></h2>
-                <form id="productForm" onsubmit="handleProductSubmit(event)">
-                    <input type="hidden" id="productId" value="">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="productName">Product Name</label>
-                            <input type="text" id="productName" required placeholder="Enter product name">
-                        </div>
-                        <div class="form-group">
-                            <label for="productPrice">Price (₹)</label>
-                            <input type="number" id="productPrice" step="0.01" min="0" required placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label for="productCategory">Category</label>
-                            <select id="productCategory" required>
-                                <option value="">Select category</option>
-                                <option value="drinks">Drinks</option>
-                                <option value="food">Food</option>
-                                <option value="desserts">Desserts</option>
-                            </select>
+            <div id="dashboardTab" class="tab-content active">
+                <div class="time-filter">
+                    <button onclick="updateTimeFrame('day')" class="active">Today</button>
+                    <button onclick="updateTimeFrame('week')">This Week</button>
+                    <button onclick="updateTimeFrame('month')">This Month</button>
+                    <button onclick="updateTimeFrame('year')">This Year</button>
+                </div>
+
+                <div class="dashboard-container">
+                    <div class="stat-card revenue">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Total Revenue</div>
+                                <div class="stat-value">₹<span id="revenueValue">0</span></div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="revenueChange">0%</span> vs last period
+                                </div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-rupee-sign"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="submit-btn">
-                            <i class="fas fa-save"></i> <span id="submitButtonText">Add Product</span>
-                        </button>
-                        <button type="button" class="action-btn" onclick="resetProductForm()" id="cancelButton" style="display: none;">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
+
+                    <div class="stat-card visits">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">QR Scans</div>
+                                <div class="stat-value" id="scansValue">0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="scansChange">0%</span> vs last period
+                                </div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                        </div>
                     </div>
-                </form>
+
+                    <div class="stat-card orders">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Total Orders</div>
+                                <div class="stat-value" id="ordersValue">0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="ordersChange">0%</span> vs last period
+                                </div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card customers">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Unique Customers</div>
+                                <div class="stat-value" id="customersValue">0</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span id="customersChange">0%</span> vs last period
+                                </div>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Top Selling Products</div>
+                        </div>
+                        <div class="top-items" id="topProducts"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title">Most Frequent Customers</div>
+                        </div>
+                        <div class="top-items" id="topCustomers"></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="product-grid" id="productGrid"></div>
+            <div id="ordersTab" class="tab-content">
+                <div class="filter-section">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-th-list"></i> All Orders
+                    </button>
+                    <button class="filter-btn" data-filter="pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </button>
+                    <button class="filter-btn" data-filter="completed">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </button>
+                </div>
+                <div class="orders-grid" id="ordersGrid"></div>
+            </div>
+
+            <div id="productsTab" class="tab-content">
+                <div class="product-form">
+                    <h2><i class="fas fa-box"></i> <span id="formTitle">Add New Product</span></h2>
+                    <form id="productForm" onsubmit="handleProductSubmit(event)">
+                        <input type="hidden" id="productId" value="">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="productName">Product Name</label>
+                                <input type="text" id="productName" required placeholder="Enter product name">
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice">Price (₹)</label>
+                                <input type="number" id="productPrice" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div class="form-group">
+                                <label for="productCategory">Category</label>
+                                <select id="productCategory" required>
+                                    <option value="">Select category</option>
+                                    <option value="drinks">Drinks</option>
+                                    <option value="food">Food</option>
+                                    <option value="desserts">Desserts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-save"></i> <span id="submitButtonText">Add Product</span>
+                            </button>
+                            <button type="button" class="action-btn" onclick="resetProductForm()" id="cancelButton" style="display: none;">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="product-grid" id="productGrid"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Add login functionality
+        const ADMIN_PIN = '837337'; // Updated PIN for admin access
+        const loginScreen = document.getElementById('loginScreen');
+        const adminContent = document.getElementById('adminContent');
+        const pinDigits = document.querySelectorAll('.pin-digit');
+        const errorMessage = document.getElementById('errorMessage');
+        let currentPin = '';
+
+        // Check if already logged in
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+            showAdminContent();
+        }
+
+        // Handle PIN input
+        pinDigits.forEach((digit, index) => {
+            digit.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Only allow numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Update current PIN
+                currentPin = Array.from(pinDigits).map(d => d.value).join('');
+
+                // Move to next input if value entered
+                if (value && index < pinDigits.length - 1) {
+                    pinDigits[index + 1].focus();
+                }
+
+                // Check PIN when all digits entered
+                if (currentPin.length === 6) {
+                    checkPin();
+                }
+            });
+
+            // Handle backspace
+            digit.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !digit.value && index > 0) {
+                    pinDigits[index - 1].focus();
+                }
+            });
+        });
+
+        function checkPin() {
+            if (currentPin === ADMIN_PIN) {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showAdminContent();
+            } else {
+                // Show error
+                pinDigits.forEach(digit => {
+                    digit.classList.add('error');
+                });
+                errorMessage.classList.add('show');
+
+                // Clear PIN after delay
+                setTimeout(() => {
+                    pinDigits.forEach(digit => {
+                        digit.value = '';
+                        digit.classList.remove('error');
+                    });
+                    errorMessage.classList.remove('show');
+                    currentPin = '';
+                    pinDigits[0].focus();
+                }, 1000);
+            }
+        }
+
+        function showAdminContent() {
+            loginScreen.style.display = 'none';
+            adminContent.classList.add('show');
+            initializeAdmin();
+        }
+
         // Get orders from localStorage
         function getOrders() {
             try {

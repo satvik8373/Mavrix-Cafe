@@ -1,14 +1,13 @@
 services:
-  - type: web
+  - type: static
     name: mavrix-cafe
-    env: node
-    buildCommand: cd frontend && rm -f yarn.lock && npm install
-    startCommand: cd frontend && npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 3000
+    env: static
+    buildCommand: cd frontend && npm install
+    staticPublishPath: ./frontend
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
   - type: web
     name: mavrix-cafe-api

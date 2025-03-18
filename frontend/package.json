@@ -2,13 +2,11 @@
   "name": "restaurant-management-frontend",
   "version": "1.0.0",
   "description": "Restaurant Management System Frontend",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "node index.js"
+    "build": "echo 'No build step needed'"
   },
-  "dependencies": {
-    "express": "^4.18.2"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=14.0.0"
   },

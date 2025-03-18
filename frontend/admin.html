@@ -1687,10 +1687,138 @@
 
         // Add this at the end of your script section, just before the closing </script> tag
         document.addEventListener('DOMContentLoaded', () => {
-            setupFilterButtons();
+            // Debug logging
+            console.log('DOM Content Loaded');
+            console.log('Config:', window.config);
+            console.log('API URL:', window.config.API_URL);
+
+            // Setup password validation
+            const digitInputs = [...document.querySelectorAll('.digit-input')];
+            const submitPassword = document.getElementById('submitPassword');
+            const passwordScreen = document.getElementById('passwordScreen');
+            const adminContent = document.getElementById('adminContent');
+
+            // Handle digit input
+            digitInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    
+                    // Allow only numbers
+                    if (!/^\d*$/.test(value)) {
+                        input.value = '';
+                        return;
+                    }
+
+                    // Move to next input
+                    if (value && index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+
+                    // Enable submit button if all digits are filled
+                    const isComplete = digitInputs.every(input => input.value.length === 1);
+                    submitPassword.disabled = !isComplete;
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    // Handle backspace
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        digitInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            // Handle password submission
+            submitPassword.addEventListener('click', async () => {
+                const enteredPassword = digitInputs.map(input => input.value).join('');
+                
+                if (enteredPassword === '837337') {
+                    // Store authentication in session storage
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    
+                    // Show success message
+                    const passwordMessage = document.getElementById('passwordMessage');
+                    passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
+                    passwordMessage.style.color = '#2ecc71';
+                    
+                    // Hide password screen
+                    passwordScreen.style.display = 'none';
+                    adminContent.classList.add('visible');
+                    
+                    // Initialize admin interface
+                    try {
+                        await initializeAdmin();
+                    } catch (error) {
+                        console.error('Error initializing admin interface:', error);
+                        showToast(error.message, 'error');
+                    }
+                } else {
+                    // Show error message and shake effect
+                    const passwordMessage = document.getElementById('passwordMessage');
+                    passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password';
+                    passwordMessage.style.color = '#e74c3c';
+                    
+                    const passwordInput = document.getElementById('passwordInput');
+                    passwordInput.classList.add('shake');
+                    
+                    // Clear inputs
+                    digitInputs.forEach(input => input.value = '');
+                    digitInputs[0].focus();
+                    submitPassword.disabled = true;
+                    
+                    // Remove shake class after animation
+                    setTimeout(() => {
+                        passwordInput.classList.remove('shake');
+                    }, 500);
+                }
+            });
+
+            // Check if already authenticated
             if (sessionStorage.getItem('adminAuthenticated') === 'true') {
-                initializeAdmin();
+                passwordScreen.style.display = 'none';
+                adminContent.classList.add('visible');
+                initializeAdmin().catch(error => {
+                    console.error('Error initializing admin interface:', error);
+                    showToast(error.message, 'error');
+                });
             }
+
+            // Setup tab switching
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const tabId = button.dataset.tab;
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Update active tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabId}Tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+
+                    // Refresh content based on active tab
+                    try {
+                        switch(tabId) {
+                            case 'dashboard':
+                                await updateDashboard();
+                                break;
+                            case 'orders':
+                                await displayOrders();
+                                break;
+                            case 'products':
+                                await displayProducts();
+                                break;
+                        }
+                    } catch (error) {
+                        console.error('Error switching tabs:', error);
+                        showToast(error.message, 'error');
+                    }
+                });
+            });
         });
     </script>
 </body>

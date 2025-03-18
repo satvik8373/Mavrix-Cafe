@@ -13,7 +13,7 @@ const app = express();
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-frontend-url.onrender.com']
+    ? ['https://mavrix-cafe.onrender.com']
     : ['http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
@@ -21,6 +21,19 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Default route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Mavrix Cafe API Server',
+    status: 'running',
+    endpoints: {
+      menu: '/api/menu',
+      orders: '/api/orders',
+      health: '/health'
+    }
+  });
+});
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
@@ -122,7 +135,10 @@ app.put('/api/orders/:id', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'healthy' });
+  res.json({ 
+    status: 'healthy',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
 });
 
 const PORT = process.env.PORT || 3000;

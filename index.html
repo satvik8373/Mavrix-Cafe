@@ -915,6 +915,7 @@
     </div>
 
     <script>
+        const API_URL = '/api';  // Changed from 'http://localhost:3000/api'
         let cart = [];
         let tableNumber = null;
 
@@ -930,7 +931,7 @@
         // Get products from MongoDB API
         async function getProducts() {
             try {
-                const response = await fetch('http://localhost:3000/api/menu');
+                const response = await fetch(`${API_URL}/menu`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch menu items');
                 }
@@ -1167,7 +1168,7 @@
             
             try {
                 // Send order to server
-                const response = await fetch('http://localhost:3000/api/orders', {
+                const response = await fetch(`${API_URL}/orders`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -977,6 +977,60 @@
         .product-form:focus-within {
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
+        /* New styles for error states */
+        .no-products,
+        .error-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-products i,
+        .error-state i {
+            font-size: 3rem;
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+        }
+
+        .error-state i {
+            color: #e74c3c;
+        }
+
+        .no-products p,
+        .error-state p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+        }
+
+        .retry-btn {
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .retry-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .retry-btn i {
+            font-size: 1rem;
+            color: white;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -1285,23 +1339,67 @@
             };
         }
 
-        // Fetch menu items
+        // Fetch menu items with better error handling
         async function displayProducts() {
             try {
+                showToast('Loading products...', 'info');
+                
                 const response = await fetch(`${API_BASE_URL}/menu`);
-                if (!response.ok) throw new Error('Failed to fetch menu items');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch menu items. Please check your connection.');
+                }
+                
                 const products = await response.json();
                 
+                if (!Array.isArray(products)) {
+                    throw new Error('Invalid data received from server');
+                }
+                
                 const productsContainer = document.getElementById('productGrid');
+                if (!productsContainer) {
+                    throw new Error('Products container not found');
+                }
+                
                 productsContainer.innerHTML = '';
                 
+                if (products.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="no-products">
+                            <i class="fas fa-box-open"></i>
+                            <p>No products available</p>
+                            <button onclick="handleAddProduct()" class="retry-btn">
+                                <i class="fas fa-plus"></i> Add First Product
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 products.forEach(product => {
-                    const productCard = createProductCard(product);
-                    productsContainer.appendChild(productCard);
+                    if (product && product._id) {
+                        const productCard = createProductCard(product);
+                        productsContainer.appendChild(productCard);
+                    }
                 });
+                
+                showToast(`${products.length} products loaded successfully`, 'success');
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast('Error loading products', 'error');
+                showToast(error.message, 'error');
+                
+                // Show error state in grid
+                const productsContainer = document.getElementById('productGrid');
+                if (productsContainer) {
+                    productsContainer.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Error loading products</p>
+                            <button onclick="displayProducts()" class="retry-btn">
+                                <i class="fas fa-sync-alt"></i> Retry
+                            </button>
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1761,8 +1859,12 @@
         async function editProduct(productId) {
             try {
                 if (!productId) {
-                    throw new Error('Invalid product ID');
+                    showToast('Invalid product ID', 'error');
+                    return;
                 }
+
+                // Show loading state
+                showToast('Loading product details...', 'info');
 
                 // Switch to products tab first
                 document.querySelector('[data-tab="products"]').click();
@@ -1771,7 +1873,8 @@
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        throw new Error('Product not found or may have been deleted. Please refresh the page.');
+                        await displayProducts(); // Refresh product list
+                        throw new Error('This product no longer exists. The product list has been refreshed.');
                     }
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.message || 'Unable to load product details. Please try again.');
@@ -1780,37 +1883,55 @@
                 const product = await response.json();
                 
                 if (!product || !product._id) {
-                    throw new Error('Invalid product data received');
+                    throw new Error('Invalid product data received from server');
                 }
 
                 // Scroll form into view
                 const productForm = document.querySelector('.product-form');
-                productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                if (productForm) {
+                    productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
                 
                 // Update form with a slight delay to ensure smooth scrolling
                 setTimeout(() => {
-                    // Update form
-                    document.getElementById('productId').value = product._id.toString();
-                    document.getElementById('productName').value = product.name || '';
-                    document.getElementById('productPrice').value = product.price || '';
-                    document.getElementById('productCategory').value = product.category || '';
-                    
-                    // Update form UI
-                    document.getElementById('formTitle').textContent = `Edit Product: ${product.name}`;
-                    document.getElementById('submitButtonText').textContent = 'Update Product';
-                    document.getElementById('cancelButton').style.display = 'block';
-                    
-                    // Focus on the name field
-                    document.getElementById('productName').focus();
-                    
-                    showToast('Product loaded for editing', 'info');
+                    try {
+                        // Update form
+                        const idField = document.getElementById('productId');
+                        const nameField = document.getElementById('productName');
+                        const priceField = document.getElementById('productPrice');
+                        const categoryField = document.getElementById('productCategory');
+                        const formTitle = document.getElementById('formTitle');
+                        const submitButton = document.getElementById('submitButtonText');
+                        const cancelButton = document.getElementById('cancelButton');
+
+                        if (!idField || !nameField || !priceField || !categoryField) {
+                            throw new Error('Form elements not found');
+                        }
+
+                        idField.value = product._id.toString();
+                        nameField.value = product.name || '';
+                        priceField.value = product.price || '';
+                        categoryField.value = product.category || '';
+                        
+                        // Update form UI
+                        if (formTitle) formTitle.textContent = `Edit Product: ${product.name}`;
+                        if (submitButton) submitButton.textContent = 'Update Product';
+                        if (cancelButton) cancelButton.style.display = 'block';
+                        
+                        // Focus on the name field
+                        nameField.focus();
+                        
+                        showToast('Product loaded for editing', 'success');
+                    } catch (error) {
+                        console.error('Error updating form:', error);
+                        showToast('Error updating form fields. Please try again.', 'error');
+                        resetProductForm();
+                    }
                 }, 300);
 
             } catch (error) {
                 console.error('Error editing product:', error);
                 showToast(error.message, 'error');
-                
-                // Reset form in case of error
                 resetProductForm();
             }
         }
@@ -1941,6 +2062,18 @@
                     errorSpan.remove();
                 }
             });
+        }
+
+        // Helper function to switch to products tab and show add product form
+        function handleAddProduct() {
+            const productsTab = document.querySelector('[data-tab="products"]');
+            if (productsTab) {
+                productsTab.click();
+                const nameField = document.getElementById('productName');
+                if (nameField) {
+                    nameField.focus();
+                }
+            }
         }
     </script>
 </body>

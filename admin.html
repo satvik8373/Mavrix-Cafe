@@ -716,136 +716,177 @@
             background: #e9ecef;
         }
 
-        /* Login Screen Styles */
-        .login-overlay {
+        /* Password Screen Styles */
+        .password-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             z-index: 1000;
         }
 
-        .login-container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 400px;
+        .password-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            max-width: 450px;
+            width: 90%;
+            animation: fadeInUp 0.5s ease;
         }
 
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--coffee-light), var(--coffee-medium));
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .login-title {
+        .password-title {
             color: var(--coffee-dark);
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
         }
 
-        .pin-input-container {
+        .password-title i {
+            color: var(--coffee-medium);
+            font-size: 2rem;
+        }
+
+        .password-input {
             display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .digit-input {
+            width: 50px;
+            height: 60px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 2rem;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            color: var(--coffee-dark);
+            font-weight: 600;
+            -webkit-text-security: disc;
+        }
+
+        .digit-input:focus {
+            border-color: var(--coffee-medium);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(111, 78, 55, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .password-message {
+            color: #e74c3c;
+            margin-bottom: 1.5rem;
+            min-height: 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            margin: 1.5rem 0;
         }
 
-        .pin-digit {
-            width: 40px;
-            height: 50px;
-            border: 2px solid var(--coffee-medium);
-            border-radius: 8px;
-            font-size: 1.5rem;
-            text-align: center;
-            background: var(--cream-color);
-            transition: var(--transition);
+        .password-message i {
+            font-size: 1.2rem;
         }
 
-        .pin-digit:focus {
-            border-color: var(--coffee-dark);
-            box-shadow: 0 0 0 2px rgba(74, 44, 42, 0.2);
-            outline: none;
-        }
-
-        .login-button {
-            background: linear-gradient(135deg, var(--coffee-medium), var(--coffee-dark));
+        .password-button {
+            background: linear-gradient(135deg, var(--coffee-dark), var(--coffee-medium));
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
+            padding: 1rem 3rem;
+            border-radius: 12px;
             cursor: pointer;
-            transition: var(--transition);
-            width: 100%;
-            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin: 0 auto;
         }
 
-        .login-button:hover {
+        .password-button:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(111, 78, 55, 0.3);
         }
 
-        .login-error {
-            color: var(--secondary-color);
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            display: none;
+        .password-button:disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .password-button i {
+            font-size: 1.2rem;
         }
 
         .shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            animation: shake 0.5s ease-in-out;
         }
 
         @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
 
         /* Hide admin content initially */
-        #adminContent {
+        .admin-content {
             display: none;
+        }
+
+        .admin-content.visible {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <!-- Login Overlay -->
-    <div id="loginOverlay" class="login-overlay">
-        <div class="login-container">
-            <h2 class="login-title">Mavrix Cafe Admin</h2>
-            <p>Enter 6-digit PIN to access admin panel</p>
-            <div class="pin-input-container">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
-                <input type="password" class="pin-digit" maxlength="1" pattern="[0-9]" inputmode="numeric">
+    <!-- Password Screen -->
+    <div class="password-screen" id="passwordScreen">
+        <div class="password-container">
+            <h2 class="password-title">
+                <i class="fas fa-lock"></i> Admin Access
+            </h2>
+            <div class="password-input" id="passwordInput">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="password" class="digit-input" maxlength="1" pattern="[0-9]" inputmode="numeric">
             </div>
-            <button class="login-button" onclick="validatePin()">Login</button>
-            <p id="loginError" class="login-error">Incorrect PIN. Please try again.</p>
+            <div class="password-message" id="passwordMessage"></div>
+            <button class="password-button" id="submitPassword" disabled>
+                <i class="fas fa-key"></i> Login
+            </button>
         </div>
     </div>
 
     <!-- Admin Content -->
-    <div id="adminContent">
+    <div class="admin-content" id="adminContent">
         <div class="admin-container">
             <header class="admin-header">
                 <h1><i class="fas fa-coffee"></i> Mavrix Cafe Admin</h1>
@@ -1045,88 +1086,132 @@
     </div>
 
     <script>
-        // Login validation
-        const ADMIN_PIN = '837337';
-        let loginAttempts = 0;
-        const MAX_ATTEMPTS = 5;
+        // Password validation
+        const ADMIN_PASSWORD = '837337';
+        const passwordScreen = document.getElementById('passwordScreen');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordMessage = document.getElementById('passwordMessage');
+        const submitPassword = document.getElementById('submitPassword');
+        const adminContent = document.getElementById('adminContent');
+        const digitInputs = [...passwordInput.getElementsByClassName('digit-input')];
 
-        // Handle PIN input
-        const pinInputs = document.querySelectorAll('.pin-digit');
-        pinInputs.forEach((input, index) => {
+        // Handle digit input
+        digitInputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
-                if (e.target.value.length === 1) {
-                    if (index < pinInputs.length - 1) {
-                        pinInputs[index + 1].focus();
-                    }
+                const value = e.target.value;
+                
+                // Allow only numbers
+                if (!/^\d*$/.test(value)) {
+                    input.value = '';
+                    return;
                 }
+
+                // Move to next input
+                if (value && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+
+                // Enable submit button if all digits are filled
+                const isComplete = digitInputs.every(input => input.value.length === 1);
+                submitPassword.disabled = !isComplete;
             });
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                    pinInputs[index - 1].focus();
+                // Handle backspace
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    digitInputs[index - 1].focus();
                 }
             });
         });
 
-        // Validate PIN
-        function validatePin() {
-            const enteredPin = Array.from(pinInputs).map(input => input.value).join('');
-            const loginError = document.getElementById('loginError');
-            const loginContainer = document.querySelector('.login-container');
+        // Handle password submission
+        submitPassword.addEventListener('click', validatePassword);
 
-            if (enteredPin === ADMIN_PIN) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
+        function validatePassword() {
+            const enteredPassword = digitInputs.map(input => input.value).join('');
+            
+            if (enteredPassword === ADMIN_PASSWORD) {
+                // Show success message before transitioning
+                passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
+                passwordMessage.style.color = '#2ecc71';
                 
-                // Save login state
-                sessionStorage.setItem('adminLoggedIn', 'true');
+                // Store authentication in session storage
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                
+                // Animate container out
+                const container = document.querySelector('.password-container');
+                container.style.animation = 'fadeOutDown 0.5s ease forwards';
+                
+                // Hide password screen with delay
+                setTimeout(() => {
+                    passwordScreen.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        passwordScreen.style.display = 'none';
+                        adminContent.classList.add('visible');
+                        if (typeof initializeAdmin === 'function') {
+                            initializeAdmin();
+                        }
+                    }, 300);
+                }, 500);
             } else {
-                loginAttempts++;
-                loginError.style.display = 'block';
-                loginContainer.classList.add('shake');
+                // Show error message and shake effect
+                passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password. Please try again.';
+                passwordInput.classList.add('shake');
                 
                 // Clear inputs
-                pinInputs.forEach(input => input.value = '');
-                pinInputs[0].focus();
+                digitInputs.forEach(input => {
+                    input.value = '';
+                });
+                digitInputs[0].focus();
+                submitPassword.disabled = true;
 
-                // Remove shake animation
+                // Remove shake class after animation
                 setTimeout(() => {
-                    loginContainer.classList.remove('shake');
+                    passwordInput.classList.remove('shake');
                 }, 500);
-
-                // Handle max attempts
-                if (loginAttempts >= MAX_ATTEMPTS) {
-                    loginError.textContent = 'Too many attempts. Please try again later.';
-                    document.querySelector('.login-button').disabled = true;
-                    setTimeout(() => {
-                        loginAttempts = 0;
-                        loginError.textContent = 'Incorrect PIN. Please try again.';
-                        document.querySelector('.login-button').disabled = false;
-                    }, 30000); // 30 seconds lockout
-                }
             }
         }
 
-        // Check if already logged in
+        // Check for existing authentication
         window.addEventListener('load', () => {
-            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
+            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+                passwordScreen.style.display = 'none';
+                adminContent.classList.add('visible');
+                if (typeof initializeAdmin === 'function') {
+                    initializeAdmin();
+                }
             }
         });
 
-        // Handle logout
-        function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            location.reload();
-        }
+        // Handle paste event
+        passwordInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numbers = pastedText.replace(/\D/g, '').slice(0, 6).split('');
+            
+            numbers.forEach((num, index) => {
+                if (index < digitInputs.length) {
+                    digitInputs[index].value = num;
+                }
+            });
 
-        // Add logout button to your admin interface
-        const logoutButton = document.createElement('button');
-        logoutButton.textContent = 'Logout';
-        logoutButton.onclick = logout;
-        logoutButton.className = 'logout-button';
-        document.body.appendChild(logoutButton);
+            // Enable submit button if all digits are filled
+            const isComplete = digitInputs.every(input => input.value.length === 1);
+            submitPassword.disabled = !isComplete;
+
+            if (isComplete) {
+                digitInputs[5].focus();
+            } else {
+                digitInputs[numbers.length].focus();
+            }
+        });
+
+        // Add keyboard support for Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !submitPassword.disabled) {
+                validatePassword();
+            }
+        });
 
         // Get orders from localStorage
         function getOrders() {

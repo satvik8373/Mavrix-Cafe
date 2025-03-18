@@ -12,10 +12,11 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: '*', // Allow all origins during testing
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://mavrix-cafe.onrender.com']
+    : ['http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
 };
 
 app.use(cors(corsOptions));

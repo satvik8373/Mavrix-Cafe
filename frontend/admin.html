@@ -7,7 +7,36 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="config.js"></script>
+    <script type="module">
+        import config from './config.js';
+        window.API_URL = config.API_URL;
+    </script>
+    <script>
+        // Rest of your JavaScript code using window.API_URL
+        async function getMenuItems() {
+            try {
+                const response = await fetch(`${window.API_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error fetching menu items', 'error');
+                return [];
+            }
+        }
+
+        async function getOrders() {
+            try {
+                const response = await fetch(`${window.API_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Error fetching orders', 'error');
+                return [];
+            }
+        }
+    </script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -1209,11 +1238,7 @@
     </div>
 
     <script>
-        // Debug logging
-        console.log('Admin Config loaded:', window.config);
-        console.log('Admin API URL:', window.config.API_URL);
-
-        const API_URL = window.config.API_URL;
+        const API_URL = 'http://localhost:3000/api';
 
         // Fetch menu items from MongoDB
         async function getMenuItems() {
@@ -1244,153 +1269,653 @@
         }
 
         // Add new product to MongoDB
-        async function addProduct(event) {
-            event.preventDefault();
+        async function addProduct(productData) {
             try {
-                const formData = new FormData(event.target);
-                const product = {
-                    name: formData.get('name').trim(),
-                    price: parseFloat(formData.get('price')),
-                    category: formData.get('category').trim(),
-                    description: formData.get('description').trim(),
-                    available: true
-                };
-
-                if (!product.name || !product.price || !product.category) {
-                    throw new Error('Please fill in all required fields');
-                }
-
-                if (product.price <= 0) {
-                    throw new Error('Price must be greater than 0');
-                }
-
                 const response = await fetch(`${API_URL}/menu`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(product)
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(productData)
                 });
-
                 if (!response.ok) {
-                    throw new Error(`Failed to add product: ${response.statusText}`);
+                    throw new Error('Failed to add product');
                 }
-
-                showToast('Product added successfully');
-                event.target.reset();
-                await displayProducts();
-
+                return await response.json();
             } catch (error) {
                 console.error('Error adding product:', error);
-                showToast(error.message, 'error');
+                throw error;
             }
         }
 
         // Update product in MongoDB
-        async function updateProduct(event) {
-            event.preventDefault();
+        async function updateProduct(productId, productData) {
             try {
-                const formData = new FormData(event.target);
-                const productId = formData.get('productId');
-                const product = {
-                    name: formData.get('name').trim(),
-                    price: parseFloat(formData.get('price')),
-                    category: formData.get('category').trim(),
-                    description: formData.get('description').trim()
-                };
-
-                if (!product.name || !product.price || !product.category) {
-                    throw new Error('Please fill in all required fields');
-                }
-
-                if (product.price <= 0) {
-                    throw new Error('Price must be greater than 0');
-                }
-
                 const response = await fetch(`${API_URL}/menu/${productId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(product)
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(productData)
                 });
-
                 if (!response.ok) {
-                    throw new Error(`Failed to update product: ${response.statusText}`);
+                    throw new Error('Failed to update product');
                 }
-
-                showToast('Product updated successfully');
-                document.getElementById('editProductModal').style.display = 'none';
-                await displayProducts();
-
+                return await response.json();
             } catch (error) {
                 console.error('Error updating product:', error);
-                showToast(error.message, 'error');
+                throw error;
             }
         }
 
         // Delete product from MongoDB
         async function deleteProduct(productId) {
             try {
-                if (!confirm('Are you sure you want to delete this product?')) {
-                    return;
-                }
-
                 const response = await fetch(`${API_URL}/menu/${productId}`, {
                     method: 'DELETE'
                 });
-
                 if (!response.ok) {
-                    throw new Error(`Failed to delete product: ${response.statusText}`);
+                    throw new Error('Failed to delete product');
                 }
-
-                showToast('Product deleted successfully');
-                await displayProducts();
-
+                return await response.json();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showToast(error.message, 'error');
+                throw error;
             }
         }
 
         // Update order status in MongoDB
         async function updateOrderStatus(orderId, status) {
             try {
-                const response = await fetch(`${window.config.API_URL}/orders/${orderId}`, {
+                const response = await fetch(`${API_URL}/orders/${orderId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({ status })
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to update order status');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                throw error;
+            }
+        }
+
+        // Display products from MongoDB
+        async function displayProducts() {
+            try {
+                const response = await fetch(`${API_URL}/menu`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const products = await response.json();
+
+                if (!Array.isArray(products)) {
+                    console.error('Products data is not an array:', products);
+                    return;
+                }
+
+                const productsContainer = document.getElementById('productGrid');
+                productsContainer.innerHTML = '';
+
+                if (products.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="no-orders" style="margin-top: 2rem;">
+                            <i class="fas fa-box-open"></i>
+                            <h3>No Products Added</h3>
+                            <p>Add your first product using the form above</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    productCard.innerHTML = `
+                        <div class="product-header">
+                            <h3>${product.name}</h3>
+                            <span class="product-price">₹${product.price.toFixed(2)}</span>
+                        </div>
+                        <span class="product-category">${product.category}</span>
+                        <div class="product-actions">
+                            <button onclick="editProduct('${product._id}')" class="action-btn edit-btn">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="toggleAvailability('${product._id}', ${!product.available})" 
+                                class="action-btn toggle-btn ${product.available ? '' : 'unavailable'}">
+                                <i class="fas ${product.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                ${product.available ? 'Available' : 'Unavailable'}
+                            </button>
+                            <button onclick="deleteProductConfirm('${product._id}')" class="action-btn delete-btn">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                    productsContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error displaying products:', error);
+                showToast('Error loading products', 'error');
+            }
+        }
+
+        // Handle product form submission
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            
+            const productId = document.getElementById('productId').value;
+            const productData = {
+                name: document.getElementById('productName').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                category: document.getElementById('productCategory').value,
+                available: true
+            };
+
+            try {
+                let response;
+                if (productId) {
+                    response = await fetch(`${API_URL}/menu/${productId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(productData)
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/menu`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(productData)
+                    });
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                showToast(productId ? 'Product updated successfully' : 'Product added successfully', 'success');
+                resetProductForm();
+                await refreshData();
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showToast('Error saving product', 'error');
+            }
+        }
+
+        // Edit product
+        async function editProduct(productId) {
+            try {
+                const products = await getMenuItems();
+                const product = products.find(p => p._id === productId);
+                
+                if (product) {
+                    document.getElementById('productId').value = product._id;
+                    document.getElementById('productName').value = product.name;
+                    document.getElementById('productPrice').value = product.price;
+                    document.getElementById('productCategory').value = product.category;
+                    
+                    document.getElementById('formTitle').textContent = 'Edit Product';
+                    document.getElementById('submitButtonText').textContent = 'Update Product';
+                    document.getElementById('cancelButton').style.display = 'block';
+                    
+                    document.querySelector('.product-form').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (error) {
+                showToast('Error loading product details', 'error');
+            }
+        }
+
+        // Toggle product availability
+        async function toggleAvailability(productId, available) {
+            try {
+                const response = await fetch(`${API_URL}/menu/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ available })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to update order status: ${response.statusText}`);
+                    throw new Error('Failed to update product availability');
                 }
 
-                showToast('Order status updated successfully');
-                await displayOrders();
-                await updateStats();
-                await updateDashboard();
-
+                await refreshData();
+                showToast('Product availability updated', 'success');
             } catch (error) {
-                console.error('Error updating order status:', error);
-                showToast(error.message, 'error');
+                console.error('Error updating product availability:', error);
+                showToast('Failed to update product availability', 'error');
+            }
+        }
+
+        // Delete product confirmation
+        async function deleteProductConfirm(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    const response = await fetch(`${API_URL}/menu/${productId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to delete product');
+                    }
+
+                    await refreshData();
+                    showToast('Product deleted successfully', 'success');
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                    showToast('Failed to delete product', 'error');
+                }
+            }
+        }
+
+        // Reset product form
+        function resetProductForm() {
+            document.getElementById('productId').value = '';
+            document.getElementById('productName').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productCategory').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('submitButtonText').textContent = 'Add Product';
+            document.getElementById('cancelButton').style.display = 'none';
+        }
+
+        // Display orders from MongoDB
+        async function displayOrders(filter = 'all') {
+            try {
+                const response = await fetch(`${API_URL}/orders`);
+                const orders = await response.json();
+                
+                if (!Array.isArray(orders)) {
+                    console.error('Orders data is not an array:', orders);
+                    return;
+                }
+
+                const ordersContainer = document.getElementById('ordersGrid');
+                ordersContainer.innerHTML = '';
+
+                const filteredOrders = orders.filter(order => {
+                    if (filter === 'all') return true;
+                    if (filter === 'pending') return order.status === 'pending';
+                    if (filter === 'completed') return order.status === 'completed';
+                    return true;
+                });
+
+                filteredOrders.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.className = 'order-card';
+                    orderCard.innerHTML = `
+                        <div class="order-header">
+                            <h3>Order #${order._id}</h3>
+                            <span class="status ${order.status}">${order.status}</span>
+                        </div>
+                        <div class="order-details">
+                            <p><strong>Table:</strong> ${order.tableNumber}</p>
+                            <p><strong>Customer:</strong> ${order.customerName}</p>
+                            <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                            <p><strong>Total:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+                        </div>
+                        <div class="order-items">
+                            <h4>Items:</h4>
+                            <ul>
+                                ${order.items.map(item => `
+                                    <li>${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                        ${order.status === 'pending' ? `
+                            <button onclick="completeOrder('${order._id}')" class="complete-btn">
+                                Complete Order
+                            </button>
+                        ` : ''}
+                    `;
+                    ordersContainer.appendChild(orderCard);
+                });
+            } catch (error) {
+                console.error('Error displaying orders:', error);
+            }
+        }
+
+        // Complete order
+        async function completeOrder(orderId) {
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'completed' })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to complete order');
+                }
+
+                await refreshData();
+                showToast('Order completed successfully', 'success');
+            } catch (error) {
+                console.error('Error completing order:', error);
+                showToast('Failed to complete order', 'error');
+            }
+        }
+
+        // Add function to update stats
+        async function updateStats() {
+            try {
+                const [orders, products] = await Promise.all([
+                    fetch(`${API_URL}/orders`).then(res => res.json()),
+                    fetch(`${API_URL}/menu`).then(res => res.json())
+                ]);
+
+                if (!Array.isArray(orders)) {
+                    console.error('Orders data is not an array:', orders);
+                    return;
+                }
+
+                const pendingOrders = orders.filter(order => order.status === 'pending').length;
+                const completedToday = orders.filter(order => {
+                    const orderDate = new Date(order.timestamp).toDateString();
+                    const today = new Date().toDateString();
+                    return order.status === 'completed' && orderDate === today;
+                }).length;
+
+                const totalProducts = Array.isArray(products) ? products.length : 0;
+
+                document.getElementById('pendingOrdersCount').textContent = pendingOrders;
+                document.getElementById('completedOrdersCount').textContent = completedToday;
+                document.getElementById('totalProductsCount').textContent = totalProducts;
+            } catch (error) {
+                console.error('Error updating stats:', error);
             }
         }
 
         // Show toast message
-        function showToast(message, type = 'success') {
+        function showToast(message, type = 'info') {
             const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                padding: 1rem 2rem;
-                border-radius: 4px;
-                color: white;
-                z-index: 1000;
-                animation: slideIn 0.3s ease;
-            `;
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 3000);
+            }, 100);
+        }
+
+        // Setup filter buttons
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    displayOrders(button.dataset.filter);
+                });
+            });
+        }
+
+        // Update dashboard data with MongoDB data
+        async function updateDashboard(timeframe) {
+            try {
+                const response = await fetch(`${API_URL}/orders`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                const orders = await response.json();
+                
+                const now = new Date();
+                let filteredOrders = [];
+                
+                // Filter orders based on timeframe
+                switch(timeframe) {
+                    case 'day':
+                        filteredOrders = orders.filter(order => {
+                            const orderDate = new Date(order.timestamp);
+                            return orderDate.toDateString() === now.toDateString();
+                        });
+                        break;
+                    case 'week':
+                        filteredOrders = orders.filter(order => {
+                            const orderDate = new Date(order.timestamp);
+                            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                            return orderDate >= weekAgo;
+                        });
+                        break;
+                    case 'month':
+                        filteredOrders = orders.filter(order => {
+                            const orderDate = new Date(order.timestamp);
+                            return orderDate.getMonth() === now.getMonth() &&
+                                   orderDate.getFullYear() === now.getFullYear();
+                        });
+                        break;
+                    case 'year':
+                        filteredOrders = orders.filter(order => {
+                            const orderDate = new Date(order.timestamp);
+                            return orderDate.getFullYear() === now.getFullYear();
+                        });
+                        break;
+                }
+
+                // Calculate statistics
+                const revenue = filteredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+                const uniqueCustomers = new Set(filteredOrders.map(order => order.phoneNumber)).size;
+                const scans = filteredOrders.length;
+
+                // Update dashboard values
+                document.getElementById('revenueValue').textContent = revenue.toFixed(2);
+                document.getElementById('scansValue').textContent = scans;
+                document.getElementById('ordersValue').textContent = filteredOrders.length;
+                document.getElementById('customersValue').textContent = uniqueCustomers;
+
+                // Calculate top selling products
+                const productSales = {};
+                filteredOrders.forEach(order => {
+                    order.items.forEach(item => {
+                        if (!productSales[item.name]) {
+                            productSales[item.name] = { quantity: 0, revenue: 0 };
+                        }
+                        productSales[item.name].quantity += item.quantity;
+                        productSales[item.name].revenue += item.price * item.quantity;
+                    });
+                });
+
+                // Sort and display top products
+                const topProducts = Object.entries(productSales)
+                    .sort(([,a], [,b]) => b.revenue - a.revenue)
+                    .slice(0, 5);
+
+                const topProductsHtml = topProducts.map(([name, data]) => `
+                    <div class="top-item">
+                        <div class="top-item-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="top-item-info">
+                            <div class="top-item-title">${name}</div>
+                            <div class="top-item-value">₹${data.revenue.toFixed(2)} • ${data.quantity} sold</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('topProducts').innerHTML = topProductsHtml || '<p>No sales data available</p>';
+
+                // Calculate top customers
+                const customerOrders = {};
+                filteredOrders.forEach(order => {
+                    if (!customerOrders[order.phoneNumber]) {
+                        customerOrders[order.phoneNumber] = {
+                            name: order.customerName,
+                            visits: 0,
+                            spent: 0
+                        };
+                    }
+                    customerOrders[order.phoneNumber].visits++;
+                    customerOrders[order.phoneNumber].spent += order.totalAmount;
+                });
+
+                // Sort and display top customers
+                const topCustomers = Object.entries(customerOrders)
+                    .sort(([,a], [,b]) => b.spent - a.spent)
+                    .slice(0, 5);
+
+                const topCustomersHtml = topCustomers.map(([phone, data]) => `
+                    <div class="top-item">
+                        <div class="top-item-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="top-item-info">
+                            <div class="top-item-title">${data.name}</div>
+                            <div class="top-item-value">₹${data.spent.toFixed(2)} • ${data.visits} visits</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('topCustomers').innerHTML = topCustomersHtml || '<p>No customer data available</p>';
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+                showToast('Error updating dashboard data', 'error');
+            }
+        }
+
+        // Initialize admin dashboard
+        async function initializeAdmin() {
+            try {
+                // Setup event listeners first
+                setupFilterButtons();
+                
+                // Initialize all data
+                await Promise.all([
+                    displayOrders('all'),
+                    displayProducts(),
+                    updateStats(),
+                    updateDashboard('day')
+                ]);
+
+                // Setup auto-refresh
+                setInterval(async () => {
+                    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                    if (activeTab === 'dashboard') {
+                        await updateDashboard('day');
+                    } else if (activeTab === 'orders') {
+                        const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                        await displayOrders(activeFilter);
+                    }
+                    await updateStats();
+                }, 30000);
+
+            } catch (error) {
+                console.error('Error initializing admin interface:', error);
+                showToast('Error initializing admin interface', 'error');
+            }
+        }
+
+        // Update time frame
+        function updateTimeFrame(timeframe) {
+            // Update active button
+            document.querySelectorAll('.time-filter button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(timeframe)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update dashboard data
+            updateDashboard(timeframe);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Check authentication
+                if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+                    passwordScreen.style.display = 'none';
+                    adminContent.classList.add('visible');
+                    await initializeAdmin();
+                }
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                showToast('Error initializing page', 'error');
+            }
+        });
+
+        // Password validation
+        const ADMIN_PASSWORD = '837337';
+        const passwordScreen = document.getElementById('passwordScreen');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordMessage = document.getElementById('passwordMessage');
+        const submitPassword = document.getElementById('submitPassword');
+        const adminContent = document.getElementById('adminContent');
+        const digitInputs = [...passwordInput.getElementsByClassName('digit-input')];
+
+        // Handle digit input
+        digitInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Allow only numbers
+                if (!/^\d*$/.test(value)) {
+                    input.value = '';
+                    return;
+                }
+
+                // Move to next input
+                if (value && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+
+                // Enable submit button if all digits are filled
+                const isComplete = digitInputs.every(input => input.value.length === 1);
+                submitPassword.disabled = !isComplete;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Handle password submission
+        submitPassword.addEventListener('click', validatePassword);
+
+        function validatePassword() {
+            const enteredPassword = digitInputs.map(input => input.value).join('');
             
-            if (type === 'error') {
-                toast.style.background = '#e74c3c';
+            if (enteredPassword === ADMIN_PASSWORD) {
+                // Show success message before transitioning
+                passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
+                passwordMessage.style.color = '#2ecc71';
+                
+                // Store authentication in session storage
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                
+                // Animate container out
+                const container = document.querySelector('.password-container');
+                container.style.animation = 'fadeOutDown 0.5s ease forwards';
+                
+                // Hide password screen with delay
+                setTimeout(() => {
+                    passwordScreen.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => {
+                        passwordScreen.style.display = 'none';
+                        adminContent.classList.add('visible');
+                        if (typeof initializeAdmin === 'function') {
+                            initializeAdmin();
+                        }
+                    }, 300);
+                }, 500);
             } else {
-                toast.style.background = '#2ecc71';
                 // Show error message and shake effect
                 passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password. Please try again.';
                 passwordInput.classList.add('shake');
@@ -1493,509 +2018,6 @@
             setTimeout(() => {
                 refreshButton.classList.remove('refreshing');
             }, 1000);
-        }
-
-        // Add health check endpoint
-        async function checkBackendHealth() {
-            try {
-                const response = await fetch(`${window.config.API_URL.replace('/api', '')}/health`);
-                if (!response.ok) {
-                    throw new Error('Backend health check failed');
-                }
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                console.error('Health check error:', error);
-                showToast('Backend server is not responding', 'error');
-                return null;
-            }
-        }
-
-        async function editProduct(productId) {
-            try {
-                const response = await fetch(`${window.config.API_URL}/menu/${productId}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch product: ${response.statusText}`);
-                }
-
-                const product = await response.json();
-                const form = document.getElementById('editProductForm');
-                form.elements['productId'].value = product._id;
-                form.elements['name'].value = product.name;
-                form.elements['price'].value = product.price;
-                form.elements['category'].value = product.category;
-                form.elements['description'].value = product.description || '';
-
-                document.getElementById('editProductModal').style.display = 'block';
-
-            } catch (error) {
-                console.error('Error editing product:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        async function toggleAvailability(productId) {
-            try {
-                const response = await fetch(`${window.config.API_URL}/menu/${productId}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch product: ${response.statusText}`);
-                }
-
-                const product = await response.json();
-                const updateResponse = await fetch(`${window.config.API_URL}/menu/${productId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...product, available: !product.available })
-                });
-
-                if (!updateResponse.ok) {
-                    throw new Error(`Failed to update availability: ${updateResponse.statusText}`);
-                }
-
-                showToast(`Product ${product.available ? 'disabled' : 'enabled'} successfully`);
-                await displayProducts();
-
-            } catch (error) {
-                console.error('Error toggling availability:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        async function updateDashboard(timeframe = 'day') {
-            try {
-                const response = await fetch(`${window.config.API_URL}/orders`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch orders: ${response.statusText}`);
-                }
-
-                const orders = await response.json();
-                const now = new Date();
-                let filteredOrders = [];
-                
-                // Filter orders based on timeframe
-                switch(timeframe) {
-                    case 'day':
-                        filteredOrders = orders.filter(order => {
-                            const orderDate = new Date(order.timestamp);
-                            return orderDate.toDateString() === now.toDateString();
-                        });
-                        break;
-                    case 'week':
-                        filteredOrders = orders.filter(order => {
-                            const orderDate = new Date(order.timestamp);
-                            const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-                            return orderDate >= weekAgo;
-                        });
-                        break;
-                    case 'month':
-                        filteredOrders = orders.filter(order => {
-                            const orderDate = new Date(order.timestamp);
-                            return orderDate.getMonth() === now.getMonth() &&
-                                   orderDate.getFullYear() === now.getFullYear();
-                        });
-                        break;
-                    case 'year':
-                        filteredOrders = orders.filter(order => {
-                            const orderDate = new Date(order.timestamp);
-                            return orderDate.getFullYear() === now.getFullYear();
-                        });
-                        break;
-                    default:
-                        filteredOrders = orders;
-                }
-
-                // Calculate statistics
-                const revenue = filteredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
-                const uniqueCustomers = new Set(filteredOrders.map(order => order.phoneNumber)).size;
-                const scans = filteredOrders.length;
-
-                // Update dashboard values
-                document.getElementById('revenueValue').textContent = revenue.toFixed(2);
-                document.getElementById('scansValue').textContent = scans;
-                document.getElementById('ordersValue').textContent = filteredOrders.length;
-                document.getElementById('customersValue').textContent = uniqueCustomers;
-
-                // Calculate top selling products
-                const productSales = {};
-                filteredOrders.forEach(order => {
-                    order.items.forEach(item => {
-                        if (!productSales[item.name]) {
-                            productSales[item.name] = { quantity: 0, revenue: 0 };
-                        }
-                        productSales[item.name].quantity += item.quantity;
-                        productSales[item.name].revenue += item.price * item.quantity;
-                    });
-                });
-
-                // Sort and display top products
-                const topProducts = Object.entries(productSales)
-                    .sort(([,a], [,b]) => b.revenue - a.revenue)
-                    .slice(0, 5);
-
-                const topProductsHtml = topProducts.map(([name, data]) => `
-                    <div class="top-item">
-                        <div class="top-item-icon">
-                            <i class="fas fa-utensils"></i>
-                        </div>
-                        <div class="top-item-info">
-                            <div class="top-item-title">${name}</div>
-                            <div class="top-item-value">₹${data.revenue.toFixed(2)} • ${data.quantity} sold</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                document.getElementById('topProducts').innerHTML = topProductsHtml || '<p>No sales data available</p>';
-
-                // Calculate top customers
-                const customerOrders = {};
-                filteredOrders.forEach(order => {
-                    if (!customerOrders[order.phoneNumber]) {
-                        customerOrders[order.phoneNumber] = {
-                            name: order.customerName,
-                            visits: 0,
-                            spent: 0
-                        };
-                    }
-                    customerOrders[order.phoneNumber].visits++;
-                    customerOrders[order.phoneNumber].spent += order.totalAmount;
-                });
-
-                // Sort and display top customers
-                const topCustomers = Object.entries(customerOrders)
-                    .sort(([,a], [,b]) => b.spent - a.spent)
-                    .slice(0, 5);
-
-                const topCustomersHtml = topCustomers.map(([phone, data]) => `
-                    <div class="top-item">
-                        <div class="top-item-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="top-item-info">
-                            <div class="top-item-title">${data.name}</div>
-                            <div class="top-item-value">₹${data.spent.toFixed(2)} • ${data.visits} visits</div>
-                        </div>
-                    </div>
-                `).join('');
-
-                document.getElementById('topCustomers').innerHTML = topCustomersHtml || '<p>No customer data available</p>';
-
-            } catch (error) {
-                console.error('Error updating dashboard:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        // Add this at the end of your script section, just before the closing
-         </script> tag
-        document.addEventListener('DOMContentLoaded', () => {
-            // Debug logging
-            console.log('DOM Content Loaded');
-            console.log('Config:', window.config);
-            console.log('API URL:', window.config.API_URL);
-
-            // Setup password validation
-            const digitInputs = [...document.querySelectorAll('.digit-input')];
-            const submitPassword = document.getElementById('submitPassword');
-            const passwordScreen = document.getElementById('passwordScreen');
-            const adminContent = document.getElementById('adminContent');
-
-            // Handle digit input
-            digitInputs.forEach((input, index) => {
-                input.addEventListener('input', (e) => {
-                    const value = e.target.value;
-                    
-                    // Allow only numbers
-                    if (!/^\d*$/.test(value)) {
-                        input.value = '';
-                        return;
-                    }
-
-                    // Move to next input
-                    if (value && index < digitInputs.length - 1) {
-                        digitInputs[index + 1].focus();
-                    }
-
-                    // Enable submit button if all digits are filled
-                    const isComplete = digitInputs.every(input => input.value.length === 1);
-                    submitPassword.disabled = !isComplete;
-                });
-
-                input.addEventListener('keydown', (e) => {
-                    // Handle backspace
-                    if (e.key === 'Backspace' && !input.value && index > 0) {
-                        digitInputs[index - 1].focus();
-                    }
-                });
-            });
-
-            // Handle password submission
-            submitPassword.addEventListener('click', async () => {
-                const enteredPassword = digitInputs.map(input => input.value).join('');
-                
-                if (enteredPassword === '837337') {
-                    // Store authentication in session storage
-                    sessionStorage.setItem('adminAuthenticated', 'true');
-                    
-                    // Show success message
-                    const passwordMessage = document.getElementById('passwordMessage');
-                    passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
-                    passwordMessage.style.color = '#2ecc71';
-                    
-                    // Hide password screen
-                    passwordScreen.style.display = 'none';
-                    adminContent.classList.add('visible');
-                    
-                    // Initialize admin interface
-                    try {
-                        await initializeAdmin();
-                    } catch (error) {
-                        console.error('Error initializing admin interface:', error);
-                        showToast(error.message, 'error');
-                    }
-                } else {
-                    // Show error message and shake effect
-                    const passwordMessage = document.getElementById('passwordMessage');
-                    passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password';
-                    passwordMessage.style.color = '#e74c3c';
-                    
-                    const passwordInput = document.getElementById('passwordInput');
-                    passwordInput.classList.add('shake');
-                    
-                    // Clear inputs
-                    digitInputs.forEach(input => input.value = '');
-                    digitInputs[0].focus();
-                    submitPassword.disabled = true;
-                    
-                    // Remove shake class after animation
-                    setTimeout(() => {
-                        passwordInput.classList.remove('shake');
-                    }, 500);
-                }
-            });
-
-            // Check if already authenticated
-            if (sessionStorage.getItem('adminAuthenticated') === 'true') {
-                passwordScreen.style.display = 'none';
-                adminContent.classList.add('visible');
-                initializeAdmin().catch(error => {
-                    console.error('Error initializing admin interface:', error);
-                    showToast(error.message, 'error');
-                });
-            }
-
-            // Setup tab switching
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', async () => {
-                    const tabId = button.dataset.tab;
-                    
-                    // Update active tab button
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    
-                    // Update active tab content
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === `${tabId}Tab`) {
-                            content.classList.add('active');
-                        }
-                    });
-
-                    // Refresh content based on active tab
-                    try {
-                        switch(tabId) {
-                            case 'dashboard':
-                                await updateDashboard();
-                                break;
-                            case 'orders':
-                                await displayOrders();
-                                break;
-                            case 'products':
-                                await displayProducts();
-                                break;
-                        }
-                    } catch (error) {
-                        console.error('Error switching tabs:', error);
-                        showToast(error.message, 'error');
-                    }
-                });
-            });
-        });
-
-        // Add this function right after the existing script tag
-        async function initializeAdmin() {
-            try {
-                console.log('Initializing admin dashboard...');
-                console.log('API URL:', window.config.API_URL);
-                
-                // Test API connection
-                const healthCheck = await fetch(`${window.config.API_URL.replace('/api', '')}/health`);
-                if (!healthCheck.ok) {
-                    throw new Error('Backend server is not responding');
-                }
-                const healthData = await healthCheck.json();
-                console.log('Backend health check:', healthData);
-
-                if (healthData.mongodb !== 'connected') {
-                    showToast('Warning: MongoDB is not connected', 'error');
-                }
-
-                // Initialize dashboard
-                await Promise.all([
-                    displayOrders(),
-                    displayProducts(),
-                    updateStats(),
-                    updateDashboard()
-                ]);
-
-                // Setup filter buttons
-                setupFilterButtons();
-
-                // Set up auto-refresh
-                setInterval(async () => {
-                    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-                    if (activeTab === 'dashboard') {
-                        await updateDashboard();
-                    } else if (activeTab === 'orders') {
-                        await displayOrders();
-                    }
-                    await updateStats();
-                }, 30000);
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showToast(`Failed to initialize: ${error.message}`, 'error');
-            }
-        }
-
-        // Update the displayProducts function
-        async function displayProducts() {
-            try {
-                console.log('Fetching products from:', window.config.API_URL);
-                const response = await fetch(`${window.config.API_URL}/menu`);
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch products: ${response.statusText}`);
-                }
-
-                const products = await response.json();
-                console.log('Received products:', products);
-
-                if (!Array.isArray(products)) {
-                    throw new Error('Invalid products data received');
-                }
-
-                const productsContainer = document.getElementById('productGrid');
-                if (!productsContainer) {
-                    throw new Error('Products container not found');
-                }
-
-                productsContainer.innerHTML = products.length === 0 
-                    ? '<div class="no-products"><i class="fas fa-box-open"></i><h3>No Products Added</h3><p>Add your first product using the form above</p></div>'
-                    : products.map(product => `
-                        <div class="product-card ${product.available ? 'available' : 'unavailable'}">
-                            <div class="product-header">
-                                <h3>${product.name}</h3>
-                                <span class="price">₹${product.price.toFixed(2)}</span>
-                            </div>
-                            <div class="product-details">
-                                <p class="category"><i class="fas fa-tag"></i> ${product.category}</p>
-                                ${product.description ? `<p class="description">${product.description}</p>` : ''}
-                            </div>
-                            <div class="product-actions">
-                                <button onclick="editProduct('${product._id}')" class="edit-btn">
-                                    <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button onclick="toggleAvailability('${product._id}')" 
-                                        class="toggle-btn ${product.available ? 'available' : 'unavailable'}">
-                                    <i class="fas fa-${product.available ? 'check' : 'times'}"></i>
-                                    ${product.available ? 'Available' : 'Unavailable'}
-                                </button>
-                                <button onclick="deleteProduct('${product._id}')" class="delete-btn">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-
-            } catch (error) {
-                console.error('Error displaying products:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        // Update the displayOrders function
-        async function displayOrders(filter = 'all') {
-            try {
-                console.log('Fetching orders from:', window.config.API_URL);
-                const response = await fetch(`${window.config.API_URL}/orders`);
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch orders: ${response.statusText}`);
-                }
-
-                const orders = await response.json();
-                console.log('Received orders:', orders);
-
-                if (!Array.isArray(orders)) {
-                    throw new Error('Invalid orders data received');
-                }
-
-                const filteredOrders = filter === 'all' 
-                    ? orders 
-                    : orders.filter(order => order.status === filter);
-
-                const ordersContainer = document.getElementById('ordersGrid');
-                if (!ordersContainer) {
-                    throw new Error('Orders container not found');
-                }
-
-                ordersContainer.innerHTML = filteredOrders.length === 0 
-                    ? '<div class="no-orders"><i class="fas fa-clipboard-list"></i><h3>No Orders Found</h3><p>Orders will appear here when customers place them</p></div>'
-                    : filteredOrders.map(order => `
-                        <div class="order-card ${order.status}">
-                            <div class="order-header">
-                                <h3>Order #${order._id.slice(-6)}</h3>
-                                <span class="status-badge ${order.status}">${order.status}</span>
-                            </div>
-                            <div class="order-details">
-                                <p><strong>Customer:</strong> ${order.customerName}</p>
-                                <p><strong>Phone:</strong> ${order.phoneNumber}</p>
-                                <p><strong>Total:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-                                <p><strong>Time:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
-                            </div>
-                            <div class="order-items">
-                                ${order.items.map(item => `
-                                    <div class="order-item">
-                                        <span>${item.name} x${item.quantity}</span>
-                                        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            ${order.status === 'pending' ? `
-                                <button class="complete-btn" onclick="completeOrder('${order._id}')">
-                                    <i class="fas fa-check"></i> Complete Order
-                                </button>
-                            ` : ''}
-                        </div>
-                    `).join('');
-
-            } catch (error) {
-                console.error('Error displaying orders:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        // Add the setupFilterButtons function
-        function setupFilterButtons() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
-                    button.classList.add('active');
-                    displayOrders(button.dataset.filter);
-                });
-            });
         }
     </script>
 </body>

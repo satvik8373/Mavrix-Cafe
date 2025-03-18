@@ -11,7 +11,6 @@
     <title>Mavrix Cafe</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="config.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -791,9 +790,49 @@
     </style>
 </head>
 <body>
-    <div id="menuItems" class="menu-container">
-        <!-- Menu items will be loaded here -->
-        <p>Loading menu items...</p>
+    <div class="menu-container">
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-coffee"></i> Mavrix Cafe</h1>
+                <p>Delicious food & beverages at your table</p>
+                <div class="table-info">
+                    <i class="fas fa-table"></i> Table <span id="tableNumber">-</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="category-tabs-container">
+            <button class="scroll-arrow left" onclick="scrollCategories('left')" id="leftArrow">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-arrow right" onclick="scrollCategories('right')" id="rightArrow">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="category-tabs">
+                <div class="category-scroll" id="categoryScroll">
+                    <button class="category-tab active" data-category="all">
+                        <i class="fas fa-th-list"></i> All Items
+                    </button>
+                    <button class="category-tab" data-category="drinks">
+                        <i class="fas fa-coffee"></i> Drinks
+                    </button>
+                    <button class="category-tab" data-category="food">
+                        <i class="fas fa-utensils"></i> Food
+                    </button>
+                    <button class="category-tab" data-category="desserts">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+
+        <div class="cart-preview" onclick="openOrderModal()">
+            <i class="fas fa-shopping-cart"></i>
+            <span>View Cart</span>
+            <div class="cart-count" id="cartCount">0</div>
+        </div>
     </div>
 
     <div id="orderModal">
@@ -843,508 +882,374 @@
         </div>
     </div>
 
-    <script>
-        // Debug logging
-        console.log('Config loaded:', window.config);
-        console.log('API URL:', window.config.API_URL);
+    <script type="module">
+    import config from './config.js';
 
-        // Call getMenuItems when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Page loaded, fetching menu items...');
-            getMenuItems();
+    async function getMenuItems() {
+        try {
+            const response = await fetch(`${config.API_URL}/menu`);
+            if (!response.ok) throw new Error('Failed to fetch menu items');
+            return await response.json();
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Error fetching menu items', 'error');
+            return [];
+        }
+    }
+
+    let cart = [];
+    let tableNumber = null;
+
+    // Get table number from URL
+    function getTableNumber() {
+        const params = new URLSearchParams(window.location.search);
+        tableNumber = params.get('table');
+        if (tableNumber) {
+            document.getElementById('tableNumber').textContent = tableNumber;
+        }
+    }
+
+    // Get products from localStorage
+    function getProducts() {
+        const products = localStorage.getItem('cafeProducts');
+        return products ? JSON.parse(products) : {
+            drinks: [],
+            food: [],
+            desserts: []
+        };
+    }
+
+    // Display menu items
+    function displayMenuItems(category = 'all') {
+        const menuGrid = document.getElementById('menuGrid');
+        const products = getProducts();
+        menuGrid.innerHTML = '';
+
+        Object.entries(products).forEach(([productCategory, items]) => {
+            if (category === 'all' || category === productCategory) {
+                items.forEach(item => {
+                    const menuItem = document.createElement('div');
+                    menuItem.className = 'menu-item';
+                    
+                    menuItem.innerHTML = `
+                        ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
+                        <div class="menu-item-header">
+                            <h3 class="menu-item-title">${item.name}</h3>
+                            <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
+                        </div>
+                        <div class="menu-item-actions">
+                            <div class="quantity-control">
+                                <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                                <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item.id}">
+                                <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                            </div>
+                            <button class="add-to-cart" onclick="addToCart('${item.id}')" ${!item.available ? 'disabled' : ''}>
+                                <i class="fas fa-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    `;
+                    menuGrid.appendChild(menuItem);
+                });
+            }
         });
+    }
 
-        let cart = [];
-        let tableNumber = null;
+    // Update quantity
+    function updateQuantity(itemId, change) {
+        const input = document.getElementById(`quantity-${itemId}`);
+        let value = parseInt(input.value) + change;
+        value = Math.max(1, Math.min(10, value));
+        input.value = value;
+    }
 
-        // Get table number from URL
-        function getTableNumber() {
-            const params = new URLSearchParams(window.location.search);
-            tableNumber = params.get('table');
-            if (tableNumber) {
-                document.getElementById('tableNumber').textContent = tableNumber;
+    // Add to cart
+    function addToCart(itemId) {
+        const products = getProducts();
+        let product = null;
+        
+        // Find the product
+        for (const category in products) {
+            const found = products[category].find(p => p.id === parseInt(itemId));
+            if (found) {
+                product = found;
+                break;
             }
         }
 
-        // Get products from localStorage
-        function getProducts() {
-            const products = localStorage.getItem('cafeProducts');
-            return products ? JSON.parse(products) : {
-                drinks: [],
-                food: [],
-                desserts: []
-            };
-        }
-
-        // Display menu items
-        function displayMenuItems(category = 'all') {
-            const menuGrid = document.getElementById('menuGrid');
-            const products = getProducts();
-            menuGrid.innerHTML = '';
-
-            Object.entries(products).forEach(([productCategory, items]) => {
-                if (category === 'all' || category === productCategory) {
-                    items.forEach(item => {
-                        const menuItem = document.createElement('div');
-                        menuItem.className = 'menu-item';
-                        
-                        menuItem.innerHTML = `
-                            ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
-                            <div class="menu-item-header">
-                                <h3 class="menu-item-title">${item.name}</h3>
-                                <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
-                            </div>
-                            <div class="menu-item-actions">
-                                <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item.id}">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
-                                </div>
-                                <button class="add-to-cart" onclick="addToCart('${item.id}')" ${!item.available ? 'disabled' : ''}>
-                                    <i class="fas fa-plus"></i> Add to Cart
-                                </button>
-                            </div>
-                        `;
-                        menuGrid.appendChild(menuItem);
-                    });
-                }
-            });
-        }
-
-        // Update quantity
-        function updateQuantity(itemId, change) {
-            const input = document.getElementById(`quantity-${itemId}`);
-            let value = parseInt(input.value) + change;
-            value = Math.max(1, Math.min(10, value));
-            input.value = value;
-        }
-
-        // Add to cart
-        function addToCart(itemId) {
-            const products = getProducts();
-            let product = null;
+        if (product && product.available) {
+            const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
             
-            // Find the product
-            for (const category in products) {
-                const found = products[category].find(p => p.id === parseInt(itemId));
-                if (found) {
-                    product = found;
-                    break;
-                }
-            }
-
-            if (product && product.available) {
-                const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
-                
-                // Check if item already in cart
-                const existingItem = cart.find(item => item.id === product.id);
-                if (existingItem) {
-                    existingItem.quantity += quantity;
-                } else {
-                    cart.push({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: quantity
-                    });
-                }
-                
-                updateCartCount();
-                showToast('Item added to cart!');
-            }
-        }
-
-        // Show toast message
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                right: 20px;
-                background: var(--success-color);
-                color: white;
-                padding: 1rem 2rem;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow);
-                animation: slideIn 0.3s ease;
-                z-index: 1000;
-            `;
-            toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        }
-
-        // Update cart count
-        function updateCartCount() {
-            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-            document.getElementById('cartCount').textContent = count;
-        }
-
-        // Open order modal
-        function openOrderModal() {
-            if (cart.length === 0) {
-                showToast('Your cart is empty!');
-                return;
-            }
-            
-            document.getElementById('orderModal').style.display = 'block';
-            displayCartItems();
-        }
-
-        // Close order modal
-        function closeOrderModal() {
-            document.getElementById('orderModal').style.display = 'none';
-        }
-
-        // Display cart items
-        function displayCartItems() {
-            const cartItems = document.getElementById('cartItems');
-            const cartTotal = document.getElementById('cartTotal');
-            cartItems.innerHTML = '';
-            
-            let total = 0;
-            
-            cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
-                
-                const cartItem = document.createElement('div');
-                cartItem.className = 'cart-item';
-                cartItem.innerHTML = `
-                    <div class="cart-item-info">
-                        <div class="cart-item-title">${item.name}</div>
-                        <div class="cart-item-price">₹${item.price.toFixed(2)} x ${item.quantity}</div>
-                    </div>
-                    <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
-                    <button class="quantity-btn" onclick="removeFromCart(${item.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                `;
-                cartItems.appendChild(cartItem);
-            });
-            
-            cartTotal.textContent = `₹${total.toFixed(2)}`;
-        }
-
-        // Remove from cart
-        function removeFromCart(itemId) {
-            cart = cart.filter(item => item.id !== itemId);
-            updateCartCount();
-            displayCartItems();
-            
-            if (cart.length === 0) {
-                closeOrderModal();
-            }
-        }
-
-        // Submit order
-        function submitOrder(event) {
-            event.preventDefault();
-            
-            if (!tableNumber) {
-                showToast('Invalid table number!');
-                return;
-            }
-            
-            const customerName = document.getElementById('customerName').value;
-            const customerPhone = document.getElementById('customerPhone').value;
-            
-            const order = {
-                id: Date.now().toString(),
-                tableNumber,
-                customerName,
-                customerPhone,
-                items: cart,
-                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-                status: 'pending',
-                timestamp: new Date().toISOString()
-            };
-
-            // Show loading animation
-            document.getElementById('loadingOverlay').style.display = 'block';
-            
-            // Simulate order processing with cooking animation
-            setTimeout(() => {
-                // Show completed state
-                const coffeeCup = document.getElementById('coffeeCup');
-                const coffeeSmoke = document.getElementById('coffeeSmoke');
-                const coffeeLiquid = document.getElementById('coffeeLiquid');
-                const checkMark = document.getElementById('checkMark');
-                const loadingText = document.getElementById('loadingText');
-
-                // Update to completed state
-                coffeeCup.classList.add('completed');
-                coffeeSmoke.classList.add('completed');
-                coffeeLiquid.classList.add('completed');
-                checkMark.classList.add('show');
-                loadingText.textContent = 'Order Ready!';
-                loadingText.style.color = '#27ae60';
-
-                // Save order
-                const orders = JSON.parse(localStorage.getItem('cafeOrders') || '[]');
-                orders.push(order);
-                localStorage.setItem('cafeOrders', JSON.stringify(orders));
-                
-                // Wait a moment to show completion state
-                setTimeout(() => {
-                    // Reset animation states
-                    coffeeCup.classList.remove('completed');
-                    coffeeSmoke.classList.remove('completed');
-                    coffeeLiquid.classList.remove('completed');
-                    checkMark.classList.remove('show');
-                    loadingText.textContent = 'Preparing your order...';
-                    loadingText.style.color = 'white';
-
-                    // Clear cart and close modal
-                    cart = [];
-                    updateCartCount();
-                    closeOrderModal();
-                    
-                    // Hide loading animation
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    
-                    // Show success message
-                    showToast('Order placed successfully!');
-                }, 1500); // Show completion state for 1.5 seconds
-            }, 2000); // Initial preparation animation for 2 seconds
-        }
-
-        // Add category scrolling functionality
-        function scrollCategories(direction) {
-            const scroll = document.getElementById('categoryScroll');
-            const scrollAmount = 200;
-            
-            if (direction === 'left') {
-                scroll.scrollLeft -= scrollAmount;
+            // Check if item already in cart
+            const existingItem = cart.find(item => item.id === product.id);
+            if (existingItem) {
+                existingItem.quantity += quantity;
             } else {
-                scroll.scrollLeft += scrollAmount;
-            }
-            
-            updateScrollArrows();
-        }
-
-        function updateScrollArrows() {
-            const menuContainer = document.querySelector('.menu-container');
-            const leftArrow = document.querySelector('.scroll-arrow.left');
-            const rightArrow = document.querySelector('.scroll-arrow.right');
-            
-            // Only proceed if all elements exist
-            if (!menuContainer || !leftArrow || !rightArrow) {
-                console.log('Scroll elements not ready yet');
-                return;
-            }
-
-            // Use requestAnimationFrame for smooth updates
-            requestAnimationFrame(() => {
-                try {
-                    const hasLeftScroll = menuContainer.scrollLeft > 0;
-                    const hasRightScroll = menuContainer.scrollLeft < (menuContainer.scrollWidth - menuContainer.clientWidth);
-
-                    leftArrow.style.display = hasLeftScroll ? 'flex' : 'none';
-                    rightArrow.style.display = hasRightScroll ? 'flex' : 'none';
-                } catch (error) {
-                    console.error('Error updating scroll arrows:', error);
-                }
-            });
-        }
-
-        // Setup category tabs
-        function setupCategoryTabs() {
-            const tabs = document.querySelectorAll('.category-tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    displayMenuItems(tab.dataset.category);
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
                 });
-            });
-        }
-
-        // Add these new functions
-        function requestFullscreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
             }
-        }
-
-        function setupMobileOptimizations() {
-            // Prevent double-tap zoom
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', (event) => {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-
-            // Prevent pinch zoom
-            document.addEventListener('touchmove', (event) => {
-                if (event.touches.length > 1) {
-                    event.preventDefault();
-                }
-            }, { passive: false });
-
-            // Request fullscreen on first user interaction for iOS
-            document.addEventListener('touchstart', function initiateFullscreen() {
-                requestFullscreen();
-                document.removeEventListener('touchstart', initiateFullscreen);
-            }, { once: true });
-        }
-
-        // Update the initialization
-        window.addEventListener('load', () => {
-            getTableNumber();
-            displayMenuItems();
-            setupCategoryTabs();
-            updateScrollArrows();
-            setupMobileOptimizations();
             
-            document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
-            window.addEventListener('resize', updateScrollArrows);
-        });
-
-        async function getMenuItems() {
-            try {
-                console.log('Fetching menu items from:', `${window.config.API_URL}/menu`);
-                const response = await fetch(`${window.config.API_URL}/menu`);
-                console.log('Response status:', response.status);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch menu items: ${response.status}`);
-                }
-                const menuItems = await response.json();
-                console.log('Received menu items:', menuItems);
-                displayMenuItems(menuItems);
-            } catch (error) {
-                console.error('Error fetching menu items:', error);
-                showToast('Error loading menu items', 'error');
-            }
+            updateCartCount();
+            showToast('Item added to cart!');
         }
+    }
 
-        // Add error handling and logging
-        function displayMenuItems(items) {
-            console.log('Displaying menu items:', items);
-            const menuContainer = document.getElementById('menuItems');
-            if (!menuContainer) {
-                console.error('Menu container not found');
-                return;
-            }
-            menuContainer.innerHTML = '';
+    // Show toast message
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        `;
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+
+    // Update cart count
+    function updateCartCount() {
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cartCount').textContent = count;
+    }
+
+    // Open order modal
+    function openOrderModal() {
+        if (cart.length === 0) {
+            showToast('Your cart is empty!');
+            return;
+        }
+        
+        document.getElementById('orderModal').style.display = 'block';
+        displayCartItems();
+    }
+
+    // Close order modal
+    function closeOrderModal() {
+        document.getElementById('orderModal').style.display = 'none';
+    }
+
+    // Display cart items
+    function displayCartItems() {
+        const cartItems = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        cartItems.innerHTML = '';
+        
+        let total = 0;
+        
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
             
-            if (!items || items.length === 0) {
-                menuContainer.innerHTML = '<p>No menu items available</p>';
-                return;
-            }
-
-            items.forEach(item => {
-                const itemElement = createMenuItemElement(item);
-                menuContainer.appendChild(itemElement);
-            });
-        }
-
-        function createMenuItemElement(item) {
-            return `
-                <div class="menu-item ${item.available ? 'available' : 'unavailable'}">
-                    <div class="menu-item-header">
-                        <h3>${item.name}</h3>
-                        <span class="price">₹${item.price.toFixed(2)}</span>
-                    </div>
-                    <div class="menu-item-details">
-                        <p class="category"><i class="fas fa-tag"></i> ${item.category}</p>
-                        ${item.description ? `<p class="description">${item.description}</p>` : ''}
-                    </div>
-                    <button class="order-btn" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
-                        <i class="fas fa-${item.available ? 'plus' : 'times'}"></i>
-                        ${item.available ? 'Add to Cart' : 'Not Available'}
-                    </button>
+            const cartItem = document.createElement('div');
+            cartItem.className = 'cart-item';
+            cartItem.innerHTML = `
+                <div class="cart-item-info">
+                    <div class="cart-item-title">${item.name}</div>
+                    <div class="cart-item-price">₹${item.price.toFixed(2)} x ${item.quantity}</div>
                 </div>
+                <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
+                <button class="quantity-btn" onclick="removeFromCart(${item.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
             `;
-        }
-
-        async function displayMenuItems() {
-            try {
-                console.log('Fetching menu items from:', window.config.API_URL);
-                const response = await fetch(`${window.config.API_URL}/menu`);
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch menu: ${response.statusText}`);
-                }
-
-                const menuItems = await response.json();
-                console.log('Received menu items:', menuItems);
-
-                if (!Array.isArray(menuItems)) {
-                    throw new Error('Invalid menu data received');
-                }
-
-                const menuContainer = document.getElementById('menuContainer');
-                if (!menuContainer) {
-                    throw new Error('Menu container not found');
-                }
-
-                menuContainer.innerHTML = menuItems.length === 0 
-                    ? '<div class="no-menu"><i class="fas fa-utensils"></i><h3>Menu Coming Soon</h3><p>Our chefs are preparing something special</p></div>'
-                    : menuItems.map(createMenuItemElement).join('');
-
-                // Initialize scroll arrows after menu is loaded
-                updateScrollArrows();
-
-            } catch (error) {
-                console.error('Error displaying menu:', error);
-                showToast(error.message, 'error');
-            }
-        }
-
-        function updateScrollArrows() {
-            requestAnimationFrame(() => {
-                const menuContainer = document.getElementById('menuContainer');
-                const leftArrow = document.getElementById('scrollLeft');
-                const rightArrow = document.getElementById('scrollRight');
-
-                if (!menuContainer || !leftArrow || !rightArrow) {
-                    console.warn('Scroll elements not found');
-                    return;
-                }
-
-                const canScrollLeft = menuContainer.scrollLeft > 0;
-                const canScrollRight = menuContainer.scrollLeft < (menuContainer.scrollWidth - menuContainer.clientWidth);
-
-                leftArrow.style.display = canScrollLeft ? 'flex' : 'none';
-                rightArrow.style.display = canScrollRight ? 'flex' : 'none';
-            });
-        }
-
-        // Add event listeners for scroll arrows and menu container
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menuContainer');
-            const leftArrow = document.getElementById('scrollLeft');
-            const rightArrow = document.getElementById('scrollRight');
-
-            if (menuContainer && leftArrow && rightArrow) {
-                leftArrow.addEventListener('click', () => {
-                    menuContainer.scrollBy({ left: -200, behavior: 'smooth' });
-                });
-
-                rightArrow.addEventListener('click', () => {
-                    menuContainer.scrollBy({ left: 200, behavior: 'smooth' });
-                });
-
-                menuContainer.addEventListener('scroll', updateScrollArrows);
-                window.addEventListener('resize', updateScrollArrows);
-            }
-
-            // Initialize menu display
-            displayMenuItems();
+            cartItems.appendChild(cartItem);
         });
+        
+        cartTotal.textContent = `₹${total.toFixed(2)}`;
+    }
+
+    // Remove from cart
+    function removeFromCart(itemId) {
+        cart = cart.filter(item => item.id !== itemId);
+        updateCartCount();
+        displayCartItems();
+        
+        if (cart.length === 0) {
+            closeOrderModal();
+        }
+    }
+
+    // Submit order
+    function submitOrder(event) {
+        event.preventDefault();
+        
+        if (!tableNumber) {
+            showToast('Invalid table number!');
+            return;
+        }
+        
+        const customerName = document.getElementById('customerName').value;
+        const customerPhone = document.getElementById('customerPhone').value;
+        
+        const order = {
+            id: Date.now().toString(),
+            tableNumber,
+            customerName,
+            customerPhone,
+            items: cart,
+            total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            status: 'pending',
+            timestamp: new Date().toISOString()
+        };
+
+        // Show loading animation
+        document.getElementById('loadingOverlay').style.display = 'block';
+        
+        // Simulate order processing with cooking animation
+        setTimeout(() => {
+            // Show completed state
+            const coffeeCup = document.getElementById('coffeeCup');
+            const coffeeSmoke = document.getElementById('coffeeSmoke');
+            const coffeeLiquid = document.getElementById('coffeeLiquid');
+            const checkMark = document.getElementById('checkMark');
+            const loadingText = document.getElementById('loadingText');
+
+            // Update to completed state
+            coffeeCup.classList.add('completed');
+            coffeeSmoke.classList.add('completed');
+            coffeeLiquid.classList.add('completed');
+            checkMark.classList.add('show');
+            loadingText.textContent = 'Order Ready!';
+            loadingText.style.color = '#27ae60';
+
+            // Save order
+            const orders = JSON.parse(localStorage.getItem('cafeOrders') || '[]');
+            orders.push(order);
+            localStorage.setItem('cafeOrders', JSON.stringify(orders));
+            
+            // Wait a moment to show completion state
+            setTimeout(() => {
+                // Reset animation states
+                coffeeCup.classList.remove('completed');
+                coffeeSmoke.classList.remove('completed');
+                coffeeLiquid.classList.remove('completed');
+                checkMark.classList.remove('show');
+                loadingText.textContent = 'Preparing your order...';
+                loadingText.style.color = 'white';
+
+                // Clear cart and close modal
+                cart = [];
+                updateCartCount();
+                closeOrderModal();
+                
+                // Hide loading animation
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // Show success message
+                showToast('Order placed successfully!');
+            }, 1500); // Show completion state for 1.5 seconds
+        }, 2000); // Initial preparation animation for 2 seconds
+    }
+
+    // Add category scrolling functionality
+    function scrollCategories(direction) {
+        const scroll = document.getElementById('categoryScroll');
+        const scrollAmount = 200;
+        
+        if (direction === 'left') {
+            scroll.scrollLeft -= scrollAmount;
+        } else {
+            scroll.scrollLeft += scrollAmount;
+        }
+        
+        updateScrollArrows();
+    }
+
+    function updateScrollArrows() {
+        const scroll = document.getElementById('categoryScroll');
+        const leftArrow = document.getElementById('leftArrow');
+        const rightArrow = document.getElementById('rightArrow');
+        
+        // Show/hide left arrow
+        if (scroll.scrollLeft <= 0) {
+            leftArrow.classList.add('hidden');
+        } else {
+            leftArrow.classList.remove('hidden');
+        }
+        
+        // Show/hide right arrow
+        if (scroll.scrollLeft >= (scroll.scrollWidth - scroll.clientWidth - 5)) {
+            rightArrow.classList.add('hidden');
+        } else {
+            rightArrow.classList.remove('hidden');
+        }
+    }
+
+    // Setup category tabs
+    function setupCategoryTabs() {
+        const tabs = document.querySelectorAll('.category-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                displayMenuItems(tab.dataset.category);
+            });
+        });
+    }
+
+    // Add these new functions
+    function requestFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
+    function setupMobileOptimizations() {
+        // Prevent double-tap zoom
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (event) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Prevent pinch zoom
+        document.addEventListener('touchmove', (event) => {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // Request fullscreen on first user interaction for iOS
+        document.addEventListener('touchstart', function initiateFullscreen() {
+            requestFullscreen();
+            document.removeEventListener('touchstart', initiateFullscreen);
+        }, { once: true });
+    }
+
+    // Update the initialization
+    window.addEventListener('load', () => {
+        getTableNumber();
+        displayMenuItems();
+        setupCategoryTabs();
+        updateScrollArrows();
+        setupMobileOptimizations();
+        
+        document.getElementById('categoryScroll').addEventListener('scroll', updateScrollArrows);
+        window.addEventListener('resize', updateScrollArrows);
+    });
     </script>
 </body>
 </html> 

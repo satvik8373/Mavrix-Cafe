@@ -1128,23 +1128,28 @@
         }
 
         function updateScrollArrows() {
-            const scroll = document.getElementById('categoryScroll');
-            const leftArrow = document.getElementById('leftArrow');
-            const rightArrow = document.getElementById('rightArrow');
+            const menuContainer = document.querySelector('.menu-container');
+            const leftArrow = document.querySelector('.scroll-arrow.left');
+            const rightArrow = document.querySelector('.scroll-arrow.right');
             
-            // Show/hide left arrow
-            if (scroll.scrollLeft <= 0) {
-                leftArrow.classList.add('hidden');
-            } else {
-                leftArrow.classList.remove('hidden');
+            // Only proceed if all elements exist
+            if (!menuContainer || !leftArrow || !rightArrow) {
+                console.log('Scroll elements not ready yet');
+                return;
             }
-            
-            // Show/hide right arrow
-            if (scroll.scrollLeft >= (scroll.scrollWidth - scroll.clientWidth - 5)) {
-                rightArrow.classList.add('hidden');
-            } else {
-                rightArrow.classList.remove('hidden');
-            }
+
+            // Use requestAnimationFrame for smooth updates
+            requestAnimationFrame(() => {
+                try {
+                    const hasLeftScroll = menuContainer.scrollLeft > 0;
+                    const hasRightScroll = menuContainer.scrollLeft < (menuContainer.scrollWidth - menuContainer.clientWidth);
+
+                    leftArrow.style.display = hasLeftScroll ? 'flex' : 'none';
+                    rightArrow.style.display = hasRightScroll ? 'flex' : 'none';
+                } catch (error) {
+                    console.error('Error updating scroll arrows:', error);
+                }
+            });
         }
 
         // Setup category tabs
@@ -1245,6 +1250,101 @@
                 menuContainer.appendChild(itemElement);
             });
         }
+
+        function createMenuItemElement(item) {
+            return `
+                <div class="menu-item ${item.available ? 'available' : 'unavailable'}">
+                    <div class="menu-item-header">
+                        <h3>${item.name}</h3>
+                        <span class="price">₹${item.price.toFixed(2)}</span>
+                    </div>
+                    <div class="menu-item-details">
+                        <p class="category"><i class="fas fa-tag"></i> ${item.category}</p>
+                        ${item.description ? `<p class="description">${item.description}</p>` : ''}
+                    </div>
+                    <button class="order-btn" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
+                        <i class="fas fa-${item.available ? 'plus' : 'times'}"></i>
+                        ${item.available ? 'Add to Cart' : 'Not Available'}
+                    </button>
+                </div>
+            `;
+        }
+
+        async function displayMenuItems() {
+            try {
+                console.log('Fetching menu items from:', window.config.API_URL);
+                const response = await fetch(`${window.config.API_URL}/menu`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch menu: ${response.statusText}`);
+                }
+
+                const menuItems = await response.json();
+                console.log('Received menu items:', menuItems);
+
+                if (!Array.isArray(menuItems)) {
+                    throw new Error('Invalid menu data received');
+                }
+
+                const menuContainer = document.getElementById('menuContainer');
+                if (!menuContainer) {
+                    throw new Error('Menu container not found');
+                }
+
+                menuContainer.innerHTML = menuItems.length === 0 
+                    ? '<div class="no-menu"><i class="fas fa-utensils"></i><h3>Menu Coming Soon</h3><p>Our chefs are preparing something special</p></div>'
+                    : menuItems.map(createMenuItemElement).join('');
+
+                // Initialize scroll arrows after menu is loaded
+                updateScrollArrows();
+
+            } catch (error) {
+                console.error('Error displaying menu:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        function updateScrollArrows() {
+            requestAnimationFrame(() => {
+                const menuContainer = document.getElementById('menuContainer');
+                const leftArrow = document.getElementById('scrollLeft');
+                const rightArrow = document.getElementById('scrollRight');
+
+                if (!menuContainer || !leftArrow || !rightArrow) {
+                    console.warn('Scroll elements not found');
+                    return;
+                }
+
+                const canScrollLeft = menuContainer.scrollLeft > 0;
+                const canScrollRight = menuContainer.scrollLeft < (menuContainer.scrollWidth - menuContainer.clientWidth);
+
+                leftArrow.style.display = canScrollLeft ? 'flex' : 'none';
+                rightArrow.style.display = canScrollRight ? 'flex' : 'none';
+            });
+        }
+
+        // Add event listeners for scroll arrows and menu container
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menuContainer');
+            const leftArrow = document.getElementById('scrollLeft');
+            const rightArrow = document.getElementById('scrollRight');
+
+            if (menuContainer && leftArrow && rightArrow) {
+                leftArrow.addEventListener('click', () => {
+                    menuContainer.scrollBy({ left: -200, behavior: 'smooth' });
+                });
+
+                rightArrow.addEventListener('click', () => {
+                    menuContainer.scrollBy({ left: 200, behavior: 'smooth' });
+                });
+
+                menuContainer.addEventListener('scroll', updateScrollArrows);
+                window.addEventListener('resize', updateScrollArrows);
+            }
+
+            // Initialize menu display
+            displayMenuItems();
+        });
     </script>
 </body>
 </html> 

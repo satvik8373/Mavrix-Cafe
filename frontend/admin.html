@@ -1685,7 +1685,8 @@
             }
         }
 
-        // Add this at the end of your script section, just before the closing </script> tag
+        // Add this at the end of your script section, just before the closing
+         </script> tag
         document.addEventListener('DOMContentLoaded', () => {
             // Debug logging
             console.log('DOM Content Loaded');
@@ -1820,6 +1821,182 @@
                 });
             });
         });
+
+        // Add this function right after the existing script tag
+        async function initializeAdmin() {
+            try {
+                console.log('Initializing admin dashboard...');
+                console.log('API URL:', window.config.API_URL);
+                
+                // Test API connection
+                const healthCheck = await fetch(`${window.config.API_URL.replace('/api', '')}/health`);
+                if (!healthCheck.ok) {
+                    throw new Error('Backend server is not responding');
+                }
+                const healthData = await healthCheck.json();
+                console.log('Backend health check:', healthData);
+
+                if (healthData.mongodb !== 'connected') {
+                    showToast('Warning: MongoDB is not connected', 'error');
+                }
+
+                // Initialize dashboard
+                await Promise.all([
+                    displayOrders(),
+                    displayProducts(),
+                    updateStats(),
+                    updateDashboard()
+                ]);
+
+                // Setup filter buttons
+                setupFilterButtons();
+
+                // Set up auto-refresh
+                setInterval(async () => {
+                    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+                    if (activeTab === 'dashboard') {
+                        await updateDashboard();
+                    } else if (activeTab === 'orders') {
+                        await displayOrders();
+                    }
+                    await updateStats();
+                }, 30000);
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showToast(`Failed to initialize: ${error.message}`, 'error');
+            }
+        }
+
+        // Update the displayProducts function
+        async function displayProducts() {
+            try {
+                console.log('Fetching products from:', window.config.API_URL);
+                const response = await fetch(`${window.config.API_URL}/menu`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch products: ${response.statusText}`);
+                }
+
+                const products = await response.json();
+                console.log('Received products:', products);
+
+                if (!Array.isArray(products)) {
+                    throw new Error('Invalid products data received');
+                }
+
+                const productsContainer = document.getElementById('productGrid');
+                if (!productsContainer) {
+                    throw new Error('Products container not found');
+                }
+
+                productsContainer.innerHTML = products.length === 0 
+                    ? '<div class="no-products"><i class="fas fa-box-open"></i><h3>No Products Added</h3><p>Add your first product using the form above</p></div>'
+                    : products.map(product => `
+                        <div class="product-card ${product.available ? 'available' : 'unavailable'}">
+                            <div class="product-header">
+                                <h3>${product.name}</h3>
+                                <span class="price">₹${product.price.toFixed(2)}</span>
+                            </div>
+                            <div class="product-details">
+                                <p class="category"><i class="fas fa-tag"></i> ${product.category}</p>
+                                ${product.description ? `<p class="description">${product.description}</p>` : ''}
+                            </div>
+                            <div class="product-actions">
+                                <button onclick="editProduct('${product._id}')" class="edit-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button onclick="toggleAvailability('${product._id}')" 
+                                        class="toggle-btn ${product.available ? 'available' : 'unavailable'}">
+                                    <i class="fas fa-${product.available ? 'check' : 'times'}"></i>
+                                    ${product.available ? 'Available' : 'Unavailable'}
+                                </button>
+                                <button onclick="deleteProduct('${product._id}')" class="delete-btn">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+            } catch (error) {
+                console.error('Error displaying products:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Update the displayOrders function
+        async function displayOrders(filter = 'all') {
+            try {
+                console.log('Fetching orders from:', window.config.API_URL);
+                const response = await fetch(`${window.config.API_URL}/orders`);
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+                }
+
+                const orders = await response.json();
+                console.log('Received orders:', orders);
+
+                if (!Array.isArray(orders)) {
+                    throw new Error('Invalid orders data received');
+                }
+
+                const filteredOrders = filter === 'all' 
+                    ? orders 
+                    : orders.filter(order => order.status === filter);
+
+                const ordersContainer = document.getElementById('ordersGrid');
+                if (!ordersContainer) {
+                    throw new Error('Orders container not found');
+                }
+
+                ordersContainer.innerHTML = filteredOrders.length === 0 
+                    ? '<div class="no-orders"><i class="fas fa-clipboard-list"></i><h3>No Orders Found</h3><p>Orders will appear here when customers place them</p></div>'
+                    : filteredOrders.map(order => `
+                        <div class="order-card ${order.status}">
+                            <div class="order-header">
+                                <h3>Order #${order._id.slice(-6)}</h3>
+                                <span class="status-badge ${order.status}">${order.status}</span>
+                            </div>
+                            <div class="order-details">
+                                <p><strong>Customer:</strong> ${order.customerName}</p>
+                                <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                                <p><strong>Total:</strong> ₹${order.totalAmount.toFixed(2)}</p>
+                                <p><strong>Time:</strong> ${new Date(order.timestamp).toLocaleString()}</p>
+                            </div>
+                            <div class="order-items">
+                                ${order.items.map(item => `
+                                    <div class="order-item">
+                                        <span>${item.name} x${item.quantity}</span>
+                                        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ${order.status === 'pending' ? `
+                                <button class="complete-btn" onclick="completeOrder('${order._id}')">
+                                    <i class="fas fa-check"></i> Complete Order
+                                </button>
+                            ` : ''}
+                        </div>
+                    `).join('');
+
+            } catch (error) {
+                console.error('Error displaying orders:', error);
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Add the setupFilterButtons function
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    displayOrders(button.dataset.filter);
+                });
+            });
+        }
     </script>
 </body>
 </html> 

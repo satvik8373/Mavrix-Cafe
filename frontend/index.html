@@ -886,29 +886,55 @@
         let cart = [];
         let tableNumber = null;
 
-        // Get table number from URL
-        function getTableNumber() {
-            const params = new URLSearchParams(window.location.search);
-            tableNumber = params.get('table');
-            if (tableNumber) {
-                document.getElementById('tableNumber').textContent = tableNumber;
+        // API Configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : 'https://mavrix-cafe-api.onrender.com/api';
+
+        // Fetch products from API
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                const products = await response.json();
+                
+                // Organize products by category
+                const organizedProducts = {
+                    drinks: products.filter(p => p.category === 'drinks'),
+                    food: products.filter(p => p.category === 'food'),
+                    desserts: products.filter(p => p.category === 'desserts')
+                };
+                
+                // Store in localStorage
+                localStorage.setItem('cafeProducts', JSON.stringify(organizedProducts));
+                return organizedProducts;
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                return {
+                    drinks: [],
+                    food: [],
+                    desserts: []
+                };
             }
         }
 
-        // Get products from localStorage
-        function getProducts() {
-            const products = localStorage.getItem('cafeProducts');
-            return products ? JSON.parse(products) : {
-                drinks: [],
-                food: [],
-                desserts: []
-            };
+        // Get products from localStorage or API
+        async function getProducts() {
+            let products = localStorage.getItem('cafeProducts');
+            if (!products) {
+                products = await fetchProducts();
+            } else {
+                products = JSON.parse(products);
+                // Refresh products in background
+                fetchProducts();
+            }
+            return products;
         }
 
         // Display menu items
-        function displayMenuItems(category = 'all') {
+        async function displayMenuItems(category = 'all') {
             const menuGrid = document.getElementById('menuGrid');
-            const products = getProducts();
+            const products = await getProducts();
             menuGrid.innerHTML = '';
 
             Object.entries(products).forEach(([productCategory, items]) => {
@@ -925,11 +951,11 @@
                             </div>
                             <div class="menu-item-actions">
                                 <div class="quantity-control">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item.id}">
-                                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                                    <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)">-</button>
+                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item._id}">
+                                    <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)">+</button>
                                 </div>
-                                <button class="add-to-cart" onclick="addToCart('${item.id}')" ${!item.available ? 'disabled' : ''}>
+                                <button class="add-to-cart" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
                                     <i class="fas fa-plus"></i> Add to Cart
                                 </button>
                             </div>
@@ -1228,7 +1254,7 @@
         // Update the initialization
         window.addEventListener('load', () => {
             getTableNumber();
-            displayMenuItems();
+            displayMenuItems('all');
             setupCategoryTabs();
             updateScrollArrows();
             setupMobileOptimizations();

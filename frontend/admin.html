@@ -2296,8 +2296,8 @@
                 const isComplete = digitInputs.every(input => /^[0-9]$/.test(input.value));
                 submitPassword.disabled = !isComplete;
                 
-                if (isComplete) {
-                    passwordMessage.textContent = '';
+                if (isComplete && index === digitInputs.length - 1) {
+                    validatePassword();
                 }
             });
 
@@ -2311,6 +2311,7 @@
                     } else {
                         input.value = '';
                     }
+                    submitPassword.disabled = true;
                 }
                 // Handle left/right arrow keys
                 if (e.key === 'ArrowLeft' && index > 0) {
@@ -2319,8 +2320,37 @@
                 if (e.key === 'ArrowRight' && index < digitInputs.length - 1) {
                     digitInputs[index + 1].focus();
                 }
+                // Handle Enter key
+                if (e.key === 'Enter' && !submitPassword.disabled) {
+                    validatePassword();
+                }
+            });
+
+            // Prevent paste except for the first input
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                if (index === 0) {
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    const numbers = pastedText.replace(/\D/g, '').slice(0, 6).split('');
+                    
+                    numbers.forEach((num, i) => {
+                        if (i < digitInputs.length) {
+                            digitInputs[i].value = num;
+                        }
+                    });
+
+                    const isComplete = digitInputs.every(input => /^[0-9]$/.test(input.value));
+                    submitPassword.disabled = !isComplete;
+
+                    if (isComplete) {
+                        validatePassword();
+                    }
+                }
             });
         });
+
+        // Add click handler for submit button
+        submitPassword.addEventListener('click', validatePassword);
 
         // Handle password submission with improved security
         async function validatePassword() {
@@ -2379,6 +2409,23 @@
                 }, 500);
             }
         }
+
+        // Check for existing authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const authenticated = sessionStorage.getItem('adminAuthenticated');
+            const authExpiration = parseInt(sessionStorage.getItem('authExpiration'));
+            
+            if (authenticated && authExpiration > Date.now()) {
+                passwordScreen.style.display = 'none';
+                adminContent.classList.add('visible');
+                initializeAdmin();
+            } else {
+                // Clear any expired authentication
+                sessionStorage.removeItem('adminAuthenticated');
+                sessionStorage.removeItem('authExpiration');
+                digitInputs[0].focus();
+            }
+        });
 
         // Tab Management
         const tabButtons = document.querySelectorAll('.tab-btn');

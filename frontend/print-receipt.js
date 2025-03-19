@@ -158,7 +158,7 @@ function printReceipt(order) {
                             padding: 0;
                             background: white;
                             width: 98.4mm; /* Envelope #9 width */
-                            min-height: 225.4mm; /* Envelope #9 height */
+                            height: fit-content; /* Adjust height to content */
                             display: flex;
                             justify-content: center;
                             align-items: flex-start;
@@ -166,9 +166,10 @@ function printReceipt(order) {
                         
                         .receipt {
                             width: 90mm !important; /* Slightly smaller than envelope width for margins */
-                            margin: 4.2mm auto !important; /* Center horizontally with equal margins */
+                            margin: 0 auto !important; /* Remove vertical margins */
                             padding: 2mm !important;
                             box-sizing: border-box !important;
+                            height: fit-content !important;
                         }
                         
                         @media print {
@@ -178,8 +179,8 @@ function printReceipt(order) {
                             
                             body {
                                 width: 98.4mm !important;
-                                min-height: 225.4mm !important;
-                                margin: 0 auto !important;
+                                height: fit-content !important;
+                                margin: 0 !important;
                                 padding: 0 !important;
                                 print-color-adjust: exact;
                                 -webkit-print-color-adjust: exact;
@@ -187,10 +188,11 @@ function printReceipt(order) {
                             
                             .receipt {
                                 box-shadow: none !important;
-                                margin: 4.2mm auto !important;
+                                margin: 0 auto !important;
                                 padding: 2mm !important;
                                 width: 90mm !important;
                                 page-break-inside: avoid !important;
+                                height: fit-content !important;
                             }
                             
                             /* Ensure no page breaks within sections */
@@ -203,19 +205,63 @@ function printReceipt(order) {
                                 print-color-adjust: exact !important;
                                 -webkit-print-color-adjust: exact !important;
                             }
+
+                            /* Remove any forced page breaks */
+                            .receipt::before,
+                            .receipt::after {
+                                display: none !important;
+                            }
+
+                            /* Adjust spacing for print */
+                            .receipt > div {
+                                margin-bottom: 2mm !important;
+                            }
+
+                            /* Compact the footer */
+                            .receipt > div:last-child {
+                                margin-bottom: 0 !important;
+                                padding-bottom: 2mm !important;
+                            }
                         }
                         
                         /* Print preview adjustments */
                         @media screen {
                             body {
                                 background: #f0f0f0;
-                                min-height: 100vh;
-                                padding: 20px 0;
+                                min-height: fit-content;
+                                padding: 0;
                             }
                             
                             .receipt {
                                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                                margin: 0 auto !important;
                             }
+                        }
+
+                        /* Compact spacing for all sections */
+                        .receipt > div {
+                            margin-bottom: 2mm !important;
+                        }
+
+                        .receipt h2 {
+                            margin: 0 0 1mm 0 !important;
+                        }
+
+                        .receipt h3 {
+                            margin: 0 0 1mm 0 !important;
+                        }
+
+                        .receipt p {
+                            margin: 0.5mm 0 !important;
+                        }
+
+                        .receipt table {
+                            margin-bottom: 1mm !important;
+                        }
+
+                        /* Adjust padding for sections */
+                        .receipt > div {
+                            padding: 1.5mm !important;
                         }
                     </style>
                 </head>
@@ -236,7 +282,9 @@ function printReceipt(order) {
                 const printSettings = {
                     scale: 1,
                     margin: 0,
-                    paperSize: { width: 98.4, height: 225.4, unit: 'mm' }
+                    paperSize: { width: 98.4, height: 225.4, unit: 'mm' },
+                    shrinkToFit: true,
+                    printBackground: true
                 };
                 
                 // Print the iframe content

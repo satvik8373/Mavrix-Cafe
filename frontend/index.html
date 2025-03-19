@@ -204,90 +204,83 @@
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
+            gap: 1rem;
             margin-bottom: 2rem;
         }
 
         .menu-item {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            overflow: hidden;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             box-shadow: var(--shadow);
             transition: var(--transition);
-            position: relative;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
         }
 
         .menu-item:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
             box-shadow: var(--shadow-hover);
         }
 
-        .menu-item-header {
+        .menu-item-info {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             gap: 1rem;
         }
 
-        .menu-item-title {
-            font-size: 1.2rem;
+        .menu-item-name {
             font-weight: 600;
             color: var(--text-primary);
-            flex: 1;
             margin: 0;
         }
 
         .menu-item-price {
-            font-size: 1.25rem;
             font-weight: 700;
             color: var(--primary-color);
             white-space: nowrap;
-            padding: 0.3rem 0.8rem;
-            background: var(--background-color);
-            border-radius: var(--border-radius);
-        }
-
-        .menu-item-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-top: auto;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: var(--background-color);
-            padding: 0.5rem;
-            border-radius: var(--border-radius);
+            margin-left: auto;
         }
 
         .quantity-btn {
-            background: none;
+            width: 30px;
+            height: 30px;
             border: none;
-            color: var(--primary-color);
-            cursor: pointer;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
             font-size: 1.2rem;
-            padding: 0.2rem 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: var(--transition);
         }
 
         .quantity-btn:hover {
-            color: var(--secondary-color);
+            background: var(--primary-dark);
+            transform: scale(1.1);
         }
 
-        .quantity-input {
-            width: 40px;
-            text-align: center;
-            border: none;
-            background: none;
+        .quantity-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quantity-display {
             font-weight: 600;
-            color: var(--text-primary);
+            min-width: 30px;
+            text-align: center;
         }
 
         .add-to-cart {
@@ -603,13 +596,12 @@
                 padding: 1rem;
             }
 
-            .menu-item-title {
+            .menu-item-name {
                 font-size: 1.1rem;
             }
 
             .menu-item-price {
                 font-size: 1.1rem;
-                padding: 0.2rem 0.6rem;
             }
 
             .quantity-control {
@@ -904,42 +896,6 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
-
-        .quantity-btn {
-            transition: all 0.3s ease;
-        }
-        
-        .quantity-btn:hover:not(:disabled) {
-            background: #e0e0e0 !important;
-        }
-        
-        .quantity-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-        }
-        
-        .quantity-display {
-            font-family: var(--font-family);
-            color: var(--text-color);
-        }
-        
-        .add-to-cart {
-            transition: all 0.3s ease;
-        }
-        
-        .add-to-cart:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .add-to-cart:disabled {
-            opacity: 0.5;
-            cursor: not-allowed !important;
-        }
-        
-        .update-cart {
-            background: var(--accent-color) !important;
-        }
     </style>
 </head>
 <body>
@@ -1099,10 +1055,8 @@
 
         // Display menu items
         async function displayMenuItems(category = 'all') {
-            const menuGrid = document.getElementById('menuGrid');
-            menuGrid.innerHTML = '<div class="loading-text">Loading menu items...</div>';
-            
             try {
+                const menuGrid = document.getElementById('menuGrid');
                 const products = await getProducts();
                 menuGrid.innerHTML = '';
 
@@ -1112,45 +1066,20 @@
                             const menuItem = document.createElement('div');
                             menuItem.className = 'menu-item';
                             
-                            // Get quantity from cart if exists
-                            const cartItem = cart.find(ci => ci._id === item._id);
-                            const currentQty = cartItem ? cartItem.quantity : 0;
-                            
                             menuItem.innerHTML = `
                                 ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
-                                <div class="menu-item-header">
-                                    <h3 class="menu-item-title">${item.name}</h3>
+                                <div class="menu-item-info">
+                                    <h3 class="menu-item-name">${item.name}</h3>
                                     <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
                                 </div>
-                                <p class="menu-item-description">${item.description || ''}</p>
-                                <div class="menu-item-actions">
-                                    <div class="quantity-control" style="display: flex; align-items: center; gap: 8px;">
-                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)" 
-                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
-                                            ${currentQty === 0 ? 'disabled' : ''}>
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <span id="quantity-${item._id}" class="quantity-display" 
-                                            style="min-width: 30px; text-align: center; font-weight: bold;">
-                                            ${currentQty}
-                                        </span>
-                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)"
-                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
-                                            ${!item.available ? 'disabled' : ''}>
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-                                    ${currentQty > 0 ? `
-                                        <button class="add-to-cart update-cart" onclick="updateCart('${item._id}')"
-                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
-                                            <i class="fas fa-shopping-cart"></i> Update Cart
-                                        </button>
-                                    ` : `
-                                        <button class="add-to-cart" onclick="updateQuantity('${item._id}', 1)" ${!item.available ? 'disabled' : ''}
-                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
-                                            <i class="fas fa-plus"></i> Add to Cart
-                                        </button>
-                                    `}
+                                <div class="quantity-control">
+                                    <button class="quantity-btn" onclick="updateCartQuantity('${item._id}', '${item.name}', ${item.price}, -1)" ${!item.available ? 'disabled' : ''}>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="quantity-display" id="qty-${item._id}">${cart.find(i => i._id === item._id)?.quantity || 0}</span>
+                                    <button class="quantity-btn" onclick="updateCartQuantity('${item._id}', '${item.name}', ${item.price}, 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                             `;
                             menuGrid.appendChild(menuItem);
@@ -1158,79 +1087,48 @@
                     }
                 });
             } catch (error) {
-                menuGrid.innerHTML = '<div class="error-text">Failed to load menu items. Please try again later.</div>';
                 console.error('Error displaying menu items:', error);
+                showToast('Failed to display menu items', 'error');
             }
         }
 
-        // Update quantity and cart
-        function updateQuantity(itemId, change) {
-            const quantityDisplay = document.getElementById(`quantity-${itemId}`);
-            let currentQty = parseInt(quantityDisplay.textContent);
-            let newQty = currentQty + change;
+        // Update quantity
+        function updateCartQuantity(itemId, itemName, itemPrice, change) {
+            const qtyDisplay = document.getElementById(`qty-${itemId}`);
+            let cartItem = cart.find(i => i._id === itemId);
             
-            // Ensure quantity stays between 0 and 10
-            newQty = Math.max(0, Math.min(10, newQty));
+            if (!cartItem && change > 0) {
+                // Add new item to cart
+                cartItem = {
+                    _id: itemId,
+                    name: itemName,
+                    price: itemPrice,
+                    quantity: 0
+                };
+                cart.push(cartItem);
+            }
             
-            // Update display
-            quantityDisplay.textContent = newQty;
-            
-            // Update buttons state
-            const parentDiv = quantityDisplay.closest('.menu-item-actions');
-            const minusBtn = parentDiv.querySelector('.quantity-btn:first-child');
-            minusBtn.disabled = newQty === 0;
-            
-            // Auto-update cart
-            updateCart(itemId, newQty);
-        }
-
-        // Update cart with new quantity
-        async function updateCart(itemId, quantity) {
-            try {
-                const products = await getProducts();
-                let product = null;
+            if (cartItem) {
+                cartItem.quantity = Math.max(0, cartItem.quantity + change);
+                qtyDisplay.textContent = cartItem.quantity;
                 
-                // Find the product
-                for (const category in products) {
-                    const found = products[category].find(p => p._id === itemId);
-                    if (found) {
-                        product = found;
-                        break;
-                    }
+                // Enable/disable minus button based on quantity
+                const minusBtn = qtyDisplay.previousElementSibling;
+                minusBtn.disabled = cartItem.quantity === 0;
+                
+                // Remove item from cart if quantity is 0
+                if (cartItem.quantity === 0) {
+                    cart = cart.filter(i => i._id !== itemId);
                 }
-
-                if (product && product.available) {
-                    const quantityDisplay = document.getElementById(`quantity-${itemId}`);
-                    const currentQty = parseInt(quantityDisplay.textContent);
-                    
-                    // Remove item if quantity is 0
-                    if (currentQty === 0) {
-                        cart = cart.filter(item => item._id !== itemId);
-                    } else {
-                        // Update or add item
-                        const existingItem = cart.find(item => item._id === itemId);
-                        if (existingItem) {
-                            existingItem.quantity = currentQty;
-                        } else {
-                            cart.push({
-                                _id: itemId,
-                                name: product.name,
-                                price: product.price,
-                                quantity: currentQty
-                            });
-                        }
-                    }
-                    
-                    updateCartCount();
+                
+                // Update cart display
+                updateCartCount();
+                if (document.getElementById('orderModal').style.display === 'block') {
                     displayCartItems();
-                    showToast('Cart updated!');
-                    
-                    // Refresh menu display to update buttons
-                    await displayMenuItems(currentCategory || 'all');
                 }
-            } catch (error) {
-                console.error('Error updating cart:', error);
-                showToast('Failed to update cart', 'error');
+                
+                // Show feedback
+                showToast(change > 0 ? 'Item added to cart!' : 'Item removed from cart');
             }
         }
 

@@ -2241,27 +2241,37 @@
         async function editProduct(productId) {
             try {
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
-                if (!response.ok) throw new Error('Failed to fetch product');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch product (Status: ${response.status})`);
+                }
+                
                 const product = await response.json();
+                if (!product) {
+                    throw new Error('Product not found');
+                }
                 
                 // Update form with product data
                 document.getElementById('productId').value = productId;
                 document.getElementById('productName').value = product.name || '';
                 document.getElementById('productPrice').value = product.price || '';
                 document.getElementById('productCategory').value = product.category || 'drinks';
-                document.getElementById('productDescription').value = product.description || '';
+                
+                // Switch to products tab if not already there
+                const productsTab = document.querySelector('[data-tab="products"]');
+                if (!productsTab.classList.contains('active')) {
+                    productsTab.click();
+                }
                 
                 // Update form UI
                 document.getElementById('formTitle').textContent = 'Edit Product';
                 document.getElementById('submitButtonText').textContent = 'Update Product';
                 document.getElementById('cancelButton').style.display = 'block';
                 
-                // Show the form
-                document.getElementById('productForm').style.display = 'block';
-                document.getElementById('productName').focus();
+                // Scroll form into view
+                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Error editing product:', error);
-                showMessage('Error loading product details', 'error');
+                showToast('Error loading product details. Please try again.', 'error');
             }
         }
 
@@ -2314,12 +2324,27 @@
             
             const productId = document.getElementById('productId').value;
             const productData = {
-                name: document.getElementById('productName').value,
+                name: document.getElementById('productName').value.trim(),
                 price: parseFloat(document.getElementById('productPrice').value),
                 category: document.getElementById('productCategory').value,
-                description: document.getElementById('productDescription').value,
                 available: true
             };
+            
+            // Validate input
+            if (!productData.name) {
+                showToast('Please enter a product name', 'error');
+                return;
+            }
+            
+            if (isNaN(productData.price) || productData.price <= 0) {
+                showToast('Please enter a valid price', 'error');
+                return;
+            }
+            
+            if (!productData.category) {
+                showToast('Please select a category', 'error');
+                return;
+            }
             
             try {
                 const url = productId 
@@ -2334,20 +2359,23 @@
                     body: JSON.stringify(productData)
                 });
                 
-                if (!response.ok) throw new Error('Failed to save product');
+                if (!response.ok) {
+                    throw new Error(`Failed to save product (Status: ${response.status})`);
+                }
                 
-                showMessage(`Product ${productId ? 'updated' : 'added'} successfully`);
+                showToast(`Product ${productId ? 'updated' : 'added'} successfully`);
                 resetProductForm();
                 await displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showMessage('Error saving product', 'error');
+                showToast('Error saving product. Please try again.', 'error');
             }
         }
 
         function resetProductForm() {
-            document.getElementById('productForm').reset();
+            const form = document.getElementById('productForm');
+            form.reset();
             document.getElementById('productId').value = '';
             document.getElementById('formTitle').textContent = 'Add New Product';
             document.getElementById('submitButtonText').textContent = 'Add Product';

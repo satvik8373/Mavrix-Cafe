@@ -2455,7 +2455,9 @@
         async function editProduct(productId) {
             try {
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
-                if (!response.ok) throw new Error('Failed to fetch product');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch product: ${response.status}`);
+                }
                 const product = await response.json();
                 
                 // Update form
@@ -2469,11 +2471,17 @@
                 document.getElementById('submitButtonText').textContent = 'Update Product';
                 document.getElementById('cancelButton').style.display = 'block';
                 
-                // Switch to products tab
-                document.querySelector('[data-tab="products"]').click();
+                // Scroll to the form
+                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+                
+                // Switch to products tab if not already there
+                const productsTab = document.querySelector('[data-tab="products"]');
+                if (!productsTab.classList.contains('active')) {
+                    productsTab.click();
+                }
             } catch (error) {
                 console.error('Error editing product:', error);
-                showValidation('Error loading product details', 'error');
+                showToast('Error loading product details', 'error');
             }
         }
 
@@ -2489,12 +2497,12 @@
                 
                 if (!response.ok) throw new Error('Failed to update product availability');
                 
-                showValidation(`Product ${newAvailability ? 'available' : 'unavailable'}`, 'success');
+                showToast(`Product ${newAvailability ? 'available' : 'unavailable'}`, 'success');
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
-                showValidation('Error updating product availability', 'error');
+                showToast('Error updating product availability', 'error');
             }
         }
 
@@ -2512,12 +2520,12 @@
                 
                 if (!response.ok) throw new Error('Failed to delete product');
                 
-                showValidation('Product deleted successfully', 'success');
+                showToast('Product deleted successfully', 'success');
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showValidation('Error deleting product', 'error');
+                showToast('Error deleting product', 'error');
             }
         }
 
@@ -2531,7 +2539,7 @@
             const isValid = fields.every(fieldId => validateField(document.getElementById(fieldId)));
             
             if (!isValid) {
-                showValidation('Please fix the errors in the form', 'error');
+                showToast('Please fix the errors in the form', 'error');
                 return;
             }
             
@@ -2562,13 +2570,13 @@
                 
                 if (!response.ok) throw new Error('Failed to save product');
                 
-                showValidation(`Product ${productId ? 'updated' : 'added'} successfully`, 'success');
+                showToast(`Product ${productId ? 'updated' : 'added'} successfully`, 'success');
                 resetProductForm();
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showValidation('Error saving product', 'error');
+                showToast('Error saving product', 'error');
             } finally {
                 const submitBtn = document.getElementById('submitProductBtn');
                 submitBtn.disabled = false;
@@ -2640,6 +2648,11 @@
                 }
             }
 
+            // Show validation message
+            if (message) {
+                showToast(message, 'error');
+            }
+            
             validationDiv.textContent = message;
             validationDiv.classList.toggle('show', !isValid);
             

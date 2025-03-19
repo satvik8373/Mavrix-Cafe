@@ -377,41 +377,78 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             max-width: 600px;
+            width: 90%;
             margin: 2rem auto;
             padding: 2rem;
             position: relative;
             max-height: calc(100vh - 4rem);
             overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--background-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .close-modal {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
+            position: relative;
+            top: 0;
+            right: 0;
+            background: var(--background-color);
             border: none;
-            font-size: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
             cursor: pointer;
             color: var(--text-secondary);
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .close-modal:hover {
-            color: var(--secondary-color);
+            background: var(--secondary-color);
+            color: white;
+            transform: rotate(90deg);
         }
 
         .cart-items {
-            margin: 2rem 0;
+            margin: 0 0 2rem 0;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 1rem;
         }
 
         .cart-item {
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
+            padding: 1.2rem;
             background: var(--background-color);
             border-radius: var(--border-radius);
             margin-bottom: 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .cart-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
         }
 
         .cart-item-info {
@@ -420,70 +457,122 @@
 
         .cart-item-title {
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
 
         .cart-item-price {
             color: var(--text-secondary);
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-item-total {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .cart-item .remove-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-item .remove-item:hover {
+            color: var(--secondary-color);
+            background: rgba(231, 76, 60, 0.1);
+            transform: scale(1.1);
         }
 
         .cart-total {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
-            border-top: 2px solid var(--background-color);
-            margin-top: 1rem;
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
             font-weight: 600;
             font-size: 1.2rem;
         }
 
         .customer-form {
             margin-top: 2rem;
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
         }
 
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
             font-weight: 500;
+            font-size: 1rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 0.8rem;
-            border: 2px solid var(--background-color);
+            padding: 1rem;
+            border: 2px solid transparent;
+            background: white;
             border-radius: var(--border-radius);
             font-size: 1rem;
             transition: var(--transition);
+            box-shadow: var(--shadow);
         }
 
         .form-group input:focus {
             border-color: var(--primary-color);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
         }
 
         .submit-order {
             background: var(--success-color);
             color: white;
             border: none;
-            padding: 1rem 2rem;
+            padding: 1.2rem;
             border-radius: var(--border-radius);
             cursor: pointer;
             width: 100%;
             font-size: 1.1rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: var(--transition);
             margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
         }
 
         .submit-order:hover {
-            background: #27ae60;
+            background: #219a52;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .submit-order:active {
+            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
@@ -546,9 +635,38 @@
             }
 
             .modal-content {
-                margin: 0.5rem;
+                width: 95%;
+                margin: 1rem auto;
+                padding: 1.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .cart-items {
+                max-height: 40vh;
+            }
+
+            .cart-item {
                 padding: 1rem;
-                max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 1rem);
+            }
+
+            .cart-item-title {
+                font-size: 1rem;
+            }
+
+            .cart-total {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .form-group input {
+                padding: 0.8rem;
+            }
+
+            .submit-order {
+                padding: 1rem;
             }
 
             input[type="number"],
@@ -837,22 +955,24 @@
 
     <div id="orderModal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeOrderModal()">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2>Your Order</h2>
+            <div class="modal-header">
+                <h2><i class="fas fa-shopping-bag"></i> Your Order</h2>
+                <button class="close-modal" onclick="closeOrderModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <div class="cart-items" id="cartItems"></div>
             <div class="cart-total">
-                <span>Total Amount:</span>
+                <span><i class="fas fa-receipt"></i> Total Amount:</span>
                 <span id="cartTotal">₹0.00</span>
             </div>
             <form id="orderForm" onsubmit="submitOrder(event)" class="customer-form">
                 <div class="form-group">
-                    <label for="customerName">Your Name</label>
+                    <label for="customerName"><i class="fas fa-user"></i> Your Name</label>
                     <input type="text" id="customerName" required placeholder="Enter your name">
                 </div>
                 <div class="form-group">
-                    <label for="customerPhone">Phone Number</label>
+                    <label for="customerPhone"><i class="fas fa-phone"></i> Phone Number</label>
                     <input type="tel" id="customerPhone" required placeholder="Enter your phone number">
                 </div>
                 <button type="submit" class="submit-order">
@@ -1099,11 +1219,13 @@
                 cartItem.innerHTML = `
                     <div class="cart-item-info">
                         <div class="cart-item-title">${item.name}</div>
-                        <div class="cart-item-price">₹${item.price.toFixed(2)} x ${item.quantity}</div>
+                        <div class="cart-item-price">
+                            <i class="fas fa-tag"></i> ₹${item.price.toFixed(2)} × ${item.quantity}
+                        </div>
                     </div>
                     <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
-                    <button class="quantity-btn" onclick="removeFromCart(${item._id})">
-                        <i class="fas fa-trash"></i>
+                    <button class="remove-item" onclick="removeFromCart('${item._id}')">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 `;
                 cartItems.appendChild(cartItem);

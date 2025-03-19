@@ -170,8 +170,7 @@
             box-shadow: var(--shadow);
             transition: var(--transition);
             position: relative;
-            overflow: visible;
-            margin-bottom: 1rem;
+            overflow: hidden;
         }
 
         .order-card:hover {
@@ -179,104 +178,59 @@
             box-shadow: var(--shadow-hover);
         }
 
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--warning-color);
+            transition: var(--transition);
+        }
+
+        .order-card.completed::before {
+            background: var(--success-color);
+        }
+
         .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            gap: 1rem;
         }
 
-        .order-header h3 {
-            font-size: 1.1rem;
-            margin: 0;
-            flex: 1;
-        }
-
-        .status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: capitalize;
-            white-space: nowrap;
-        }
-
-        .status.pending {
-            background: var(--warning-color);
-            color: #856404;
-        }
-
-        .status.completed {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .order-details {
-            background: var(--background-color);
+        .order-info {
+            margin: 1rem 0;
             padding: 1rem;
+            background: var(--background-color);
             border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-        }
-
-        .order-details p {
-            margin: 0.5rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .order-items {
-            background: var(--background-color);
+            margin: 1rem 0;
             padding: 1rem;
+            background: var(--background-color);
             border-radius: var(--border-radius);
-            margin-bottom: 1rem;
         }
 
-        .order-items h4 {
-            margin: 0 0 0.5rem 0;
-            color: var(--text-secondary);
-        }
-
-        .order-items ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .order-items li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        .order-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
         }
 
-        .order-items li:last-child {
+        .order-item:last-child {
             border-bottom: none;
         }
 
-        .complete-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            width: 100%;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+        .order-total {
             margin-top: 1rem;
-        }
-
-        .complete-btn:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .status-badge {
@@ -1044,119 +998,48 @@
 
         /* Order Card Styles */
         .order-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: visible;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
             margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .order-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .order-header {
+        .order-card .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            gap: 1rem;
         }
 
-        .order-header h3 {
-            font-size: 1.1rem;
-            margin: 0;
-            flex: 1;
+        .order-card .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
         }
 
-        .status {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-transform: capitalize;
-            white-space: nowrap;
-        }
-
-        .status.pending {
-            background: var(--warning-color);
-            color: #856404;
-        }
-
-        .status.completed {
-            background: var(--success-color);
+        .order-card .status.pending {
+            background-color: #ff9800;
             color: white;
         }
 
-        .order-details {
-            background: var(--background-color);
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
+        .order-card .status.completed {
+            background-color: #4CAF50;
+            color: white;
         }
 
-        .order-details p {
-            margin: 0.5rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-items {
-            background: var(--background-color);
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-        }
-
-        .order-items h4 {
-            margin: 0 0 0.5rem 0;
-            color: var(--text-secondary);
-        }
-
-        .order-items ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .order-items li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .order-items li:last-child {
-            border-bottom: none;
-        }
-
-        .complete-btn {
-            background: var(--success-color);
+        .order-card .complete-btn {
+            background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            width: 100%;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
             margin-top: 1rem;
         }
 
-        .complete-btn:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
+        .order-card .complete-btn:hover {
+            background-color: #45a049;
         }
 
         /* Product Card Styles */
@@ -1717,7 +1600,7 @@
             card.className = `order-card ${order.status}`;
             card.innerHTML = `
                 <div class="order-header">
-                    <h3>Order #${order._id.slice(-6)}</h3>
+                    <h3>Order #${order._id}</h3>
                     <span class="status ${order.status}">${order.status}</span>
                 </div>
                 <div class="order-details">
@@ -1730,16 +1613,13 @@
                     <h4>Items:</h4>
                     <ul>
                         ${order.items.map(item => `
-                            <li>
-                                <span>${item.name} x${item.quantity}</span>
-                                <span>₹${(item.price * item.quantity).toFixed(2)}</span>
-                            </li>
+                            <li>${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}</li>
                         `).join('')}
                     </ul>
                 </div>
                 ${order.status === 'pending' ? `
                     <button onclick="completeOrder('${order._id}')" class="complete-btn">
-                        <i class="fas fa-check"></i> Complete Order
+                        Complete Order
                     </button>
                 ` : ''}
             `;

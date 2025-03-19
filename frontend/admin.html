@@ -2106,7 +2106,7 @@
                             </button>
                         ` : ''}
                         <button onclick="printReceipt('${order._id}')" class="print-btn">
-                            <i class="fas fa-file-invoice"></i> Print Invoice
+                            <i class="fas fa-print"></i> Print Receipt
                         </button>
                     </div>
                 </div>
@@ -3234,42 +3234,50 @@
             </style>
         `);
 
-        // Update the print receipt function to generate receipt on demand
-        async function printReceipt(orderId) {
+        // Update the print receipt function
+        function printReceipt(orderId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-                const order = await response.json();
-
                 // Create a new window for printing
                 const printWindow = window.open('', '_blank');
-                const receiptContent = generateReceiptHTML(order);
-                const printTemplate = `<!DOCTYPE html>
-                    <html>
-                        <head>
-                            <title>Invoice #${orderId.slice(-6).toUpperCase()}</title>
-                            <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
-                        </head>
-                        <body>
-                            ${receiptContent}
-                            <script>
-                                window.onload = function() {
-                                    window.print();
-                                    window.onafterprint = function() {
-                                        window.close();
-                                    };
-                                };
-                            </script>
-                        </body>
-                    </html>`;
                 
-                printWindow.document.write(printTemplate);
-                printWindow.document.close();
+                // Get the order data
+                fetch(`${API_BASE_URL}/orders/${orderId}`)
+                    .then(response => response.json())
+                    .then(order => {
+                        // Generate receipt HTML
+                        const receiptHTML = generateReceiptHTML(order);
+                        
+                        // Write to the new window
+                        printWindow.document.write(`
+                            <html>
+                                <head>
+                                    <title>Receipt #${orderId.slice(-6).toUpperCase()}</title>
+                                    <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
+                                </head>
+                                <body>
+                                    ${receiptHTML}
+                                    <script>
+                                        window.onload = function() {
+                                            window.print();
+                                            window.onafterprint = function() {
+                                                window.close();
+                                            };
+                                        };
+                                    </script>
+                                </body>
+                            </html>
+                        `);
+                        
+                        printWindow.document.close();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching order:', error);
+                        printWindow.close();
+                        showNotification('Error printing receipt', 'error', 'Print Failed');
+                    });
             } catch (error) {
                 console.error('Error printing receipt:', error);
-                showNotification('Failed to print receipt', 'error', 'Print Error');
+                showNotification('Error printing receipt', 'error', 'Print Failed');
             }
         }
     </script>

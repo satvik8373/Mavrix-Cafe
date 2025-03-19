@@ -1664,48 +1664,6 @@
         }
 
         /* ... existing styles ... */
-
-        .order-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .print-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition);
-        }
-
-        .print-btn:hover {
-            background: #34495e;
-            transform: translateY(-2px);
-        }
-
-        .print-btn i {
-            font-size: 1rem;
-        }
-
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .print-content * {
-                visibility: visible;
-            }
-            .print-content {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1943,6 +1901,9 @@
         </div>
     </div>
 
+    <!-- Add this after the other script imports in the head section -->
+    <script src="print-receipt.js"></script>
+
     <script>
         // API Configuration
         const API_BASE_URL = window.location.hostname === 'localhost' 
@@ -2052,12 +2013,7 @@
                         <h3>Order #${order._id.slice(-6).toUpperCase()}</h3>
                         <span class="order-time">${formattedTime}</span>
                     </div>
-                    <div class="order-actions">
-                        <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="printReceipt(${JSON.stringify(order)})" class="print-btn">
-                            <i class="fas fa-print"></i> Print
-                        </button>
-                    </div>
+                    <span class="status-badge ${order.status}">${order.status}</span>
                 </div>
                 
                 <div class="order-content">
@@ -2093,11 +2049,16 @@
                         </div>
                     </div>
                     
-                    ${order.status === 'pending' ? `
-                        <button onclick="completeOrder('${order._id}')" class="complete-btn">
-                            <i class="fas fa-check"></i> Complete Order
+                    <div class="order-actions" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        ${order.status === 'pending' ? `
+                            <button onclick="completeOrder('${order._id}')" class="complete-btn" style="flex: 2;">
+                                <i class="fas fa-check"></i> Complete Order
+                            </button>
+                        ` : ''}
+                        <button onclick="printOrderReceipt(${JSON.stringify(order)})" class="action-btn" style="flex: 1; background: #3498db; color: white;">
+                            <i class="fas fa-print"></i> Print Receipt
                         </button>
-                    ` : ''}
+                    </div>
                 </div>
             `;
             return card;
@@ -3222,9 +3183,6 @@
                 }
             </style>
         `);
-
-        // Add this import at the beginning of the script section
-        import { printReceipt } from './print-receipt.js';
     </script>
 </body>
 </html> 

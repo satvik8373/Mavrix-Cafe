@@ -1,5 +1,5 @@
 // Print Receipt Function
-function printReceipt(order) {
+function printOrderReceipt(order) {
     // Create a new window for the receipt
     const printWindow = window.open('', '_blank', 'width=300,height=600');
     
@@ -83,7 +83,8 @@ function printReceipt(order) {
             <div class="header">
                 <div class="logo">Mavrix Cafe</div>
                 <div class="info">Order #${order._id.slice(-6).toUpperCase()}</div>
-                <div class="info">${date} ${time}</div>
+                <div class="info">Date: ${date}</div>
+                <div class="info">Time: ${time}</div>
             </div>
             
             <div class="divider"></div>
@@ -98,15 +99,15 @@ function printReceipt(order) {
             
             <div class="items">
                 <div class="item" style="font-weight: bold;">
-                    <div class="item-name">Item</div>
-                    <div class="item-quantity">Qty</div>
-                    <div class="item-price">Price</div>
+                    <span class="item-name">Item</span>
+                    <span class="item-quantity">Qty</span>
+                    <span class="item-price">Price</span>
                 </div>
                 ${order.items.map(item => `
                     <div class="item">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-quantity">${item.quantity}</div>
-                        <div class="item-price">₹${(item.price * item.quantity).toFixed(2)}</div>
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-quantity">${item.quantity}</span>
+                        <span class="item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                 `).join('')}
             </div>
@@ -121,7 +122,7 @@ function printReceipt(order) {
             <div class="divider"></div>
             
             <div class="footer">
-                Thank you for visiting Mavrix Cafe!<br>
+                Thank you for dining with us!<br>
                 Please visit again
             </div>
         </body>
@@ -130,9 +131,9 @@ function printReceipt(order) {
     
     // Write the receipt HTML to the new window
     printWindow.document.write(receiptHTML);
-    printWindow.document.close();
     
-    // Wait for the content to load before printing
+    // Wait for content to load
+    printWindow.document.close();
     printWindow.onload = function() {
         // Print the receipt
         printWindow.print();
@@ -144,4 +145,4 @@ function printReceipt(order) {
 }
 
 // Export the function
-export { printReceipt }; 
+window.printOrderReceipt = printOrderReceipt; 

@@ -153,74 +153,81 @@ function printReceipt(order) {
                             margin: 0;
                         }
                         
-                        html, body {
+                        html {
+                            height: 100%;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        
+                        body {
                             margin: 0;
                             padding: 0;
                             background: white;
-                            width: 98.4mm; /* Envelope #9 width */
-                            height: fit-content; /* Adjust height to content */
-                            display: flex;
-                            justify-content: center;
-                            align-items: flex-start;
+                            min-height: fit-content;
+                            height: auto;
+                            width: 98.4mm;
+                            position: relative;
+                            box-sizing: border-box;
                         }
                         
                         .receipt {
-                            width: 90mm !important; /* Slightly smaller than envelope width for margins */
-                            margin: 0 auto !important; /* Remove vertical margins */
-                            padding: 2mm !important;
+                            width: 90mm !important;
+                            margin: 0 auto !important;
+                            padding: 10px 5px !important;
                             box-sizing: border-box !important;
-                            height: fit-content !important;
+                            background: white;
+                            height: fit-content;
                         }
                         
                         @media print {
-                            html {
-                                zoom: 1; /* Reset any browser zoom */
-                            }
-                            
-                            body {
+                            html, body {
                                 width: 98.4mm !important;
-                                height: fit-content !important;
+                                height: auto !important;
+                                min-height: 0 !important;
                                 margin: 0 !important;
                                 padding: 0 !important;
-                                print-color-adjust: exact;
-                                -webkit-print-color-adjust: exact;
                             }
                             
                             .receipt {
-                                box-shadow: none !important;
                                 margin: 0 auto !important;
-                                padding: 2mm !important;
+                                padding: 5px !important;
                                 width: 90mm !important;
-                                page-break-inside: avoid !important;
-                                height: fit-content !important;
+                                height: auto !important;
+                                page-break-after: avoid !important;
+                                page-break-before: avoid !important;
                             }
                             
-                            /* Ensure no page breaks within sections */
-                            table, tr, td, th, thead, tbody {
-                                page-break-inside: avoid !important;
-                            }
-                            
-                            /* Ensure background colors print */
-                            * {
-                                print-color-adjust: exact !important;
-                                -webkit-print-color-adjust: exact !important;
-                            }
-
-                            /* Remove any forced page breaks */
-                            .receipt::before,
-                            .receipt::after {
-                                display: none !important;
-                            }
-
-                            /* Adjust spacing for print */
+                            /* Compact spacing for print */
                             .receipt > div {
-                                margin-bottom: 2mm !important;
+                                margin-bottom: 8px !important;
                             }
-
-                            /* Compact the footer */
-                            .receipt > div:last-child {
-                                margin-bottom: 0 !important;
-                                padding-bottom: 2mm !important;
+                            
+                            .receipt h2 {
+                                font-size: 18px !important;
+                                margin: 5px 0 !important;
+                            }
+                            
+                            .receipt h3 {
+                                font-size: 14px !important;
+                                margin: 5px 0 !important;
+                            }
+                            
+                            .receipt p {
+                                margin: 3px 0 !important;
+                                line-height: 1.2 !important;
+                            }
+                            
+                            .receipt table {
+                                margin: 5px 0 !important;
+                            }
+                            
+                            .receipt td, .receipt th {
+                                padding: 3px 0 !important;
+                            }
+                            
+                            /* Remove any page breaks */
+                            * {
+                                page-break-inside: avoid !important;
                             }
                         }
                         
@@ -228,40 +235,13 @@ function printReceipt(order) {
                         @media screen {
                             body {
                                 background: #f0f0f0;
+                                padding: 20px 0;
                                 min-height: fit-content;
-                                padding: 0;
                             }
                             
                             .receipt {
                                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                                margin: 0 auto !important;
                             }
-                        }
-
-                        /* Compact spacing for all sections */
-                        .receipt > div {
-                            margin-bottom: 2mm !important;
-                        }
-
-                        .receipt h2 {
-                            margin: 0 0 1mm 0 !important;
-                        }
-
-                        .receipt h3 {
-                            margin: 0 0 1mm 0 !important;
-                        }
-
-                        .receipt p {
-                            margin: 0.5mm 0 !important;
-                        }
-
-                        .receipt table {
-                            margin-bottom: 1mm !important;
-                        }
-
-                        /* Adjust padding for sections */
-                        .receipt > div {
-                            padding: 1.5mm !important;
                         }
                     </style>
                 </head>
@@ -278,14 +258,10 @@ function printReceipt(order) {
         // Wait for content to load and ensure proper rendering
         setTimeout(() => {
             try {
-                // Set up print settings
-                const printSettings = {
-                    scale: 1,
-                    margin: 0,
-                    paperSize: { width: 98.4, height: 225.4, unit: 'mm' },
-                    shrinkToFit: true,
-                    printBackground: true
-                };
+                // Force single page print
+                const style = document.createElement('style');
+                style.textContent = '@page { size: 98.4mm 225.4mm; margin: 0; }';
+                iframe.contentDocument.head.appendChild(style);
                 
                 // Print the iframe content
                 iframe.contentWindow.print();

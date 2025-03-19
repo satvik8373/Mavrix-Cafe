@@ -2158,7 +2158,7 @@
                     </div>
                     <div class="order-actions">
                         <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="event.preventDefault(); if(!window.isPrinting) printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
+                        <button onclick="printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
                             <i class="fas fa-print"></i> Print
                         </button>
                     </div>
@@ -3327,15 +3327,9 @@
             </style>
         `);
 
-        // Enhanced print receipt function with single print prevention
+        // Enhanced print receipt function with duplicate prevention
         function printReceipt(order) {
             try {
-                // Check if already printing
-                if (window.isPrinting) {
-                    return;
-                }
-                window.isPrinting = true;
-
                 // Remove any existing receipts first
                 const existingReceipts = document.querySelectorAll('.print-receipt');
                 existingReceipts.forEach(r => r.remove());
@@ -3343,6 +3337,7 @@
                 // Create receipt HTML
                 const receipt = document.createElement('div');
                 receipt.className = 'receipt print-receipt';
+                receipt.id = `receipt-${order._id}`;
                 
                 const formattedDate = new Date(order.timestamp).toLocaleString('en-US', {
                     dateStyle: 'medium',
@@ -3393,14 +3388,16 @@
                         <p>${new Date().toLocaleDateString()}</p>
                     </div>
                 `;
-                
-                // Add receipt to body
-                document.body.appendChild(receipt);
-                
-                // Add print styles to ensure only one copy
+
+                // Add receipt to a specific container
+                const receiptContainer = document.createElement('div');
+                receiptContainer.className = 'receipt-container';
+                receiptContainer.appendChild(receipt);
+                document.body.appendChild(receiptContainer);
+
+                // Update print styles
                 const printStyles = document.createElement('style');
-                printStyles.id = 'print-styles';
-                printStyles.innerHTML = `
+                printStyles.textContent = `
                     @media print {
                         body * {
                             visibility: hidden;
@@ -3408,27 +3405,38 @@
                             padding: 0;
                         }
                         
-                        .print-receipt, .print-receipt * {
+                        .receipt-container {
                             visibility: visible;
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: flex-start;
+                            padding: 20px;
                         }
                         
                         .print-receipt {
-                            position: fixed;
-                            left: 50%;
-                            top: 0;
-                            transform: translateX(-50%);
+                            visibility: visible;
+                            position: relative !important;
+                            left: auto !important;
+                            top: auto !important;
+                            transform: none !important;
                             width: 80mm;
-                            padding: 10mm;
                             margin: 0 auto;
+                            page-break-after: always;
+                        }
+
+                        .no-print {
+                            display: none !important;
                         }
 
                         @page {
                             size: 80mm auto;
                             margin: 0;
-                        }
-
-                        .no-print {
-                            display: none !important;
+                            padding: 0;
                         }
                     }
                 `;
@@ -3437,19 +3445,16 @@
                 // Print with delay to ensure proper rendering
                 setTimeout(() => {
                     window.print();
-                    
                     // Cleanup after printing
                     setTimeout(() => {
-                        receipt.remove();
+                        receiptContainer.remove();
                         printStyles.remove();
-                        window.isPrinting = false;
                     }, 1000);
                 }, 300);
 
             } catch (error) {
                 console.error('Error printing receipt:', error);
                 showNotification('Failed to print receipt', 'error', 'Print Error');
-                window.isPrinting = false;
             }
         }
     </script>

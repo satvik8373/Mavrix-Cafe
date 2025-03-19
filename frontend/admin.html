@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mavrix Cafe - Admin Dashboard</title>
-    <!-- Add favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-    <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -1704,6 +1701,31 @@
                 top: 0;
             }
         }
+
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fa-spin {
+            animation: spin 1s linear infinite;
+        }
     </style>
     <!-- Add this in the head section -->
     <script src="print-receipt.js"></script>
@@ -1945,26 +1967,38 @@
 
     <script>
         // API Configuration
-        const API_BASE_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api'
-            : 'https://mavrix-cafe-api.onrender.com/api';
-
-        // Global variables
-        let lastOrderTimestamp = new Date().toISOString();
-        let isPageVisible = true;
-        let orderSound = null;
-        const ADMIN_PASSWORD = '837337';
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-            if (isAuthenticated) {
-                showAdminContent();
+        const API_BASE_URL = (() => {
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:3000/api';
             }
-            setupFilterButtons();
-            setupTouchHandling();
-            initializeSound();
-        });
+            return 'https://mavrix-cafe-api.onrender.com/api';
+        })();
+
+        // Add retry logic for fetch requests
+        async function fetchWithRetry(url, options = {}, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    if (i === retries - 1) throw error;
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
+                }
+            }
+        }
 
         // Toast Notification
         function showToast(message, type = 'success') {
@@ -1985,9 +2019,8 @@
         // Fetch menu items
         async function displayProducts() {
             try {
-                const response = await fetch(`${API_BASE_URL}/menu`);
-                if (!response.ok) throw new Error('Failed to fetch menu items');
-                const products = await response.json();
+                showLoading('products');
+                const products = await fetchWithRetry(`${API_BASE_URL}/menu`);
                 
                 const productsContainer = document.getElementById('productGrid');
                 productsContainer.innerHTML = '';
@@ -1998,7 +2031,13 @@
                 });
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast('Error loading products', 'error');
+                showNotification(
+                    'Unable to load products. Please try again later.',
+                    'error',
+                    'Connection Error'
+                );
+            } finally {
+                hideLoading('products');
             }
         }
 
@@ -2032,9 +2071,8 @@
         // Fetch orders
         async function displayOrders(filter = 'all') {
             try {
-                const response = await fetch(`${API_BASE_URL}/orders`);
-                if (!response.ok) throw new Error('Failed to fetch orders');
-                const orders = await response.json();
+                showLoading('orders');
+                const orders = await fetchWithRetry(`${API_BASE_URL}/orders`);
                 
                 const filteredOrders = filter === 'all' 
                     ? orders 
@@ -2043,13 +2081,29 @@
                 const ordersContainer = document.getElementById('ordersGrid');
                 ordersContainer.innerHTML = '';
                 
+                if (filteredOrders.length === 0) {
+                    ordersContainer.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-inbox"></i>
+                            <p>No ${filter === 'all' ? '' : filter} orders found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 filteredOrders.forEach(order => {
                     const orderCard = createOrderCard(order);
                     ordersContainer.appendChild(orderCard);
                 });
             } catch (error) {
                 console.error('Error displaying orders:', error);
-                showToast('Error loading orders', 'error');
+                showNotification(
+                    'Unable to load orders. Please try again later.',
+                    'error',
+                    'Connection Error'
+                );
+            } finally {
+                hideLoading('orders');
             }
         }
 
@@ -2341,6 +2395,12 @@
             });
         }
 
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAdmin();
+            setupFilterButtons();
+        });
+
         // Update time frame
         function updateTimeFrame(timeframe) {
             // Update active button
@@ -2355,6 +2415,9 @@
             updateStats();
             displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
         }
+
+        // Add this at the beginning of the script
+        const ADMIN_PASSWORD = '837337'; // Admin password
 
         // Check for existing authentication on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -2835,6 +2898,11 @@
             });
         }
 
+        // Add these variables at the top of the script
+        let lastOrderTimestamp = new Date().toISOString();
+        let isPageVisible = true;
+        let orderSound = null;
+
         // Initialize sound
         function initializeSound() {
             orderSound = document.getElementById('newOrderSound');
@@ -3239,6 +3307,34 @@
                 }
             </style>
         `);
+
+        // Add loading indicator functions
+        function showLoading(section) {
+            const container = document.getElementById(`${section}Grid`);
+            if (!container) return;
+            
+            const loader = document.createElement('div');
+            loader.className = 'loading-indicator';
+            loader.innerHTML = `
+                <div class="spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <p>Loading ${section}...</p>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(loader);
+        }
+
+        function hideLoading(section) {
+            const container = document.getElementById(`${section}Grid`);
+            if (!container) return;
+            
+            const loader = container.querySelector('.loading-indicator');
+            if (loader) {
+                loader.remove();
+            }
+        }
     </script>
 </body>
 </html> 

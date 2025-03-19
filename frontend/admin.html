@@ -1619,6 +1619,350 @@
         }
 
         /* ... existing styles ... */
+
+        /* Responsive Design Improvements */
+        @media (max-width: 1200px) {
+            .admin-container {
+                max-width: 100%;
+                padding: 15px;
+            }
+
+            .quick-stats {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .chart-container {
+                grid-template-columns: 1fr;
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .admin-header {
+                padding: 1.2rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1.2rem;
+            }
+
+            .product-grid, .orders-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tab-container {
+                padding: 0.5rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+            }
+
+            .tab-btn {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                scroll-snap-align: start;
+                flex: 0 0 auto;
+            }
+
+            .stat-card {
+                padding: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .product-form {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 16px !important;
+                padding: 0.8rem !important;
+                height: 45px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .form-actions button {
+                width: 100%;
+            }
+
+            .order-card {
+                margin: 0.5rem 0;
+            }
+
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .order-customer {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .order-items {
+                padding: 1rem;
+            }
+
+            .order-item {
+                grid-template-columns: 1fr auto;
+                gap: 0.5rem;
+            }
+
+            .item-quantity {
+                grid-column: 1;
+            }
+
+            .item-price {
+                grid-column: 2;
+                grid-row: 1 / span 2;
+                align-self: center;
+            }
+
+            .notification {
+                width: 90%;
+                left: 5%;
+                right: 5%;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .admin-container {
+                padding: 10px;
+            }
+
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                margin-bottom: 0.5rem;
+            }
+
+            .filter-section {
+                flex-wrap: wrap;
+            }
+
+            .filter-btn {
+                flex: 1 1 calc(50% - 0.5rem);
+                font-size: 0.85rem;
+                padding: 0.6rem;
+            }
+
+            .product-card,
+            .order-card {
+                padding: 0.8rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .action-btn {
+                width: 100%;
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .password-container {
+                width: 95%;
+                padding: 2rem 1rem;
+            }
+
+            .digit-input {
+                width: 40px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) {
+            .tab-btn:hover,
+            .action-btn:hover,
+            .product-card:hover,
+            .order-card:hover {
+                transform: none;
+                box-shadow: var(--shadow);
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                transform: none;
+            }
+
+            .notification {
+                padding: 1rem;
+            }
+
+            .product-actions {
+                gap: 0.8rem;
+            }
+
+            .action-btn {
+                min-height: 44px;
+            }
+        }
+
+        /* Landscape Mode Optimizations */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .admin-header {
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .quick-stats {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 0.8rem;
+                margin-bottom: 1rem;
+            }
+
+            .tab-container {
+                margin-bottom: 1rem;
+            }
+
+            .product-form {
+                position: static;
+                margin-bottom: 1rem;
+            }
+
+            .password-screen {
+                align-items: flex-start;
+                padding: 1rem;
+            }
+
+            .password-container {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --card-bg: #2d2d2d;
+                --text-primary: #ffffff;
+                --text-secondary: #a0a0a0;
+                --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.4);
+            }
+
+            .stat-card,
+            .product-card,
+            .order-card {
+                background: var(--card-bg);
+            }
+
+            .form-group input,
+            .form-group select {
+                background: var(--card-bg);
+                color: var(--text-primary);
+                border-color: #404040;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                border-color: var(--primary-color);
+            }
+
+            .notification {
+                background: var(--card-bg);
+                color: var(--text-primary);
+            }
+        }
+
+        /* Print Media Optimization */
+        @media print {
+            .admin-header,
+            .tab-container,
+            .filter-section,
+            .product-form,
+            .form-actions,
+            .qr-generator-btn {
+                display: none !important;
+            }
+
+            .admin-container {
+                padding: 0;
+            }
+
+            .product-grid,
+            .orders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 1rem;
+            }
+
+            .product-card,
+            .order-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+
+        /* Accessibility Improvements */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* High Contrast Mode */
+        @media (forced-colors: active) {
+            .tab-btn.active,
+            .filter-btn.active,
+            .action-btn {
+                border: 2px solid currentColor;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2991,6 +3335,151 @@
                 );
             }
         }
+
+        // Add this after the existing script content
+
+        // Mobile Optimizations
+        function initializeMobileOptimizations() {
+            // Prevent double-tap zoom on buttons and interactive elements
+            document.querySelectorAll('button, .action-btn, .product-card, .order-card').forEach(element => {
+                element.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                });
+            });
+
+            // Handle tab scrolling with smooth behavior
+            const tabContainer = document.querySelector('.tab-container');
+            if (tabContainer) {
+                let isScrolling = false;
+                let startX;
+                let scrollLeft;
+
+                tabContainer.addEventListener('touchstart', (e) => {
+                    isScrolling = true;
+                    startX = e.touches[0].pageX - tabContainer.offsetLeft;
+                    scrollLeft = tabContainer.scrollLeft;
+                });
+
+                tabContainer.addEventListener('touchmove', (e) => {
+                    if (!isScrolling) return;
+                    e.preventDefault();
+                    const x = e.touches[0].pageX - tabContainer.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    tabContainer.scrollLeft = scrollLeft - walk;
+                });
+
+                tabContainer.addEventListener('touchend', () => {
+                    isScrolling = false;
+                });
+            }
+
+            // Optimize form inputs for mobile
+            document.querySelectorAll('input, select').forEach(input => {
+                // Prevent zoom on focus for iOS devices
+                input.style.fontSize = '16px';
+                
+                // Add touch feedback
+                input.addEventListener('touchstart', () => {
+                    input.style.transform = 'scale(0.98)';
+                });
+                
+                input.addEventListener('touchend', () => {
+                    input.style.transform = 'scale(1)';
+                });
+            });
+
+            // Improve scroll performance
+            const scrollableElements = document.querySelectorAll('.orders-grid, .product-grid, .tab-container');
+            scrollableElements.forEach(element => {
+                element.style.webkitOverflowScrolling = 'touch';
+                element.style.overflowScrolling = 'touch';
+            });
+
+            // Add pull-to-refresh functionality
+            let touchStartY = 0;
+            let touchEndY = 0;
+            const threshold = 150;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].pageY;
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                touchEndY = e.touches[0].pageY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', async () => {
+                const swipeDistance = touchEndY - touchStartY;
+                if (window.scrollY === 0 && swipeDistance > threshold) {
+                    // Show loading indicator
+                    showNotification('Refreshing...', 'info', 'Please wait');
+                    
+                    // Refresh data
+                    await refreshData();
+                    
+                    // Show success message
+                    showNotification('Data updated successfully', 'success', 'Refresh Complete');
+                }
+            }, { passive: true });
+
+            // Add active state for touch devices
+            document.querySelectorAll('.action-btn, .tab-btn, .filter-btn').forEach(button => {
+                button.addEventListener('touchstart', () => {
+                    button.classList.add('active-touch');
+                });
+                
+                button.addEventListener('touchend', () => {
+                    button.classList.remove('active-touch');
+                });
+            });
+
+            // Optimize notification positioning for mobile keyboards
+            const originalViewport = window.visualViewport;
+            if (originalViewport) {
+                originalViewport.addEventListener('resize', () => {
+                    const notifications = document.querySelectorAll('.notification');
+                    notifications.forEach(notification => {
+                        notification.style.bottom = `${originalViewport.height - originalViewport.pageTop}px`;
+                    });
+                });
+            }
+
+            // Handle orientation changes
+            window.addEventListener('orientationchange', () => {
+                // Reset any necessary layouts
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    updateLayoutForOrientation();
+                }, 100);
+            });
+        }
+
+        // Update layout based on orientation
+        function updateLayoutForOrientation() {
+            const isLandscape = window.innerWidth > window.innerHeight;
+            const adminContainer = document.querySelector('.admin-container');
+            
+            if (isLandscape) {
+                // Optimize layout for landscape mode
+                adminContainer.style.maxWidth = '100%';
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    card.style.maxWidth = '300px';
+                });
+            } else {
+                // Reset to default styles for portrait mode
+                adminContainer.style.maxWidth = '';
+                document.querySelectorAll('.stat-card').forEach(card => {
+                    card.style.maxWidth = '';
+                });
+            }
+        }
+
+        // Initialize mobile optimizations when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                initializeMobileOptimizations();
+            }
+        });
     </script>
 </body>
 </html> 

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="print-receipt.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -1664,6 +1665,61 @@
         }
 
         /* ... existing styles ... */
+
+        .order-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .print-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .print-btn:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn {
+            flex: 2;
+        }
+
+        @media print {
+            .admin-container * {
+                visibility: hidden;
+            }
+            .receipt, .receipt * {
+                visibility: visible;
+            }
+            .receipt {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .order-actions {
+                flex-direction: column;
+            }
+            
+            .print-btn, .complete-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1901,9 +1957,6 @@
         </div>
     </div>
 
-    <!-- Add this after the other script imports in the head section -->
-    <script src="print-receipt.js"></script>
-
     <script>
         // API Configuration
         const API_BASE_URL = window.location.hostname === 'localhost' 
@@ -2002,10 +2055,7 @@
             const card = document.createElement('div');
             card.className = `order-card ${order.status}`;
             
-            const formattedTime = new Date(order.timestamp).toLocaleString('en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short'
-            });
+            const formattedTime = formatDate(order.timestamp);
             
             card.innerHTML = `
                 <div class="order-header">
@@ -2049,16 +2099,18 @@
                         </div>
                     </div>
                     
-                    <div class="order-actions" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <div class="order-actions">
                         ${order.status === 'pending' ? `
-                            <button onclick="completeOrder('${order._id}')" class="complete-btn" style="flex: 2;">
+                            <button onclick="completeOrder('${order._id}')" class="complete-btn">
                                 <i class="fas fa-check"></i> Complete Order
                             </button>
                         ` : ''}
-                        <button onclick="printOrderReceipt(${JSON.stringify(order)})" class="action-btn" style="flex: 1; background: #3498db; color: white;">
+                        <button onclick="printReceipt('${order._id}')" class="print-btn">
                             <i class="fas fa-print"></i> Print Receipt
                         </button>
                     </div>
+                    
+                    ${generateReceiptHTML(order)}
                 </div>
             `;
             return card;

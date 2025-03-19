@@ -1,148 +1,158 @@
-// Print Receipt Function
-function printOrderReceipt(order) {
-    // Create a new window for the receipt
-    const printWindow = window.open('', '_blank', 'width=300,height=600');
-    
-    // Get current date and time
-    const date = new Date().toLocaleDateString();
-    const time = new Date().toLocaleTimeString();
-    
-    // Calculate total quantity
-    const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
-    
-    // Create receipt HTML
-    const receiptHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Order Receipt</title>
+// Print Receipt Functionality
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR'
+    }).format(amount);
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    });
+}
+
+function generateReceiptHTML(order) {
+    return `
+        <div class="receipt" id="receipt-${order._id}">
             <style>
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    #receipt-${order._id}, #receipt-${order._id} * {
+                        visibility: visible;
+                    }
+                    #receipt-${order._id} {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 80mm;
+                        padding: 10mm;
+                    }
+                    .receipt-actions {
+                        display: none !important;
+                    }
+                }
+                .receipt {
+                    font-family: 'Courier New', monospace;
+                    width: 80mm;
+                    padding: 10mm;
+                    text-align: center;
+                }
+                .receipt-header {
+                    margin-bottom: 10px;
+                }
+                .receipt-title {
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    margin: 5px 0;
+                }
+                .receipt-info {
+                    margin: 5px 0;
+                    font-size: 0.9em;
+                }
+                .receipt-items {
+                    margin: 10px 0;
+                    border-top: 1px dashed #000;
+                    border-bottom: 1px dashed #000;
+                    padding: 10px 0;
+                }
+                .receipt-item {
+                    display: flex;
+                    justify-content: space-between;
+                    margin: 5px 0;
+                    text-align: left;
+                }
+                .receipt-item-details {
+                    flex: 1;
+                }
+                .receipt-total {
+                    margin: 10px 0;
+                    font-weight: bold;
+                    text-align: right;
+                }
+                .receipt-footer {
+                    margin-top: 10px;
+                    font-size: 0.8em;
+                }
+                .receipt-actions {
+                    margin-top: 20px;
+                    text-align: center;
+                }
                 @page {
                     size: 80mm 200mm;
                     margin: 0;
                 }
-                body {
-                    font-family: 'Courier New', monospace;
-                    width: 80mm;
-                    margin: 0;
-                    padding: 10px;
-                }
-                .header {
-                    text-align: center;
-                    margin-bottom: 10px;
-                }
-                .logo {
-                    font-size: 24px;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-                .info {
-                    font-size: 12px;
-                    margin-bottom: 5px;
-                }
-                .divider {
-                    border-top: 1px dashed #000;
-                    margin: 10px 0;
-                }
-                .item {
-                    display: flex;
-                    justify-content: space-between;
-                    font-size: 12px;
-                    margin-bottom: 5px;
-                }
-                .item-name {
-                    flex: 1;
-                }
-                .item-quantity {
-                    width: 30px;
-                    text-align: center;
-                }
-                .item-price {
-                    width: 60px;
-                    text-align: right;
-                }
-                .total {
-                    font-size: 14px;
-                    font-weight: bold;
-                    text-align: right;
-                    margin-top: 10px;
-                }
-                .footer {
-                    text-align: center;
-                    font-size: 12px;
-                    margin-top: 20px;
-                }
-                @media print {
-                    body {
-                        width: 100%;
-                    }
-                }
             </style>
-        </head>
-        <body>
-            <div class="header">
-                <div class="logo">Mavrix Cafe</div>
-                <div class="info">Order #${order._id.slice(-6).toUpperCase()}</div>
-                <div class="info">Date: ${date}</div>
-                <div class="info">Time: ${time}</div>
+            <div class="receipt-header">
+                <div class="receipt-title">MAVRIX CAFE</div>
+                <div class="receipt-info">Order #${order._id.slice(-6).toUpperCase()}</div>
+                <div class="receipt-info">${formatDate(order.timestamp)}</div>
+                <div class="receipt-info">Table: ${order.tableNumber}</div>
+                <div class="receipt-info">Customer: ${order.customerName}</div>
+                <div class="receipt-info">Phone: ${order.phoneNumber}</div>
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="info">
-                Customer: ${order.customerName}<br>
-                Table: ${order.tableNumber}<br>
-                Phone: ${order.phoneNumber}
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="items">
-                <div class="item" style="font-weight: bold;">
-                    <span class="item-name">Item</span>
-                    <span class="item-quantity">Qty</span>
-                    <span class="item-price">Price</span>
-                </div>
+            <div class="receipt-items">
                 ${order.items.map(item => `
-                    <div class="item">
-                        <span class="item-name">${item.name}</span>
-                        <span class="item-quantity">${item.quantity}</span>
-                        <span class="item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
+                    <div class="receipt-item">
+                        <div class="receipt-item-details">
+                            ${item.name} x ${item.quantity}
+                        </div>
+                        <div class="receipt-item-price">
+                            ${formatCurrency(item.price * item.quantity)}
+                        </div>
                     </div>
                 `).join('')}
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="total">
-                Total Items: ${totalQuantity}<br>
-                Total Amount: ₹${order.totalAmount.toFixed(2)}
+            <div class="receipt-total">
+                Total: ${formatCurrency(order.totalAmount)}
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="footer">
-                Thank you for dining with us!<br>
-                Please visit again
+            <div class="receipt-footer">
+                <p>Thank you for dining with us!</p>
+                <p>Visit us again</p>
             </div>
-        </body>
-        </html>
+            <div class="receipt-actions">
+                <button onclick="printReceipt('${order._id}')" class="print-btn">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+            </div>
+        </div>
     `;
-    
-    // Write the receipt HTML to the new window
-    printWindow.document.write(receiptHTML);
+}
+
+function printReceipt(orderId) {
+    const receiptElement = document.getElementById(`receipt-${orderId}`);
+    if (!receiptElement) return;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Order Receipt #${orderId.slice(-6).toUpperCase()}</title>
+            </head>
+            <body>
+                ${receiptElement.outerHTML}
+            </body>
+        </html>
+    `);
     
     // Wait for content to load
     printWindow.document.close();
-    printWindow.onload = function() {
-        // Print the receipt
+    printWindow.focus();
+    
+    // Print the receipt
+    setTimeout(() => {
         printWindow.print();
         // Close the window after printing
-        printWindow.onafterprint = function() {
+        printWindow.addEventListener('afterprint', () => {
             printWindow.close();
-        };
-    };
+        });
+    }, 500);
 }
 
-// Export the function
-window.printOrderReceipt = printOrderReceipt; 
+// Export functions for use in admin.html
+window.printReceipt = printReceipt;
+window.generateReceiptHTML = generateReceiptHTML; 

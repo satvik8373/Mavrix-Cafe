@@ -2103,34 +2103,12 @@
         // Add this new function to handle printing
         async function printOrderReceipt(orderId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
-                }
-                const order = await response.json();
-                printReceipt(order);
-            } catch (error) {
-                console.error('Error printing receipt:', error);
-                showNotification('Error printing receipt. Please try again.', 'error', 'Print Failed');
-            }
-        }
-
-        // Update order status
-        async function updateOrderStatus(orderId, status) {
-            try {
                 if (!orderId) {
-                    showNotification('Invalid order ID', 'error', 'Validation Error');
+                    showNotification('Invalid order ID', 'error', 'Print Failed');
                     return;
                 }
 
-                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status })
-                });
-
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.error || 'Failed to update order status');

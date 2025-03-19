@@ -2,8 +2,7 @@
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 2
+        currency: 'INR'
     }).format(amount);
 }
 
@@ -16,196 +15,240 @@ function formatDate(dateString) {
 
 function generateReceiptHTML(order) {
     return `
-        <div class="receipt" id="receipt-${order._id}">
-            <style>
-                @media print {
-                    body * {
-                        visibility: hidden;
-                    }
-                    #receipt-${order._id}, #receipt-${order._id} * {
-                        visibility: visible;
-                    }
-                    #receipt-${order._id} {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 80mm;
-                        padding: 5mm;
-                        margin: 0;
-                    }
-                    .receipt-actions {
-                        display: none !important;
-                    }
-                }
-                .receipt {
-                    font-family: 'Courier New', monospace;
-                    width: 80mm;
-                    padding: 5mm;
-                    text-align: center;
-                    background: white;
-                    border: 1px solid #ddd;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                }
-                .receipt-logo {
-                    font-size: 24px;
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                    padding-bottom: 10px;
-                    border-bottom: 2px solid #000;
-                }
-                .receipt-header {
-                    margin-bottom: 15px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px dashed #000;
-                }
-                .receipt-title {
-                    font-size: 18px;
-                    font-weight: bold;
-                    margin: 5px 0;
-                }
-                .receipt-info {
-                    margin: 5px 0;
-                    font-size: 14px;
-                }
-                .receipt-items {
-                    margin: 15px 0;
-                    border-bottom: 1px dashed #000;
-                    padding-bottom: 15px;
-                }
-                .receipt-item {
-                    display: flex;
-                    justify-content: space-between;
-                    margin: 8px 0;
-                    text-align: left;
-                    font-size: 14px;
-                }
-                .receipt-item-details {
-                    flex: 1;
-                }
-                .receipt-item-price {
-                    text-align: right;
-                    margin-left: 15px;
-                }
-                .receipt-subtotal {
-                    display: flex;
-                    justify-content: space-between;
-                    margin: 10px 0;
-                    padding-top: 10px;
-                    font-size: 14px;
-                }
-                .receipt-total {
-                    display: flex;
-                    justify-content: space-between;
-                    margin: 15px 0;
-                    padding-top: 10px;
-                    border-top: 2px solid #000;
-                    font-weight: bold;
-                    font-size: 16px;
-                }
-                .receipt-footer {
-                    margin-top: 20px;
-                    font-size: 12px;
-                    text-align: center;
-                    padding-top: 15px;
-                    border-top: 1px dashed #000;
-                }
-                .receipt-contact {
-                    margin-top: 10px;
-                    font-size: 12px;
-                }
-                .receipt-barcode {
-                    margin-top: 15px;
-                    font-family: 'Libre Barcode 39', cursive;
-                    font-size: 40px;
-                }
-                @page {
-                    size: 80mm auto;
-                    margin: 0;
-                }
-            </style>
-            <div class="receipt-logo">
-                MAVRIX CAFE
-            </div>
-            <div class="receipt-header">
-                <div class="receipt-title">TAX INVOICE</div>
-                <div class="receipt-info">Order #${order._id.slice(-6).toUpperCase()}</div>
-                <div class="receipt-info">${formatDate(order.timestamp)}</div>
-                <div class="receipt-info">Table: ${order.tableNumber}</div>
-                <div class="receipt-info">Customer: ${order.customerName}</div>
-                <div class="receipt-info">Phone: ${order.phoneNumber}</div>
-            </div>
-            <div class="receipt-items">
-                <div class="receipt-item" style="font-weight: bold; border-bottom: 1px solid #000;">
-                    <div class="receipt-item-details">Item x Qty</div>
-                    <div class="receipt-item-price">Amount</div>
-                </div>
-                ${order.items.map(item => `
-                    <div class="receipt-item">
-                        <div class="receipt-item-details">
-                            ${item.name} x ${item.quantity}
+        <div class="receipt-modal" id="receiptModal-${order._id}">
+            <div class="receipt-modal-content">
+                <div class="receipt" id="receipt-${order._id}">
+                    <style>
+                        .receipt-modal {
+                            display: none;
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(0, 0, 0, 0.5);
+                            z-index: 1000;
+                            justify-content: center;
+                            align-items: center;
+                        }
+
+                        .receipt-modal-content {
+                            background: white;
+                            padding: 20px;
+                            border-radius: 8px;
+                            max-width: 400px;
+                            width: 90%;
+                            max-height: 90vh;
+                            overflow-y: auto;
+                            position: relative;
+                        }
+
+                        .receipt {
+                            font-family: 'Courier New', monospace;
+                            width: 100%;
+                            padding: 20px;
+                            background: white;
+                        }
+
+                        .receipt-header {
+                            text-align: center;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #000;
+                            padding-bottom: 10px;
+                        }
+
+                        .receipt-title {
+                            font-size: 24px;
+                            font-weight: bold;
+                            margin: 0;
+                            color: #2c3e50;
+                        }
+
+                        .receipt-subtitle {
+                            font-size: 14px;
+                            color: #7f8c8d;
+                            margin: 5px 0;
+                        }
+
+                        .receipt-info {
+                            margin: 15px 0;
+                            padding: 10px;
+                            background: #f8f9fa;
+                            border-radius: 4px;
+                        }
+
+                        .receipt-info-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 5px 0;
+                            font-size: 14px;
+                        }
+
+                        .receipt-items {
+                            margin: 20px 0;
+                            border-top: 1px dashed #000;
+                            border-bottom: 1px dashed #000;
+                            padding: 10px 0;
+                        }
+
+                        .receipt-item {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 8px 0;
+                            font-size: 14px;
+                        }
+
+                        .receipt-item-name {
+                            flex: 2;
+                        }
+
+                        .receipt-item-quantity {
+                            flex: 1;
+                            text-align: center;
+                        }
+
+                        .receipt-item-price {
+                            flex: 1;
+                            text-align: right;
+                        }
+
+                        .receipt-total {
+                            margin: 20px 0;
+                            padding: 10px;
+                            background: #2c3e50;
+                            color: white;
+                            border-radius: 4px;
+                            text-align: right;
+                            font-weight: bold;
+                            font-size: 16px;
+                        }
+
+                        .receipt-footer {
+                            text-align: center;
+                            margin-top: 20px;
+                            padding-top: 10px;
+                            border-top: 2px solid #000;
+                            font-size: 12px;
+                            color: #7f8c8d;
+                        }
+
+                        .receipt-actions {
+                            display: flex;
+                            gap: 10px;
+                            margin-top: 20px;
+                        }
+
+                        .receipt-btn {
+                            flex: 1;
+                            padding: 10px;
+                            border: none;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            font-weight: 500;
+                            transition: all 0.3s ease;
+                        }
+
+                        .print-btn {
+                            background: #2c3e50;
+                            color: white;
+                        }
+
+                        .close-btn {
+                            background: #e74c3c;
+                            color: white;
+                        }
+
+                        @media print {
+                            body * {
+                                visibility: hidden;
+                            }
+                            .receipt-modal {
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                            }
+                            .receipt-modal * {
+                                visibility: visible;
+                            }
+                            .receipt-actions {
+                                display: none !important;
+                            }
+                        }
+                    </style>
+                    <div class="receipt-header">
+                        <h1 class="receipt-title">MAVRIX CAFE</h1>
+                        <p class="receipt-subtitle">Your Favorite Coffee Shop</p>
+                        <p class="receipt-subtitle">GST: XXXXXXXXXXXXXXX</p>
+                    </div>
+                    <div class="receipt-info">
+                        <div class="receipt-info-row">
+                            <span>Order #:</span>
+                            <span>${order._id.slice(-6).toUpperCase()}</span>
                         </div>
-                        <div class="receipt-item-price">
-                            ${formatCurrency(item.price * item.quantity)}
+                        <div class="receipt-info-row">
+                            <span>Date:</span>
+                            <span>${formatDate(order.timestamp)}</span>
+                        </div>
+                        <div class="receipt-info-row">
+                            <span>Table:</span>
+                            <span>${order.tableNumber}</span>
+                        </div>
+                        <div class="receipt-info-row">
+                            <span>Customer:</span>
+                            <span>${order.customerName}</span>
                         </div>
                     </div>
-                `).join('')}
-            </div>
-            <div class="receipt-subtotal">
-                <span>Subtotal:</span>
-                <span>${formatCurrency(order.totalAmount)}</span>
-            </div>
-            <div class="receipt-subtotal">
-                <span>GST (5%):</span>
-                <span>${formatCurrency(order.totalAmount * 0.05)}</span>
-            </div>
-            <div class="receipt-total">
-                <span>TOTAL:</span>
-                <span>${formatCurrency(order.totalAmount * 1.05)}</span>
-            </div>
-            <div class="receipt-footer">
-                <p>Thank you for dining with us!</p>
-                <p>Please visit again</p>
-                <div class="receipt-contact">
-                    <p>www.mavrixcafe.com</p>
-                    <p>Contact: +91 9876543210</p>
-                </div>
-                <div class="receipt-barcode">
-                    *${order._id.slice(-6).toUpperCase()}*
+                    <div class="receipt-items">
+                        <div class="receipt-item" style="font-weight: bold;">
+                            <span class="receipt-item-name">Item</span>
+                            <span class="receipt-item-quantity">Qty</span>
+                            <span class="receipt-item-price">Amount</span>
+                        </div>
+                        ${order.items.map(item => `
+                            <div class="receipt-item">
+                                <span class="receipt-item-name">${item.name}</span>
+                                <span class="receipt-item-quantity">${item.quantity}</span>
+                                <span class="receipt-item-price">${formatCurrency(item.price * item.quantity)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="receipt-total">
+                        Total: ${formatCurrency(order.totalAmount)}
+                    </div>
+                    <div class="receipt-footer">
+                        <p>Thank you for dining with us!</p>
+                        <p>Visit us again soon!</p>
+                        <p>Follow us on Instagram @mavrixcafe</p>
+                    </div>
+                    <div class="receipt-actions">
+                        <button onclick="window.print()" class="receipt-btn print-btn">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button onclick="closeReceipt('${order._id}')" class="receipt-btn close-btn">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     `;
 }
 
-function printReceipt(orderId) {
-    const receiptElement = document.getElementById(`receipt-${orderId}`);
-    if (!receiptElement) return;
+function showReceipt(orderId) {
+    const modal = document.getElementById(`receiptModal-${orderId}`);
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
 
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <title>Invoice #${orderId.slice(-6).toUpperCase()}</title>
-                <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
-            </head>
-            <body>
-                ${receiptElement.outerHTML}
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        window.onafterprint = function() {
-                            window.close();
-                        };
-                    };
-                </script>
-            </body>
-        </html>
-    `);
-    
-    printWindow.document.close();
+function closeReceipt(orderId) {
+    const modal = document.getElementById(`receiptModal-${orderId}`);
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Export functions for use in admin.html
-window.printReceipt = printReceipt;
+window.showReceipt = showReceipt;
+window.closeReceipt = closeReceipt;
 window.generateReceiptHTML = generateReceiptHTML; 

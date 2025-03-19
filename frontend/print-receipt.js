@@ -6,6 +6,18 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
+function generateUPIQRCode(amount, orderId) {
+    // UPI ID for the cafe (replace with your actual UPI ID)
+    const upiId = 'mavrixcafe@ybl';
+    const merchantName = 'Mavrix Cafe';
+    
+    // Create UPI payment URL
+    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&tr=${orderId}&tn=Order%20Payment&cu=INR`;
+    
+    // Return QR code image URL using Google Charts API
+    return `https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=${encodeURIComponent(upiUrl)}`;
+}
+
 function generateReceiptHTML(order) {
     try {
         const date = new Date(order.timestamp).toLocaleString('en-IN', {
@@ -24,6 +36,9 @@ function generateReceiptHTML(order) {
         const subtotal = order.totalAmount;
         const tax = subtotal * 0.05; // 5% tax
         const total = subtotal + tax;
+
+        // Generate QR code for the total amount
+        const qrCodeUrl = generateUPIQRCode(total, order._id);
 
         return `
             <div class="receipt" style="font-family: 'Courier New', monospace; width: 300px; padding: 20px; background: white;">
@@ -111,12 +126,22 @@ function generateReceiptHTML(order) {
                     </table>
                 </div>
 
+                <!-- Payment QR Code -->
+                <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Scan to Pay</h3>
+                    <img src="${qrCodeUrl}" alt="Payment QR Code" style="width: 150px; height: 150px; margin: 10px 0;">
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">Scan this QR code to pay via UPI</p>
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">UPI ID: mavrixcafe@ybl</p>
+                </div>
+
                 <!-- Footer -->
                 <div style="text-align: center; margin-top: 20px; color: #666;">
                     <p style="margin: 5px 0; font-size: 14px;">Thank you for choosing Mavrix Cafe!</p>
                     <p style="margin: 5px 0; font-size: 12px;">We hope to serve you again soon.</p>
-                    
-                    
+                    <div style="margin-top: 15px; font-size: 10px; color: #999;">
+                        <p style="margin: 0;">This is a computer generated receipt</p>
+                        <p style="margin: 5px 0;">No signature required</p>
+                    </div>
                 </div>
             </div>
         `;

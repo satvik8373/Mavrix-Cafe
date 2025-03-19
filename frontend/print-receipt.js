@@ -115,14 +115,8 @@ function generateReceiptHTML(order) {
                 <div style="text-align: center; margin-top: 20px; color: #666;">
                     <p style="margin: 5px 0; font-size: 14px;">Thank you for choosing Mavrix Cafe!</p>
                     <p style="margin: 5px 0; font-size: 12px;">We hope to serve you again soon.</p>
-                    <div style="margin-top: 15px; font-size: 12px;">
-                        <p style="margin: 0;">Follow us on social media</p>
-                        <p style="margin: 5px 0;">@mavrixcafe</p>
-                    </div>
-                    <div style="margin-top: 15px; font-size: 10px; color: #999;">
-                        <p style="margin: 0;">This is a computer generated receipt</p>
-                        <p style="margin: 5px 0;">No signature required</p>
-                    </div>
+                    
+                    
                 </div>
             </div>
         `;

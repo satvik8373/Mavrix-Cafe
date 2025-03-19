@@ -905,163 +905,6 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-        }
-
-        .toast {
-            min-width: 300px;
-            max-width: 400px;
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            transform: translateX(120%);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: auto;
-            border-left: 4px solid;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .toast::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: rgba(255, 255, 255, 0.3);
-            animation: toast-progress 3s linear forwards;
-        }
-
-        @keyframes toast-progress {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-
-        .toast-icon {
-            flex-shrink: 0;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .toast-content {
-            flex-grow: 1;
-            padding-right: 20px;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .toast-message {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        .toast-close {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: all 0.2s;
-            pointer-events: auto;
-        }
-
-        .toast-close:hover {
-            background: rgba(0, 0, 0, 0.05);
-            color: var(--text-primary);
-        }
-
-        /* Toast Variants */
-        .toast-success {
-            background: #f0fdf4;
-            border-left-color: #22c55e;
-        }
-
-        .toast-success .toast-icon {
-            background: #22c55e;
-            color: white;
-        }
-
-        .toast-error {
-            background: #fef2f2;
-            border-left-color: #ef4444;
-        }
-
-        .toast-error .toast-icon {
-            background: #ef4444;
-            color: white;
-        }
-
-        .toast-warning {
-            background: #fffbeb;
-            border-left-color: #f59e0b;
-        }
-
-        .toast-warning .toast-icon {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .toast-info {
-            background: #f0f9ff;
-            border-left-color: #0ea5e9;
-        }
-
-        .toast-info .toast-icon {
-            background: #0ea5e9;
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .toast-container {
-                top: auto;
-                bottom: 20px;
-                left: 20px;
-                right: 20px;
-            }
-
-            .toast {
-                min-width: auto;
-                max-width: none;
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1158,9 +1001,6 @@
             <div class="loading-text" id="loadingText">Preparing your order...</div>
         </div>
     </div>
-
-    <!-- Add toast container -->
-    <div class="toast-container" id="toastContainer"></div>
 
     <script>
         let cart = [];
@@ -1276,6 +1116,7 @@
                 const products = await getProducts();
                 let product = null;
                 
+                // Find the product
                 for (const category in products) {
                     const found = products[category].find(p => p._id === itemId);
                     if (found) {
@@ -1287,10 +1128,10 @@
                 if (product && product.available) {
                     const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
                     
+                    // Check if item already in cart
                     const existingItem = cart.find(item => item._id === product._id);
                     if (existingItem) {
                         existingItem.quantity += quantity;
-                        showToast(`Updated ${product.name} quantity in your cart.`, 'info', 'Cart Updated');
                     } else {
                         cart.push({
                             _id: product._id,
@@ -1298,68 +1139,43 @@
                             price: product.price,
                             quantity: quantity
                         });
-                        showToast(`Added ${product.name} to your cart.`, 'success', 'Item Added');
                     }
                     
                     updateCartCount();
-                } else {
-                    showToast('This item is currently unavailable.', 'warning', 'Item Unavailable');
+                    showToast('Item added to cart!');
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);
-                showToast('Unable to add item to cart. Please try again.', 'error', 'Action Failed');
+                showToast('Failed to add item to cart', 'error');
             }
         }
 
         // Show toast message
-        function showToast(message, type = 'success', title = '') {
-            const icons = {
-                success: 'check',
-                error: 'times',
-                warning: 'exclamation',
-                info: 'info'
-            };
-
-            const titles = {
-                success: title || 'Success',
-                error: title || 'Error',
-                warning: title || 'Warning',
-                info: title || 'Information'
-            };
-
-            const container = document.getElementById('toastContainer');
-            if (!container) {
-                const newContainer = document.createElement('div');
-                newContainer.id = 'toastContainer';
-                newContainer.className = 'toast-container';
-                document.body.appendChild(newContainer);
-            }
-
+        function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `
-                <div class="toast-icon">
-                    <i class="fas fa-${icons[type]}"></i>
-                </div>
-                <div class="toast-content">
-                    <div class="toast-title">${titles[type]}</div>
-                    <div class="toast-message">${message}</div>
-                </div>
-                <button class="toast-close" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                background: ${type === 'success' ? 'var(--success-color)' : 'var(--secondary-color)'};
+                color: white;
+                padding: 1rem 2rem;
+                border-radius: var(--border-radius);
+                box-shadow: var(--shadow);
+                animation: slideIn 0.3s ease;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
             `;
-
-            const toastContainer = document.getElementById('toastContainer');
-            toastContainer.appendChild(toast);
-
-            // Trigger reflow to enable animation
-            toast.offsetHeight;
-            toast.classList.add('show');
-
-            // Auto remove after 3 seconds
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(toast);
+            
             setTimeout(() => {
-                toast.classList.remove('show');
+                toast.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
@@ -1434,7 +1250,7 @@
             event.preventDefault();
             
             if (!tableNumber) {
-                showToast('Please scan the QR code from your table or ask staff for assistance.', 'warning', 'Invalid Table');
+                showToast('Invalid table number!');
                 return;
             }
             
@@ -1442,12 +1258,12 @@
             const phoneNumber = document.getElementById('customerPhone').value;
             
             if (!customerName || !phoneNumber) {
-                showToast('Please provide both your name and phone number to proceed with the order.', 'warning', 'Missing Information');
+                showToast('Please enter your name and phone number', 'error');
                 return;
             }
             
             if (cart.length === 0) {
-                showToast('Add some delicious items to your cart before placing an order.', 'warning', 'Empty Cart');
+                showToast('Your cart is empty!', 'error');
                 return;
             }
 
@@ -1466,8 +1282,10 @@
             };
 
             try {
+                // Show loading animation
                 document.getElementById('loadingOverlay').style.display = 'block';
                 
+                // Send order to backend
                 const response = await fetch(`${API_BASE_URL}/orders`, {
                     method: 'POST',
                     headers: {
@@ -1480,16 +1298,18 @@
                     throw new Error('Failed to submit order');
                 }
 
+                // Clear cart and form
                 cart = [];
                 updateCartCount();
                 document.getElementById('customerName').value = '';
                 document.getElementById('customerPhone').value = '';
                 closeOrderModal();
                 
-                showToast('Your order has been successfully placed and will be prepared shortly!', 'success', 'Order Confirmed');
+                // Show success message
+                showToast('Order placed successfully!', 'success');
             } catch (error) {
                 console.error('Error submitting order:', error);
-                showToast('We encountered an issue while processing your order. Please try again or contact staff for assistance.', 'error', 'Order Failed');
+                showToast('Failed to place order. Please try again.', 'error');
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }

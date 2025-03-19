@@ -12,13 +12,37 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: true, // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  origin: ['https://mavrix-cafe.onrender.com', 'http://localhost:3000', 'http://localhost:5000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add error handling for CORS preflight
+app.options('*', cors(corsOptions));
+
+// Add request timeout middleware
+app.use((req, res, next) => {
+  req.setTimeout(30000, () => {
+    res.status(408).json({ error: 'Request timeout' });
+  });
+  next();
+});
+
+// Add MongoDB connection status middleware
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: 'Database connection unavailable',
+      details: 'The server is temporarily unable to handle the request due to database connectivity issues.'
+    });
+  }
+  next();
+});
 
 // Default route
 app.get('/', (req, res) => {
@@ -170,12 +194,29 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Update error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  console.error('Error:', err);
+  
+  // Handle specific error types
+  if (err.name === 'MongoError' || err.name === 'MongooseError') {
+    return res.status(503).json({
+      error: 'Database error',
+      message: 'A database error occurred. Please try again later.'
+    });
+  }
+  
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation error',
+      message: err.message
+    });
+  }
+  
+  // Default error response
+  res.status(err.status || 500).json({
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'An unexpected error occurred'
   });
 });
 

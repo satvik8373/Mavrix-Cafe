@@ -686,7 +686,7 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: white;
+            color: #2c3e50;
         }
 
         .revenue .stat-icon { background: linear-gradient(135deg, #2ecc71, #27ae60); }
@@ -2077,13 +2077,55 @@
             }, 100);
         }
 
-        // Fetch menu items
+        // Add these utility functions at the beginning of the script section
+        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+            let lastError;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error);
+                    lastError = error;
+                    
+                    // Show notification only on final retry
+                    if (i === maxRetries - 1) {
+                        let errorMessage = 'Network error occurred. Please try again later.';
+                        if (error.message.includes('blocked by CORS')) {
+                            errorMessage = 'Connection to server failed. Please check your network.';
+                        } else if (error.message.includes('502')) {
+                            errorMessage = 'Server is temporarily unavailable. Please try again in a few minutes.';
+                        }
+                        
+                        showNotification(errorMessage, 'error', 'Connection Error');
+                    }
+                    
+                    // Wait before retrying (exponential backoff)
+                    if (i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                    }
+                }
+            }
+            throw lastError;
+        }
+
+        // Update the displayProducts function
         async function displayProducts() {
             try {
-                const response = await fetch(`${API_BASE_URL}/menu`);
-                if (!response.ok) throw new Error('Failed to fetch menu items');
-                const products = await response.json();
-                
+                const products = await fetchWithRetry(`${API_BASE_URL}/menu`);
                 const productsContainer = document.getElementById('productGrid');
                 productsContainer.innerHTML = '';
                 
@@ -2093,7 +2135,6 @@
                 });
             } catch (error) {
                 console.error('Error displaying products:', error);
-                showToast('Error loading products', 'error');
             }
         }
 
@@ -2124,13 +2165,10 @@
             return card;
         }
 
-        // Fetch orders
+        // Update the displayOrders function
         async function displayOrders(filter = 'all') {
             try {
-                const response = await fetch(`${API_BASE_URL}/orders`);
-                if (!response.ok) throw new Error('Failed to fetch orders');
-                const orders = await response.json();
-                
+                const orders = await fetchWithRetry(`${API_BASE_URL}/orders`);
                 const filteredOrders = filter === 'all' 
                     ? orders 
                     : orders.filter(order => order.status === filter);
@@ -2138,13 +2176,22 @@
                 const ordersContainer = document.getElementById('ordersGrid');
                 ordersContainer.innerHTML = '';
                 
+                if (filteredOrders.length === 0) {
+                    ordersContainer.innerHTML = `
+                        <div class="no-orders">
+                            <i class="fas fa-inbox"></i>
+                            <p>No ${filter === 'all' ? '' : filter} orders found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 filteredOrders.forEach(order => {
                     const orderCard = createOrderCard(order);
                     ordersContainer.appendChild(orderCard);
                 });
             } catch (error) {
                 console.error('Error displaying orders:', error);
-                showToast('Error loading orders', 'error');
             }
         }
 
@@ -2265,17 +2312,14 @@
         // Update dashboard stats
         async function updateStats() {
             try {
-                const [ordersResponse, menuResponse] = await Promise.all([
-                    fetch(`${API_BASE_URL}/orders`),
-                    fetch(`${API_BASE_URL}/menu`)
+                const [orders, menuItems] = await Promise.all([
+                    fetchWithRetry(`${API_BASE_URL}/orders`),
+                    fetchWithRetry(`${API_BASE_URL}/menu`)
                 ]);
                 
-                if (!ordersResponse.ok || !menuResponse.ok) {
+                if (!orders || !menuItems) {
                     throw new Error('Failed to fetch data');
                 }
-                
-                const orders = await ordersResponse.json();
-                const menuItems = await menuResponse.json();
                 
                 // Calculate statistics
                 const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -2974,13 +3018,12 @@
             setTimeout(() => alert.remove(), 4000);
         }
 
-        // Check for new orders
+        // Update the checkNewOrders function
         async function checkNewOrders() {
+            if (!isPageVisible) return; // Don't check if page is not visible
+            
             try {
-                const response = await fetch(`${API_BASE_URL}/orders`);
-                if (!response.ok) throw new Error('Failed to fetch orders');
-                
-                const orders = await response.json();
+                const orders = await fetchWithRetry(`${API_BASE_URL}/orders`, {}, 2);
                 const newOrders = orders.filter(order => {
                     const orderTime = new Date(order.timestamp);
                     const lastCheck = new Date(lastOrderTimestamp);
@@ -2988,15 +3031,10 @@
                 });
                 
                 if (newOrders.length > 0) {
-                    // Update timestamp to latest order
                     lastOrderTimestamp = new Date().toISOString();
-                    
-                    // Show alerts for new orders
                     newOrders.forEach(order => {
                         showNewOrderAlert(order);
                     });
-                    
-                    // Refresh displays
                     await Promise.all([
                         displayOrders(),
                         updateStats()
@@ -3004,6 +3042,7 @@
                 }
             } catch (error) {
                 console.error('Error checking for new orders:', error);
+                // Don't show notification for polling errors
             }
         }
 

@@ -1663,13 +1663,7 @@
             }
         }
 
-        /* ... existing styles ... */
-
-        /* Print Styles */
-        .print-only {
-            display: none;
-        }
-
+        /* Add print styles */
         @media print {
             body * {
                 visibility: hidden;
@@ -1684,12 +1678,27 @@
                 left: 0;
                 top: 0;
                 width: 100%;
-                padding: 20px;
-                background: white;
             }
 
-            .print-only {
-                display: block;
+            .print-receipt {
+                padding: 20px;
+                font-family: 'Courier New', monospace;
+            }
+
+            .print-receipt .receipt-header {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .print-receipt .receipt-divider {
+                border-top: 1px dashed #000;
+                margin: 10px 0;
+            }
+
+            .print-receipt .receipt-footer {
+                text-align: center;
+                font-size: 14px;
+                margin-top: 20px;
             }
 
             .no-print {
@@ -1697,127 +1706,7 @@
             }
         }
 
-        .receipt-template {
-            display: none;
-            background: white;
-            padding: 30px;
-            max-width: 800px;
-            margin: 0 auto;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .receipt-header h2 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 24px;
-        }
-
-        .receipt-header p {
-            margin: 5px 0;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .receipt-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .receipt-info-group {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .receipt-info-group h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: #2c3e50;
-        }
-
-        .receipt-info-group p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .receipt-items {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        .receipt-items th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 14px;
-        }
-
-        .receipt-items td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .receipt-total {
-            text-align: right;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-
-        .receipt-total p {
-            margin: 5px 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .receipt-total .grand-total {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-top: 10px;
-        }
-
-        .receipt-footer {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
-            color: #666;
-            font-size: 14px;
-        }
-
-        .print-button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            margin-left: 10px;
-        }
-
-        .print-button:hover {
-            background: #34495e;
-        }
+        /* ... existing styles ... */
     </style>
 </head>
 <body>
@@ -2077,55 +1966,13 @@
             }, 100);
         }
 
-        // Add these utility functions at the beginning of the script section
-        async function fetchWithRetry(url, options = {}, maxRetries = 3) {
-            let lastError;
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        ...options,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...options.headers
-                        }
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-                    }
-
-                    return await response.json();
-                } catch (error) {
-                    console.error(`Attempt ${i + 1} failed:`, error);
-                    lastError = error;
-                    
-                    // Show notification only on final retry
-                    if (i === maxRetries - 1) {
-                        let errorMessage = 'Network error occurred. Please try again later.';
-                        if (error.message.includes('blocked by CORS')) {
-                            errorMessage = 'Connection to server failed. Please check your network.';
-                        } else if (error.message.includes('502')) {
-                            errorMessage = 'Server is temporarily unavailable. Please try again in a few minutes.';
-                        }
-                        
-                        showNotification(errorMessage, 'error', 'Connection Error');
-                    }
-                    
-                    // Wait before retrying (exponential backoff)
-                    if (i < maxRetries - 1) {
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                    }
-                }
-            }
-            throw lastError;
-        }
-
-        // Update the displayProducts function
+        // Fetch menu items
         async function displayProducts() {
             try {
-                const products = await fetchWithRetry(`${API_BASE_URL}/menu`);
+                const response = await fetch(`${API_BASE_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                const products = await response.json();
+                
                 const productsContainer = document.getElementById('productGrid');
                 productsContainer.innerHTML = '';
                 
@@ -2135,6 +1982,7 @@
                 });
             } catch (error) {
                 console.error('Error displaying products:', error);
+                showToast('Error loading products', 'error');
             }
         }
 
@@ -2165,10 +2013,13 @@
             return card;
         }
 
-        // Update the displayOrders function
+        // Fetch orders
         async function displayOrders(filter = 'all') {
             try {
-                const orders = await fetchWithRetry(`${API_BASE_URL}/orders`);
+                const response = await fetch(`${API_BASE_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                const orders = await response.json();
+                
                 const filteredOrders = filter === 'all' 
                     ? orders 
                     : orders.filter(order => order.status === filter);
@@ -2176,22 +2027,13 @@
                 const ordersContainer = document.getElementById('ordersGrid');
                 ordersContainer.innerHTML = '';
                 
-                if (filteredOrders.length === 0) {
-                    ordersContainer.innerHTML = `
-                        <div class="no-orders">
-                            <i class="fas fa-inbox"></i>
-                            <p>No ${filter === 'all' ? '' : filter} orders found</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
                 filteredOrders.forEach(order => {
                     const orderCard = createOrderCard(order);
                     ordersContainer.appendChild(orderCard);
                 });
             } catch (error) {
                 console.error('Error displaying orders:', error);
+                showToast('Error loading orders', 'error');
             }
         }
 
@@ -2211,10 +2053,10 @@
                         <h3>Order #${order._id.slice(-6).toUpperCase()}</h3>
                         <span class="order-time">${formattedTime}</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="order-actions">
                         <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="printReceipt(${JSON.stringify(order)})" class="print-button no-print">
-                            <i class="fas fa-print"></i> Print
+                        <button onclick="printReceipt(${JSON.stringify(order)})" class="action-btn print-btn" title="Print Receipt">
+                            <i class="fas fa-print"></i>
                         </button>
                     </div>
                 </div>
@@ -2312,14 +2154,17 @@
         // Update dashboard stats
         async function updateStats() {
             try {
-                const [orders, menuItems] = await Promise.all([
-                    fetchWithRetry(`${API_BASE_URL}/orders`),
-                    fetchWithRetry(`${API_BASE_URL}/menu`)
+                const [ordersResponse, menuResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/orders`),
+                    fetch(`${API_BASE_URL}/menu`)
                 ]);
                 
-                if (!orders || !menuItems) {
+                if (!ordersResponse.ok || !menuResponse.ok) {
                     throw new Error('Failed to fetch data');
                 }
+                
+                const orders = await ordersResponse.json();
+                const menuItems = await menuResponse.json();
                 
                 // Calculate statistics
                 const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
@@ -3018,12 +2863,13 @@
             setTimeout(() => alert.remove(), 4000);
         }
 
-        // Update the checkNewOrders function
+        // Check for new orders
         async function checkNewOrders() {
-            if (!isPageVisible) return; // Don't check if page is not visible
-            
             try {
-                const orders = await fetchWithRetry(`${API_BASE_URL}/orders`, {}, 2);
+                const response = await fetch(`${API_BASE_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                
+                const orders = await response.json();
                 const newOrders = orders.filter(order => {
                     const orderTime = new Date(order.timestamp);
                     const lastCheck = new Date(lastOrderTimestamp);
@@ -3031,10 +2877,15 @@
                 });
                 
                 if (newOrders.length > 0) {
+                    // Update timestamp to latest order
                     lastOrderTimestamp = new Date().toISOString();
+                    
+                    // Show alerts for new orders
                     newOrders.forEach(order => {
                         showNewOrderAlert(order);
                     });
+                    
+                    // Refresh displays
                     await Promise.all([
                         displayOrders(),
                         updateStats()
@@ -3042,7 +2893,6 @@
                 }
             } catch (error) {
                 console.error('Error checking for new orders:', error);
-                // Don't show notification for polling errors
             }
         }
 
@@ -3376,87 +3226,153 @@
 
         // Add print receipt function
         function printReceipt(order) {
-            // Create receipt template
+            // Create receipt content
             const receipt = document.createElement('div');
-            receipt.className = 'print-receipt receipt-template';
+            receipt.className = 'print-receipt';
             
-            const timestamp = new Date(order.timestamp);
-            const formattedDate = timestamp.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+            const formattedTime = new Date(order.timestamp).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
             });
-            const formattedTime = timestamp.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
+            
+            const itemsTotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const taxRate = 0.05; // 5% tax
+            const tax = itemsTotal * taxRate;
+            const total = itemsTotal + tax;
+            
             receipt.innerHTML = `
                 <div class="receipt-header">
-                    <h2>Mavrix Cafe</h2>
-                    <p>Invoice #${order._id.slice(-6).toUpperCase()}</p>
-                    <p>${formattedDate} at ${formattedTime}</p>
+                    <h2>MAVRIX CAFE</h2>
+                    <p>Order #${order._id.slice(-6).toUpperCase()}</p>
+                    <p>${formattedTime}</p>
                 </div>
-                
-                <div class="receipt-info">
-                    <div class="receipt-info-group">
-                        <h3>Customer Details</h3>
-                        <p><strong>Name:</strong> ${order.customerName}</p>
-                        <p><strong>Phone:</strong> ${order.phoneNumber}</p>
-                        <p><strong>Table:</strong> ${order.tableNumber}</p>
-                    </div>
-                    <div class="receipt-info-group">
-                        <h3>Order Status</h3>
-                        <p><strong>Status:</strong> ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</p>
-                        <p><strong>Payment:</strong> Completed</p>
-                        <p><strong>Order Type:</strong> Dine In</p>
-                    </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-customer">
+                    <p>Customer: ${order.customerName}</p>
+                    <p>Table: ${order.tableNumber}</p>
+                    <p>Phone: ${order.phoneNumber}</p>
                 </div>
-                
-                <table class="receipt-items">
-                    <thead>
+                <div class="receipt-divider"></div>
+                <div class="receipt-items">
+                    <table style="width: 100%">
                         <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                            <th style="text-align: left">Item</th>
+                            <th style="text-align: center">Qty</th>
+                            <th style="text-align: right">Price</th>
+                            <th style="text-align: right">Total</th>
                         </tr>
-                    </thead>
-                    <tbody>
                         ${order.items.map(item => `
                             <tr>
-                                <td>${item.name}</td>
-                                <td>${item.quantity}</td>
-                                <td>₹${item.price.toFixed(2)}</td>
-                                <td>₹${(item.price * item.quantity).toFixed(2)}</td>
+                                <td style="text-align: left">${item.name}</td>
+                                <td style="text-align: center">${item.quantity}</td>
+                                <td style="text-align: right">₹${item.price.toFixed(2)}</td>
+                                <td style="text-align: right">₹${(item.price * item.quantity).toFixed(2)}</td>
                             </tr>
                         `).join('')}
-                    </tbody>
-                </table>
-                
-                <div class="receipt-total">
-                    <p><strong>Subtotal:</strong> ₹${order.totalAmount.toFixed(2)}</p>
-                    <p><strong>Tax (5%):</strong> ₹${(order.totalAmount * 0.05).toFixed(2)}</p>
-                    <p class="grand-total"><strong>Grand Total:</strong> ₹${(order.totalAmount * 1.05).toFixed(2)}</p>
+                    </table>
                 </div>
-                
+                <div class="receipt-divider"></div>
+                <div class="receipt-summary" style="text-align: right">
+                    <p>Subtotal: ₹${itemsTotal.toFixed(2)}</p>
+                    <p>Tax (5%): ₹${tax.toFixed(2)}</p>
+                    <p style="font-weight: bold">Total: ₹${total.toFixed(2)}</p>
+                </div>
+                <div class="receipt-divider"></div>
                 <div class="receipt-footer">
                     <p>Thank you for dining with us!</p>
-                    <p class="print-only">This is a computer generated invoice</p>
+                    <p>Visit us again</p>
                 </div>
             `;
             
-            // Add receipt to body
-            document.body.appendChild(receipt);
-            
-            // Print receipt
-            window.print();
-            
-            // Remove receipt after printing
-            setTimeout(() => {
-                document.body.removeChild(receipt);
-            }, 1000);
+            // Create a new window for printing
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Order Receipt</title>
+                        <style>
+                            body {
+                                font-family: 'Courier New', monospace;
+                                padding: 20px;
+                                max-width: 300px;
+                                margin: 0 auto;
+                            }
+                            .receipt-divider {
+                                border-top: 1px dashed #000;
+                                margin: 10px 0;
+                            }
+                            .receipt-header {
+                                text-align: center;
+                                margin-bottom: 20px;
+                            }
+                            .receipt-footer {
+                                text-align: center;
+                                margin-top: 20px;
+                            }
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+                            th, td {
+                                padding: 5px;
+                            }
+                            @media print {
+                                @page {
+                                    margin: 0;
+                                    size: 80mm 297mm;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${receipt.outerHTML}
+                        <script>
+                            window.onload = function() {
+                                window.print();
+                                setTimeout(function() {
+                                    window.close();
+                                }, 500);
+                            };
+                        </script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
+
+        // Add styles for print button
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .print-btn {
+                    background: #3498db;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem;
+                    border-radius: var(--border-radius);
+                    cursor: pointer;
+                    transition: var(--transition);
+                    margin-left: 0.5rem;
+                }
+
+                .print-btn:hover {
+                    background: #2980b9;
+                    transform: translateY(-2px);
+                }
+
+                .order-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                @media (max-width: 768px) {
+                    .order-actions {
+                        flex-direction: row;
+                        margin-top: 0.5rem;
+                    }
+                }
+            </style>
+        `);
     </script>
 </body>
 </html> 

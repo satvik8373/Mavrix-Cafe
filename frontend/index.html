@@ -904,6 +904,42 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+
+        .quantity-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .quantity-btn:hover:not(:disabled) {
+            background: #e0e0e0 !important;
+        }
+        
+        .quantity-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+        }
+        
+        .quantity-display {
+            font-family: var(--font-family);
+            color: var(--text-color);
+        }
+        
+        .add-to-cart {
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-cart:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .add-to-cart:disabled {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+        }
+        
+        .update-cart {
+            background: var(--accent-color) !important;
+        }
     </style>
 </head>
 <body>
@@ -1063,8 +1099,10 @@
 
         // Display menu items
         async function displayMenuItems(category = 'all') {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '<div class="loading-text">Loading menu items...</div>';
+            
             try {
-                const menuGrid = document.getElementById('menuGrid');
                 const products = await getProducts();
                 menuGrid.innerHTML = '';
 
@@ -1074,21 +1112,45 @@
                             const menuItem = document.createElement('div');
                             menuItem.className = 'menu-item';
                             
+                            // Get quantity from cart if exists
+                            const cartItem = cart.find(ci => ci._id === item._id);
+                            const currentQty = cartItem ? cartItem.quantity : 0;
+                            
                             menuItem.innerHTML = `
                                 ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
                                 <div class="menu-item-header">
                                     <h3 class="menu-item-title">${item.name}</h3>
                                     <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
                                 </div>
+                                <p class="menu-item-description">${item.description || ''}</p>
                                 <div class="menu-item-actions">
-                                    <div class="quantity-control">
-                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)">-</button>
-                                        <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantity-${item._id}">
-                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)">+</button>
+                                    <div class="quantity-control" style="display: flex; align-items: center; gap: 8px;">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)" 
+                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
+                                            ${currentQty === 0 ? 'disabled' : ''}>
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <span id="quantity-${item._id}" class="quantity-display" 
+                                            style="min-width: 30px; text-align: center; font-weight: bold;">
+                                            ${currentQty}
+                                        </span>
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)"
+                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
+                                            ${!item.available ? 'disabled' : ''}>
+                                            <i class="fas fa-plus"></i>
+                                        </button>
                                     </div>
-                                    <button class="add-to-cart" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
-                                        <i class="fas fa-plus"></i> Add to Cart
-                                    </button>
+                                    ${currentQty > 0 ? `
+                                        <button class="add-to-cart update-cart" onclick="updateCart('${item._id}')"
+                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                                            <i class="fas fa-shopping-cart"></i> Update Cart
+                                        </button>
+                                    ` : `
+                                        <button class="add-to-cart" onclick="updateQuantity('${item._id}', 1)" ${!item.available ? 'disabled' : ''}
+                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                                            <i class="fas fa-plus"></i> Add to Cart
+                                        </button>
+                                    `}
                                 </div>
                             `;
                             menuGrid.appendChild(menuItem);
@@ -1096,21 +1158,34 @@
                     }
                 });
             } catch (error) {
+                menuGrid.innerHTML = '<div class="error-text">Failed to load menu items. Please try again later.</div>';
                 console.error('Error displaying menu items:', error);
-                showToast('Failed to display menu items', 'error');
             }
         }
 
-        // Update quantity
+        // Update quantity and cart
         function updateQuantity(itemId, change) {
-            const input = document.getElementById(`quantity-${itemId}`);
-            let value = parseInt(input.value) + change;
-            value = Math.max(1, Math.min(10, value));
-            input.value = value;
+            const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+            let currentQty = parseInt(quantityDisplay.textContent);
+            let newQty = currentQty + change;
+            
+            // Ensure quantity stays between 0 and 10
+            newQty = Math.max(0, Math.min(10, newQty));
+            
+            // Update display
+            quantityDisplay.textContent = newQty;
+            
+            // Update buttons state
+            const parentDiv = quantityDisplay.closest('.menu-item-actions');
+            const minusBtn = parentDiv.querySelector('.quantity-btn:first-child');
+            minusBtn.disabled = newQty === 0;
+            
+            // Auto-update cart
+            updateCart(itemId, newQty);
         }
 
-        // Add to cart
-        async function addToCart(itemId) {
+        // Update cart with new quantity
+        async function updateCart(itemId, quantity) {
             try {
                 const products = await getProducts();
                 let product = null;
@@ -1125,27 +1200,37 @@
                 }
 
                 if (product && product.available) {
-                    const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
+                    const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+                    const currentQty = parseInt(quantityDisplay.textContent);
                     
-                    // Check if item already in cart
-                    const existingItem = cart.find(item => item._id === product._id);
-                    if (existingItem) {
-                        existingItem.quantity += quantity;
+                    // Remove item if quantity is 0
+                    if (currentQty === 0) {
+                        cart = cart.filter(item => item._id !== itemId);
                     } else {
-                        cart.push({
-                            _id: product._id,
-                            name: product.name,
-                            price: product.price,
-                            quantity: quantity
-                        });
+                        // Update or add item
+                        const existingItem = cart.find(item => item._id === itemId);
+                        if (existingItem) {
+                            existingItem.quantity = currentQty;
+                        } else {
+                            cart.push({
+                                _id: itemId,
+                                name: product.name,
+                                price: product.price,
+                                quantity: currentQty
+                            });
+                        }
                     }
                     
                     updateCartCount();
-                    showToast('Item added to cart!');
+                    displayCartItems();
+                    showToast('Cart updated!');
+                    
+                    // Refresh menu display to update buttons
+                    await displayMenuItems(currentCategory || 'all');
                 }
             } catch (error) {
-                console.error('Error adding to cart:', error);
-                showToast('Failed to add item to cart', 'error');
+                console.error('Error updating cart:', error);
+                showToast('Failed to update cart', 'error');
             }
         }
 

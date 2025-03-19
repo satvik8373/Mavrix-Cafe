@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mavrix Cafe - Admin Dashboard</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <!-- Add favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/favicon.ico">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -1948,6 +1949,23 @@
             ? 'http://localhost:3000/api'
             : 'https://mavrix-cafe-api.onrender.com/api';
 
+        // Global variables
+        let lastOrderTimestamp = new Date().toISOString();
+        let isPageVisible = true;
+        let orderSound = null;
+        const ADMIN_PASSWORD = '837337';
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+            if (isAuthenticated) {
+                showAdminContent();
+            }
+            setupFilterButtons();
+            setupTouchHandling();
+            initializeSound();
+        });
+
         // Toast Notification
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -2323,12 +2341,6 @@
             });
         }
 
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeAdmin();
-            setupFilterButtons();
-        });
-
         // Update time frame
         function updateTimeFrame(timeframe) {
             // Update active button
@@ -2343,9 +2355,6 @@
             updateStats();
             displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
         }
-
-        // Add this at the beginning of the script
-        const ADMIN_PASSWORD = '837337'; // Admin password
 
         // Check for existing authentication on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -2825,11 +2834,6 @@
                 isScrolling = false;
             });
         }
-
-        // Add these variables at the top of the script
-        let lastOrderTimestamp = new Date().toISOString();
-        let isPageVisible = true;
-        let orderSound = null;
 
         // Initialize sound
         function initializeSound() {

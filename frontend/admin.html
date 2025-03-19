@@ -1534,90 +1534,91 @@
             }
         }
 
-        .notification-badge {
-            background: var(--danger-color);
-            color: white;
-            border-radius: 50%;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            min-width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: bounce 0.5s ease;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-5px); }
-            60% { transform: translateY(-3px); }
-        }
-
-        .new-order-alert {
+        /* Notification styles */
+        .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            z-index: 1100;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            background: white;
+            color: #2c3e50;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
-            gap: 1rem;
-            animation: slideInRight 0.5s ease, shake 0.5s ease 0.5s;
+            gap: 0.8rem;
+            z-index: 1100;
+            max-width: 350px;
+            animation: slideInRight 0.3s ease;
             cursor: pointer;
-            min-width: 300px;
+            border-left: 4px solid;
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .notification.success {
+            border-color: #2ecc71;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        .notification.error {
+            border-color: #e74c3c;
         }
 
-        .new-order-alert i {
-            font-size: 2rem;
-            color: var(--warning-color);
-            animation: ring 1s ease infinite;
+        .notification.warning {
+            border-color: #f1c40f;
         }
 
-        @keyframes ring {
-            0%, 100% { transform: rotate(0); }
-            25% { transform: rotate(10deg); }
-            75% { transform: rotate(-10deg); }
+        .notification i {
+            font-size: 1.2rem;
         }
 
-        .new-order-alert .alert-content {
+        .notification.success i {
+            color: #2ecc71;
+        }
+
+        .notification.error i {
+            color: #e74c3c;
+        }
+
+        .notification.warning i {
+            color: #f1c40f;
+        }
+
+        .notification-content {
             flex: 1;
         }
 
-        .new-order-alert h4 {
-            margin: 0;
-            font-size: 1.2rem;
+        .notification-title {
             font-weight: 600;
+            margin-bottom: 0.2rem;
         }
 
-        .new-order-alert p {
-            margin: 0.5rem 0 0;
-            font-size: 1rem;
-            opacity: 0.9;
+        .notification-message {
+            font-size: 0.9rem;
+            color: #666;
         }
 
-        .new-order-alert:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* ... existing styles ... */
     </style>
 </head>
 <body>
@@ -1645,7 +1646,6 @@
     <!-- Add this right after the opening body tag -->
     <audio id="newOrderSound" preload="auto">
         <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
-        <source src="https://assets.mixkit.co/active_storage/sfx/954/954-preview.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Admin Content -->
@@ -2014,6 +2014,11 @@
         // Update order status
         async function updateOrderStatus(orderId, status) {
             try {
+                if (!orderId) {
+                    showNotification('Invalid order ID', 'error', 'Validation Error');
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
                     method: 'PUT',
                     headers: {
@@ -2021,14 +2026,30 @@
                     },
                     body: JSON.stringify({ status })
                 });
-                if (!response.ok) throw new Error('Failed to update order status');
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update order status');
+                }
                 
-                showToast('Order status updated successfully');
-                displayOrders();
-                updateStats();
+                showNotification(
+                    `Order #${orderId.slice(-6).toUpperCase()} marked as ${status}`,
+                    'success',
+                    'Order Updated'
+                );
+                
+                // Refresh the orders display and stats
+                await Promise.all([
+                    displayOrders(),
+                    updateStats()
+                ]);
             } catch (error) {
                 console.error('Error updating order status:', error);
-                showToast('Error updating order status', 'error');
+                showNotification(
+                    error.message || 'Could not update order status',
+                    'error',
+                    'Update Failed'
+                );
             }
         }
 
@@ -2162,23 +2183,12 @@
                     displayOrders()
                 ]);
                 
-                // Set initial timestamp
-                const response = await fetch(`${API_BASE_URL}/orders`);
-                if (response.ok) {
-                    const orders = await response.json();
-                    if (orders.length > 0) {
-                        lastOrderTimestamp = new Date(Math.max(...orders.map(o => new Date(o.timestamp)))).toISOString();
-                    }
-                }
-                
-                // Then update stats and start polling
+                // Then update stats after a short delay
                 setTimeout(async () => {
                     await updateStats();
                     
-                    // Check for new orders frequently
-                    setInterval(checkNewOrders, 5000); // Check every 5 seconds
-                    
-                    // Update stats less frequently
+                    // Set up auto-refresh for orders and stats
+                    setInterval(checkNewOrders, 5000); // Check for new orders every 5 seconds
                     setInterval(async () => {
                         if (isPageVisible) {
                             const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
@@ -2453,9 +2463,16 @@
                     throw new Error(errorData.error || 'Failed to update product availability');
                 }
                 
-                showMessage(`Product ${newAvailability ? 'available' : 'unavailable'}`);
-                displayProducts();
-                updateStats();
+                showNotification(
+                    `Product is now ${newAvailability ? 'available' : 'unavailable'}`,
+                    'success',
+                    'Availability Updated'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
             } catch (error) {
                 console.error('Error toggling availability:', error);
                 showMessage(error.message || 'Error updating product availability', 'error');
@@ -2488,9 +2505,16 @@
                     throw new Error(errorData.error || 'Failed to delete product');
                 }
                 
-                showMessage('Product deleted successfully');
-                displayProducts();
-                updateStats();
+                showNotification(
+                    'Product has been deleted successfully',
+                    'success',
+                    'Product Deleted'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
             } catch (error) {
                 console.error('Error deleting product:', error);
                 showMessage(error.message || 'Error deleting product', 'error');
@@ -2502,23 +2526,37 @@
             
             try {
                 const productId = document.getElementById('productId').value;
+                const name = document.getElementById('productName').value.trim();
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const category = document.getElementById('productCategory').value;
+                const description = document.getElementById('productDescription').value.trim();
+
+                // Validation checks
+                if (!name) {
+                    showNotification('Please enter a product name', 'warning', 'Missing Information');
+                    document.getElementById('productName').focus();
+                    return;
+                }
+
+                if (!price || price <= 0) {
+                    showNotification('Please enter a valid price', 'warning', 'Invalid Price');
+                    document.getElementById('productPrice').focus();
+                    return;
+                }
+
+                if (!category) {
+                    showNotification('Please select a category', 'warning', 'Missing Information');
+                    document.getElementById('productCategory').focus();
+                    return;
+                }
+
                 const productData = {
-                    name: document.getElementById('productName').value.trim(),
-                    price: parseFloat(document.getElementById('productPrice').value),
-                    category: document.getElementById('productCategory').value,
-                    description: document.getElementById('productDescription').value.trim(),
+                    name,
+                    price,
+                    category,
+                    description,
                     available: true
                 };
-
-                // Validate the data
-                if (!productData.name) {
-                    showMessage('Product name is required', 'error');
-                    return;
-                }
-                if (isNaN(productData.price) || productData.price <= 0) {
-                    showMessage('Please enter a valid price', 'error');
-                    return;
-                }
                 
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
@@ -2537,17 +2575,24 @@
                     throw new Error(errorData.error || 'Failed to save product');
                 }
                 
-                showMessage(`Product ${productId ? 'updated' : 'added'} successfully`);
-                resetProductForm();
+                showNotification(
+                    `${name} has been ${productId ? 'updated' : 'added'} successfully`,
+                    'success',
+                    'Product Saved'
+                );
                 
-                // Immediately refresh the products display and stats
+                resetProductForm();
                 await Promise.all([
                     displayProducts(),
                     updateStats()
                 ]);
             } catch (error) {
                 console.error('Error saving product:', error);
-                showMessage(error.message || 'Error saving product', 'error');
+                showNotification(
+                    error.message || 'Could not save product',
+                    'error',
+                    'Save Failed'
+                );
             }
         }
 
@@ -2624,8 +2669,6 @@
         // Initialize sound
         function initializeSound() {
             orderSound = document.getElementById('newOrderSound');
-            orderSound.volume = 0.5; // Set volume to 50%
-            
             // Enable sound only after user interaction
             document.addEventListener('click', () => {
                 if (orderSound) {
@@ -2646,27 +2689,25 @@
                 <div class="alert-content">
                     <h4>New Order Received!</h4>
                     <p>Table ${order.tableNumber} - ${order.customerName}</p>
-                    <p class="order-total">Total: ₹${order.totalAmount.toFixed(2)}</p>
                 </div>
             `;
             
             document.body.appendChild(alert);
             
-            // Handle click on alert
+            // Play sound if page is not visible
+            if (!isPageVisible && orderSound) {
+                orderSound.play().catch(console.error);
+            }
+            
+            // Remove alert after animation
             alert.addEventListener('click', () => {
+                alert.remove();
                 // Switch to orders tab
                 const ordersTab = document.querySelector('[data-tab="orders"]');
-                if (ordersTab) {
-                    ordersTab.click();
-                    // Clear notification badge
-                    const badge = ordersTab.querySelector('.notification-badge');
-                    if (badge) badge.remove();
-                }
-                alert.remove();
+                if (ordersTab) ordersTab.click();
             });
             
-            // Auto remove after 8 seconds
-            setTimeout(() => alert.remove(), 8000);
+            setTimeout(() => alert.remove(), 4000);
         }
 
         // Check for new orders
@@ -2686,26 +2727,10 @@
                     // Update timestamp to latest order
                     lastOrderTimestamp = new Date().toISOString();
                     
-                    // Play sound for new orders
-                    if (orderSound) {
-                        orderSound.play().catch(console.error);
-                    }
-                    
                     // Show alerts for new orders
                     newOrders.forEach(order => {
                         showNewOrderAlert(order);
                     });
-                    
-                    // Update notification badge in tab
-                    const ordersTab = document.querySelector('[data-tab="orders"]');
-                    if (ordersTab) {
-                        const badge = ordersTab.querySelector('.notification-badge') || document.createElement('span');
-                        badge.className = 'notification-badge';
-                        badge.textContent = newOrders.length;
-                        if (!ordersTab.querySelector('.notification-badge')) {
-                            ordersTab.appendChild(badge);
-                        }
-                    }
                     
                     // Refresh displays
                     await Promise.all([
@@ -2726,6 +2751,246 @@
                 refreshData();
             }
         });
+
+        function showNotification(message, type = 'success', title = '') {
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => {
+                notification.remove();
+            });
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = 'check-circle';
+            switch (type) {
+                case 'error':
+                    icon = 'exclamation-circle';
+                    title = title || 'Error';
+                    break;
+                case 'warning':
+                    icon = 'exclamation-triangle';
+                    title = title || 'Warning';
+                    break;
+                default:
+                    title = title || 'Success';
+            }
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification on click
+            notification.addEventListener('click', () => notification.remove());
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Update the order status function with improved validation
+        async function updateOrderStatus(orderId, status) {
+            try {
+                if (!orderId) {
+                    showNotification('Invalid order ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update order status');
+                }
+                
+                showNotification(
+                    `Order #${orderId.slice(-6).toUpperCase()} marked as ${status}`,
+                    'success',
+                    'Order Updated'
+                );
+                
+                // Refresh the orders display and stats
+                await Promise.all([
+                    displayOrders(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showNotification(
+                    error.message || 'Could not update order status',
+                    'error',
+                    'Update Failed'
+                );
+            }
+        }
+
+        // Update the product submission validation
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            
+            try {
+                const productId = document.getElementById('productId').value;
+                const name = document.getElementById('productName').value.trim();
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const category = document.getElementById('productCategory').value;
+                const description = document.getElementById('productDescription').value.trim();
+
+                // Validation checks
+                if (!name) {
+                    showNotification('Please enter a product name', 'warning', 'Missing Information');
+                    document.getElementById('productName').focus();
+                    return;
+                }
+
+                if (!price || price <= 0) {
+                    showNotification('Please enter a valid price', 'warning', 'Invalid Price');
+                    document.getElementById('productPrice').focus();
+                    return;
+                }
+
+                if (!category) {
+                    showNotification('Please select a category', 'warning', 'Missing Information');
+                    document.getElementById('productCategory').focus();
+                    return;
+                }
+
+                const productData = {
+                    name,
+                    price,
+                    category,
+                    description,
+                    available: true
+                };
+                
+                const url = productId 
+                    ? `${API_BASE_URL}/menu/${productId}`
+                    : `${API_BASE_URL}/menu`;
+                    
+                const response = await fetch(url, {
+                    method: productId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save product');
+                }
+                
+                showNotification(
+                    `${name} has been ${productId ? 'updated' : 'added'} successfully`,
+                    'success',
+                    'Product Saved'
+                );
+                
+                resetProductForm();
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification(
+                    error.message || 'Could not save product',
+                    'error',
+                    'Save Failed'
+                );
+            }
+        }
+
+        // Update the delete product validation
+        async function deleteProduct(productId) {
+            try {
+                if (!productId) {
+                    showNotification('Invalid product ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete product');
+                }
+                
+                showNotification(
+                    'Product has been deleted successfully',
+                    'success',
+                    'Product Deleted'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification(
+                    error.message || 'Could not delete product',
+                    'error',
+                    'Delete Failed'
+                );
+            }
+        }
+
+        // Update the availability toggle validation
+        async function toggleAvailability(productId, newAvailability) {
+            try {
+                if (!productId) {
+                    showNotification('Invalid product ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ available: newAvailability })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update availability');
+                }
+                
+                showNotification(
+                    `Product is now ${newAvailability ? 'available' : 'unavailable'}`,
+                    'success',
+                    'Availability Updated'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                showNotification(
+                    error.message || 'Could not update availability',
+                    'error',
+                    'Update Failed'
+                );
+            }
+        }
     </script>
 </body>
 </html> 

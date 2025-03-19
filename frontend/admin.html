@@ -2106,12 +2106,13 @@
                             </button>
                         ` : ''}
                         <button onclick="printReceipt('${order._id}')" class="print-btn">
-                            <i class="fas fa-print"></i> Print Receipt
+                            <i class="fas fa-file-invoice"></i> Print Invoice
                         </button>
                     </div>
-                    
-                    ${generateReceiptHTML(order)}
                 </div>
+                
+                <!-- Hidden receipt template -->
+                ${generateReceiptHTML(order)}
             `;
             return card;
         }

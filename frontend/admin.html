@@ -2158,8 +2158,8 @@
                     </div>
                     <div class="order-actions">
                         <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
-                            <i class="fas fa-print"></i> Print
+                        <button onclick="event.stopPropagation(); printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
+                            <i class="fas fa-print"></i> Print Receipt
                         </button>
                     </div>
                 </div>
@@ -3330,9 +3330,10 @@
         // Enhanced print receipt function with duplicate prevention
         function printReceipt(order) {
             try {
-                // Remove any existing receipts first
-                const existingReceipts = document.querySelectorAll('.print-receipt');
-                existingReceipts.forEach(r => r.remove());
+                // Check if a receipt is already being printed
+                if (document.querySelector('.print-receipt')) {
+                    return;
+                }
 
                 // Create receipt HTML
                 const receipt = document.createElement('div');
@@ -3389,69 +3390,54 @@
                     </div>
                 `;
 
-                // Add receipt to a specific container
-                const receiptContainer = document.createElement('div');
-                receiptContainer.className = 'receipt-container';
-                receiptContainer.appendChild(receipt);
-                document.body.appendChild(receiptContainer);
-
-                // Update print styles
+                // Add print-specific styles
                 const printStyles = document.createElement('style');
                 printStyles.textContent = `
                     @media print {
                         body * {
                             visibility: hidden;
-                            margin: 0;
-                            padding: 0;
                         }
-                        
-                        .receipt-container {
+                        .print-receipt, .print-receipt * {
                             visibility: visible;
-                            position: absolute;
-                            left: 0;
-                            top: 0;
-                            width: 100%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: center;
-                            align-items: flex-start;
-                            padding: 20px;
                         }
-                        
                         .print-receipt {
-                            visibility: visible;
-                            position: relative !important;
-                            left: auto !important;
-                            top: auto !important;
-                            transform: none !important;
+                            position: fixed;
+                            left: 50%;
+                            top: 0;
+                            transform: translateX(-50%);
                             width: 80mm;
-                            margin: 0 auto;
-                            page-break-after: always;
+                            padding: 10mm;
+                            background: white;
+                            box-shadow: none;
+                            border: none;
                         }
-
                         .no-print {
                             display: none !important;
                         }
-
                         @page {
                             size: 80mm auto;
                             margin: 0;
-                            padding: 0;
                         }
                     }
                 `;
                 document.head.appendChild(printStyles);
                 
+                // Remove any existing receipts
+                const existingReceipts = document.querySelectorAll('.print-receipt');
+                existingReceipts.forEach(r => r.remove());
+                
+                // Add receipt to body
+                document.body.appendChild(receipt);
+                
                 // Print with delay to ensure proper rendering
                 setTimeout(() => {
                     window.print();
-                    // Cleanup after printing
+                    // Remove receipt and styles after printing
                     setTimeout(() => {
-                        receiptContainer.remove();
+                        receipt.remove();
                         printStyles.remove();
                     }, 1000);
                 }, 300);
-
             } catch (error) {
                 console.error('Error printing receipt:', error);
                 showNotification('Failed to print receipt', 'error', 'Print Error');

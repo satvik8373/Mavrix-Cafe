@@ -36,10 +36,24 @@ app.get('/', (req, res) => {
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000 // Add timeout
 })
 .then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1); // Exit if cannot connect to MongoDB
+});
+
+// Add connection error handler
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+// Add connection success handler
+mongoose.connection.once('open', () => {
+  console.log('MongoDB connection established successfully');
+});
 
 // API Routes
 app.get('/api/menu', async (req, res) => {
@@ -49,6 +63,23 @@ app.get('/api/menu', async (req, res) => {
   } catch (error) {
     console.error('Error fetching menu items:', error);
     res.status(500).json({ error: 'Error fetching menu items' });
+  }
+});
+
+// Add GET endpoint for single menu item
+app.get('/api/menu/:id', async (req, res) => {
+  try {
+    const menuItem = await MenuItem.findById(req.params.id);
+    if (!menuItem) {
+      return res.status(404).json({ error: 'Menu item not found' });
+    }
+    res.json(menuItem);
+  } catch (error) {
+    console.error('Error fetching menu item:', error);
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid menu item ID format' });
+    }
+    res.status(500).json({ error: 'Error fetching menu item' });
   }
 });
 

@@ -2240,43 +2240,47 @@
         // Product Management Functions
         async function editProduct(productId) {
             try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch product (Status: ${response.status})`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch product');
                 }
                 
                 const product = await response.json();
-                if (!product) {
-                    throw new Error('Product not found');
-                }
                 
                 // Update form with product data
                 document.getElementById('productId').value = productId;
                 document.getElementById('productName').value = product.name || '';
                 document.getElementById('productPrice').value = product.price || '';
                 document.getElementById('productCategory').value = product.category || 'drinks';
-                
-                // Switch to products tab if not already there
-                const productsTab = document.querySelector('[data-tab="products"]');
-                if (!productsTab.classList.contains('active')) {
-                    productsTab.click();
-                }
+                document.getElementById('productDescription').value = product.description || '';
                 
                 // Update form UI
                 document.getElementById('formTitle').textContent = 'Edit Product';
                 document.getElementById('submitButtonText').textContent = 'Update Product';
                 document.getElementById('cancelButton').style.display = 'block';
                 
-                // Scroll form into view
-                document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+                // Show the form
+                document.getElementById('productForm').style.display = 'block';
+                document.getElementById('productName').focus();
             } catch (error) {
                 console.error('Error editing product:', error);
-                showToast('Error loading product details. Please try again.', 'error');
+                showMessage(error.message || 'Error loading product details', 'error');
             }
         }
 
         async function toggleAvailability(productId, newAvailability) {
             try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
                     method: 'PUT',
                     headers: {
@@ -2285,14 +2289,17 @@
                     body: JSON.stringify({ available: newAvailability })
                 });
                 
-                if (!response.ok) throw new Error('Failed to update product availability');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update product availability');
+                }
                 
-                showMessage(`Product ${newAvailability ? 'available' : 'unavailable'}`, 'success');
+                showMessage(`Product ${newAvailability ? 'available' : 'unavailable'}`);
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error toggling availability:', error);
-                showMessage('Error updating product availability', 'error');
+                showMessage(error.message || 'Error updating product availability', 'error');
             }
         }
 
@@ -2304,49 +2311,56 @@
 
         async function deleteProduct(productId) {
             try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to delete this product?')) {
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
                     method: 'DELETE'
                 });
                 
-                if (!response.ok) throw new Error('Failed to delete product');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete product');
+                }
                 
-                showMessage('Product deleted successfully', 'success');
+                showMessage('Product deleted successfully');
                 displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error deleting product:', error);
-                showMessage('Error deleting product', 'error');
+                showMessage(error.message || 'Error deleting product', 'error');
             }
         }
 
         async function handleProductSubmit(event) {
             event.preventDefault();
             
-            const productId = document.getElementById('productId').value;
-            const productData = {
-                name: document.getElementById('productName').value.trim(),
-                price: parseFloat(document.getElementById('productPrice').value),
-                category: document.getElementById('productCategory').value,
-                available: true
-            };
-            
-            // Validate input
-            if (!productData.name) {
-                showToast('Please enter a product name', 'error');
-                return;
-            }
-            
-            if (isNaN(productData.price) || productData.price <= 0) {
-                showToast('Please enter a valid price', 'error');
-                return;
-            }
-            
-            if (!productData.category) {
-                showToast('Please select a category', 'error');
-                return;
-            }
-            
             try {
+                const productId = document.getElementById('productId').value;
+                const productData = {
+                    name: document.getElementById('productName').value.trim(),
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    category: document.getElementById('productCategory').value,
+                    description: document.getElementById('productDescription').value.trim(),
+                    available: true
+                };
+
+                // Validate the data
+                if (!productData.name) {
+                    showMessage('Product name is required', 'error');
+                    return;
+                }
+                if (isNaN(productData.price) || productData.price <= 0) {
+                    showMessage('Please enter a valid price', 'error');
+                    return;
+                }
+                
                 const url = productId 
                     ? `${API_BASE_URL}/menu/${productId}`
                     : `${API_BASE_URL}/menu`;
@@ -2360,26 +2374,27 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Failed to save product (Status: ${response.status})`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save product');
                 }
                 
-                showToast(`Product ${productId ? 'updated' : 'added'} successfully`);
+                showMessage(`Product ${productId ? 'updated' : 'added'} successfully`);
                 resetProductForm();
                 await displayProducts();
                 updateStats();
             } catch (error) {
                 console.error('Error saving product:', error);
-                showToast('Error saving product. Please try again.', 'error');
+                showMessage(error.message || 'Error saving product', 'error');
             }
         }
 
         function resetProductForm() {
-            const form = document.getElementById('productForm');
-            form.reset();
+            document.getElementById('productForm').reset();
             document.getElementById('productId').value = '';
             document.getElementById('formTitle').textContent = 'Add New Product';
             document.getElementById('submitButtonText').textContent = 'Add Product';
             document.getElementById('cancelButton').style.display = 'none';
+            document.getElementById('productForm').style.display = 'none';
         }
 
         // Replace showToast function with showMessage

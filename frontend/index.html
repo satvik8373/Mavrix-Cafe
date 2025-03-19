@@ -253,75 +253,74 @@
 
         .menu-item-actions {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 1rem;
+            margin-top: auto;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 0.5rem;
+            background: var(--background-color);
+            padding: 0.3rem;
+            border-radius: var(--border-radius);
         }
 
         .quantity-btn {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border: none;
             border-radius: 50%;
             background: var(--primary-color);
             color: white;
-            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: var(--transition);
         }
 
-        .quantity-btn:hover {
+        .quantity-btn:hover:not(:disabled) {
             transform: scale(1.1);
-            background: var(--primary-dark);
+            background: var(--primary-color-dark);
         }
 
         .quantity-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
-            transform: none;
+            opacity: 0.7;
         }
 
         .quantity-display {
-            font-size: 16px;
-            font-weight: 500;
-            min-width: 40px;
+            min-width: 30px;
             text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
         }
 
         .add-to-cart {
-            width: 100%;
-            padding: 8px;
+            flex: 1;
+            padding: 0.8rem;
             border: none;
             border-radius: var(--border-radius);
             background: var(--primary-color);
             color: white;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            transition: var(--transition);
         }
 
-        .add-to-cart:hover {
-            background: var(--primary-dark);
+        .add-to-cart:hover:not(:disabled) {
+            background: var(--primary-color-dark);
+            transform: translateY(-2px);
         }
 
         .add-to-cart:disabled {
             background: #ccc;
             cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .unavailable-badge {
@@ -1073,10 +1072,8 @@
 
         // Display menu items
         async function displayMenuItems(category = 'all') {
-            const menuGrid = document.getElementById('menuGrid');
-            menuGrid.innerHTML = '<div class="loading-text">Loading menu items...</div>';
-            
             try {
+                const menuGrid = document.getElementById('menuGrid');
                 const products = await getProducts();
                 menuGrid.innerHTML = '';
 
@@ -1094,16 +1091,16 @@
                                 </div>
                                 <div class="menu-item-actions">
                                     <div class="quantity-control">
-                                        <button class="quantity-btn minus" onclick="updateQuantity('${item.id}', -1)" disabled>
+                                        <button class="quantity-btn minus" onclick="updateQuantity('${item._id}', -1)" disabled>
                                             <i class="fas fa-minus"></i>
                                         </button>
-                                        <span class="quantity-display" id="quantity-${item.id}">0</span>
-                                        <button class="quantity-btn plus" onclick="updateQuantity('${item.id}', 1)" ${!item.available ? 'disabled' : ''}>
+                                        <span class="quantity-display" id="quantity-${item._id}">0</span>
+                                        <button class="quantity-btn plus" onclick="updateQuantity('${item._id}', 1)" ${!item.available ? 'disabled' : ''}>
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
-                                    <button class="add-to-cart" onclick="addToCart('${item.id}')" disabled ${!item.available ? 'disabled' : ''}>
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    <button class="add-to-cart" onclick="addToCart('${item._id}')" ${!item.available ? 'disabled' : ''}>
+                                        Add to Cart
                                     </button>
                                 </div>
                             `;
@@ -1112,8 +1109,8 @@
                     }
                 });
             } catch (error) {
-                menuGrid.innerHTML = '<div class="error-text">Failed to load menu items. Please try again later.</div>';
                 console.error('Error displaying menu items:', error);
+                showToast('Failed to display menu items', 'error');
             }
         }
 
@@ -1123,19 +1120,20 @@
             const currentQuantity = parseInt(quantityDisplay.textContent);
             const newQuantity = currentQuantity + change;
             
-            // Get the buttons
-            const parentDiv = quantityDisplay.parentElement;
-            const minusBtn = parentDiv.querySelector('.minus');
-            const plusBtn = parentDiv.querySelector('.plus');
-            const addToCartBtn = parentDiv.parentElement.querySelector('.add-to-cart');
-            
-            // Update quantity if within bounds (0-10)
+            // Update quantity display
             if (newQuantity >= 0 && newQuantity <= 10) {
                 quantityDisplay.textContent = newQuantity;
                 
-                // Enable/disable buttons based on quantity
+                // Enable/disable minus button based on quantity
+                const minusBtn = quantityDisplay.previousElementSibling;
                 minusBtn.disabled = newQuantity === 0;
+                
+                // Enable/disable plus button based on quantity
+                const plusBtn = quantityDisplay.nextElementSibling;
                 plusBtn.disabled = newQuantity === 10;
+                
+                // Enable/disable add to cart button based on quantity
+                const addToCartBtn = quantityDisplay.parentElement.nextElementSibling;
                 addToCartBtn.disabled = newQuantity === 0;
             }
         }
@@ -1143,42 +1141,59 @@
         // Add to cart
         async function addToCart(itemId) {
             try {
+                const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+                const quantity = parseInt(quantityDisplay.textContent);
+                
+                if (quantity === 0) {
+                    showToast('Please select quantity', 'warning');
+                    return;
+                }
+                
                 const products = await getProducts();
                 let product = null;
                 
                 // Find the product
                 for (const category in products) {
-                    const found = products[category].find(p => p.id === itemId);
+                    const found = products[category].find(p => p._id === itemId);
                     if (found) {
                         product = found;
                         break;
                     }
                 }
-
-                if (product && product.available) {
-                    const quantity = parseInt(document.getElementById(`quantity-${itemId}`).textContent);
-                    
-                    if (quantity > 0) {
-                        // Check if item already in cart
-                        const existingItem = cart.find(item => item.id === product.id);
-                        if (existingItem) {
-                            existingItem.quantity += quantity;
-                        } else {
-                            cart.push({
-                                id: product.id,
-                                name: product.name,
-                                price: product.price,
-                                quantity: quantity
-                            });
-                        }
-                        
-                        // Reset quantity to 0 after adding to cart
-                        updateQuantity(itemId, -quantity);
-                        
-                        updateCartCount();
-                        showToast('Item added to cart!');
-                    }
+                
+                if (!product) {
+                    showToast('Product not found', 'error');
+                    return;
                 }
+                
+                // Add to cart
+                const cartItem = {
+                    _id: product._id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: quantity
+                };
+                
+                // Add to cart array
+                const existingItemIndex = cart.findIndex(item => item._id === cartItem._id);
+                if (existingItemIndex !== -1) {
+                    cart[existingItemIndex].quantity += quantity;
+                } else {
+                    cart.push(cartItem);
+                }
+                
+                // Reset quantity to 0
+                quantityDisplay.textContent = '0';
+                const minusBtn = quantityDisplay.previousElementSibling;
+                const plusBtn = quantityDisplay.nextElementSibling;
+                const addToCartBtn = quantityDisplay.parentElement.nextElementSibling;
+                minusBtn.disabled = true;
+                plusBtn.disabled = false;
+                addToCartBtn.disabled = true;
+                
+                // Update cart display
+                updateCartCount();
+                showToast(`Added ${quantity} ${product.name} to cart`, 'success');
             } catch (error) {
                 console.error('Error adding to cart:', error);
                 showToast('Failed to add item to cart', 'error');
@@ -1242,7 +1257,7 @@
                         </div>
                     </div>
                     <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
-                    <button class="remove-item" onclick="removeFromCart('${item.id}')">
+                    <button class="remove-item" onclick="removeFromCart('${item._id}')">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 `;
@@ -1254,7 +1269,7 @@
 
         // Remove from cart
         function removeFromCart(itemId) {
-            cart = cart.filter(item => item.id !== itemId);
+            cart = cart.filter(item => item._id !== itemId);
             updateCartCount();
             displayCartItems();
             
@@ -1288,7 +1303,7 @@
             const orderData = {
                 tableNumber: parseInt(tableNumber),
                 items: cart.map(item => ({
-                    itemId: item.id,
+                    itemId: item._id,
                     name: item.name,
                     price: item.price,
                     quantity: item.quantity

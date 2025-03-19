@@ -404,9 +404,6 @@
         }
 
         .close-modal {
-            position: relative;
-            top: 0;
-            right: 0;
             background: var(--background-color);
             border: none;
             width: 36px;
@@ -443,7 +440,6 @@
             border-radius: var(--border-radius);
             margin-bottom: 1rem;
             transition: var(--transition);
-            position: relative;
         }
 
         .cart-item:hover {
@@ -527,6 +523,9 @@
             color: var(--text-primary);
             font-weight: 500;
             font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .form-group input {
@@ -1153,31 +1152,14 @@
         // Show toast message
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                right: 20px;
-                background: ${type === 'success' ? 'var(--success-color)' : 'var(--secondary-color)'};
-                color: white;
-                padding: 1rem 2rem;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow);
-                animation: slideIn 0.3s ease;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            `;
+            toast.className = `message message-${type}`;
             toast.innerHTML = `
                 <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
                 ${message}
             `;
             document.body.appendChild(toast);
             
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         // Update cart count
@@ -1250,20 +1232,20 @@
             event.preventDefault();
             
             if (!tableNumber) {
-                showToast('Invalid table number!');
-                return;
-            }
-            
-            const customerName = document.getElementById('customerName').value;
-            const phoneNumber = document.getElementById('customerPhone').value;
-            
-            if (!customerName || !phoneNumber) {
-                showToast('Please enter your name and phone number', 'error');
+                showToast('Please scan QR code again', 'error');
                 return;
             }
             
             if (cart.length === 0) {
-                showToast('Your cart is empty!', 'error');
+                showToast('Please add items to cart', 'error');
+                return;
+            }
+
+            const customerName = document.getElementById('customerName').value.trim();
+            const phoneNumber = document.getElementById('customerPhone').value.trim();
+            
+            if (!customerName || !phoneNumber) {
+                showToast('Please fill all fields', 'error');
                 return;
             }
 
@@ -1282,10 +1264,8 @@
             };
 
             try {
-                // Show loading animation
                 document.getElementById('loadingOverlay').style.display = 'block';
                 
-                // Send order to backend
                 const response = await fetch(`${API_BASE_URL}/orders`, {
                     method: 'POST',
                     headers: {
@@ -1294,22 +1274,16 @@
                     body: JSON.stringify(orderData)
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to submit order');
-                }
+                if (!response.ok) throw new Error('Failed to submit order');
 
-                // Clear cart and form
                 cart = [];
                 updateCartCount();
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerPhone').value = '';
+                document.getElementById('orderForm').reset();
                 closeOrderModal();
-                
-                // Show success message
-                showToast('Order placed successfully!', 'success');
+                showToast('Order placed successfully!');
             } catch (error) {
                 console.error('Error submitting order:', error);
-                showToast('Failed to place order. Please try again.', 'error');
+                showToast('Failed to place order', 'error');
             } finally {
                 document.getElementById('loadingOverlay').style.display = 'none';
             }

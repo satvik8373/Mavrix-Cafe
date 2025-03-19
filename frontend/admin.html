@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mavrix Cafe - Admin Dashboard</title>
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJTSURBVFhH7ZY9aBRBFMf/b3Zv70zOYGI+zKcSFYkiKGIhWogIFhYWFhYWFhYiFlpYWFhYWFhYiIWIhYVYWFiIhYiFhYVoEOMXUZSoURM1yea83dt9b9YLmJzJ7d2exRH8wcLOzrz3/8/Me7MD/Nd6qFKpzIrIaQBTANIACgCyAKYBHAJwWEQKhmFcBXDDNM3QNM1uEKyq6jgRPQKQB/ASwHsAGwDWAXwB8A3ALoAdAFsi8gbAMoAFAHcty5oIw3DQYDQYDNIAzgC4DOAZEW0CqAN4ISKfiMgQkTwRTQI4BuA4gBMishBF0W0Aj4UQtXK5XPd9P9Vut/eHYBjGJIDLInIJwEsielqtVt/5vt/p9XqRZVlGLpezXNe1HccxbNu2TNM0wzA0ANQBvAbwDsAigIthGH7udDrJECRWPQvgOoB5InoSBMGbVqvl9/v9SETNOI5/EtEPpdQPpdS2UmqLmTeYeY2ZV5h5mZmXmPk5Ec0R0QwzZ5IgGGPVFwDcIqKnQRAsNZvNn0qpSCkVxXEcMXOklIqjKAqVUoFS6jszvwLwQEROEtEhABkA6TiO9wIwxqrPA7ijlJoLgmC52Wz2lVIDZh4wcz+O48+2bS8y8z0ROQfgKIAJABkRsX3fdxqNxu8QjFU/A+C+UupREASfW61WD8CAmQfMvMvMn0TkIYDTAI4AyItISkRs13WtQqGQchzHGIZgmOYZEbkC4LFS6h4zPxCRBQDzABaZ+RmAJwDuALgG4CSAvIhkRMTUdf1Xmv8Jfb/6BVg8qRjL8dhnAAAAAElFTkSuQmCC">
+    <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJTSURBVFhH7ZY9aBRBFMf/b3Zv70zOYGI+zKcSFYkiKGIhWogIFhYWFhYWFhYiFlpYWFhYWFhYiIWIhYVYWFiIhYiFhYVoEOMXUZSoURM1yea83dt9b9YLmJzJ7d2exRH8wcLOzrz3/8/Me7MD/Nd6qFKpzIrIaQBTANIACgCyAKYBHAJwWEQKhmFcBXDDNM3QNM1uEKyq6jgRPQKQB/ASwHsAGwDWAXwB8A3ALoAdAFsi8gbAMoAFAHcty5oIw3DQYDQYDNIAzgC4DOAZEW0CqAN4ISKfiMgQkTwRTQI4BuA4gBMishBF0W0Aj4UQtXK5XPd9P9Vut/eHYBjGJIDLInIJwEsielqtVt/5vt/p9XqRZVlGLpezXNe1HccxbNu2TNM0wzA0ANQBvAbwDsAigIthGH7udDrJECRWPQvgOoB5InoSBMGbVqvl9/v9SETNOI5/EtEPpdQPpdS2UmqLmTeYeY2ZV5h5mZmXmPk5Ec0R0QwzZ5IgGGPVFwDcIqKnQRAsNZvNn0qpSCkVxXEcMXOklIqjKAqVUoFS6jszvwLwQEROEtEhABkA6TiO9wIwxqrPA7ijlJoLgmC52Wz2lVIDZh4wcz+O48+2bS8y8z0ROQfgKIAJABkRsX3fdxqNxu8QjFU/A+C+UupREASfW61WD8CAmQfMvMvMn0TkIYDTAI4AyItISkRs13WtQqGQchzHGIZgmOYZEbkC4LFS6h4zPxCRBQDzABaZ+RmAJwDuALgG4CSAvIhkRMTUdf1Xmv8Jfb/6BVg8qRjL8dhnAAAAAElFTkSuQmCC">
+
+    <title>Mavrix Cafe Admin</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -1701,6 +1705,99 @@
                 top: 0;
             }
         }
+
+        /* Add these styles to your existing CSS */
+        .filter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .filter-group input {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .filter-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .filter-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pagination-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
     </style>
     <!-- Add this in the head section -->
     <script src="print-receipt.js"></script>
@@ -1889,7 +1986,38 @@
                         <i class="fas fa-check-circle"></i> Completed
                     </button>
                 </div>
-                <div class="orders-grid" id="ordersGrid"></div>
+                <div class="orders-section" id="ordersSection">
+                    <div class="filter-container">
+                        <div class="filter-group">
+                            <label for="orderNoFilter">
+                                <i class="fas fa-hashtag"></i> Order No
+                            </label>
+                            <input type="text" id="orderNoFilter" placeholder="Search by order number">
+                        </div>
+                        <div class="filter-group">
+                            <label for="phoneFilter">
+                                <i class="fas fa-phone"></i> Phone Number
+                            </label>
+                            <input type="text" id="phoneFilter" placeholder="Search by phone number">
+                        </div>
+                        <div class="filter-group">
+                            <label for="startDate">
+                                <i class="fas fa-calendar"></i> Start Date
+                            </label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="filter-group">
+                            <label for="endDate">
+                                <i class="fas fa-calendar"></i> End Date
+                            </label>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+
+                    <div class="orders-grid" id="ordersGrid"></div>
+                    
+                    <div class="pagination-container" id="paginationContainer"></div>
+                </div>
             </div>
 
             <div id="productsTab" class="tab-content">
@@ -2553,11 +2681,39 @@
         // Product Management Functions
         async function editProduct(productId) {
             try {
+                // Validate productId
                 if (!productId || productId.length < 24) {
-                    showMessage('Invalid product ID', 'error');
+                    showNotification('Invalid product ID', 'error', 'Validation Error');
                     return;
                 }
 
+                // Get form elements first
+                const formElements = {
+                    form: document.getElementById('productForm'),
+                    idInput: document.getElementById('productId'),
+                    nameInput: document.getElementById('productName'),
+                    priceInput: document.getElementById('productPrice'),
+                    categoryInput: document.getElementById('productCategory'),
+                    formTitle: document.getElementById('formTitle'),
+                    submitButtonText: document.getElementById('submitButtonText'),
+                    cancelButton: document.getElementById('cancelButton')
+                };
+
+                // Check if all required form elements exist
+                const missingElements = Object.entries(formElements)
+                    .filter(([key, element]) => !element)
+                    .map(([key]) => key);
+
+                if (missingElements.length > 0) {
+                    showNotification(
+                        `Missing form elements: ${missingElements.join(', ')}`,
+                        'error',
+                        'Form Error'
+                    );
+                    return;
+                }
+
+                // Fetch product data
                 const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -2567,23 +2723,35 @@
                 const product = await response.json();
                 
                 // Update form with product data
-                document.getElementById('productId').value = productId;
-                document.getElementById('productName').value = product.name || '';
-                document.getElementById('productPrice').value = product.price || '';
-                document.getElementById('productCategory').value = product.category || 'drinks';
-                document.getElementById('productDescription').value = product.description || '';
+                formElements.idInput.value = productId;
+                formElements.nameInput.value = product.name || '';
+                formElements.priceInput.value = product.price || '';
+                formElements.categoryInput.value = product.category || 'drinks';
                 
                 // Update form UI
-                document.getElementById('formTitle').textContent = 'Edit Product';
-                document.getElementById('submitButtonText').textContent = 'Update Product';
-                document.getElementById('cancelButton').style.display = 'block';
+                formElements.formTitle.textContent = 'Edit Product';
+                formElements.submitButtonText.textContent = 'Update Product';
+                formElements.cancelButton.style.display = 'block';
                 
-                // Show the form
-                document.getElementById('productForm').style.display = 'block';
-                document.getElementById('productName').focus();
+                // Show the form and focus on name input
+                formElements.form.style.display = 'block';
+                formElements.nameInput.focus();
+
+                // Scroll form into view
+                formElements.form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                showNotification(
+                    'Product loaded for editing',
+                    'success',
+                    'Edit Product'
+                );
             } catch (error) {
                 console.error('Error editing product:', error);
-                showMessage(error.message || 'Error loading product details', 'error');
+                showNotification(
+                    error.message || 'Error loading product details',
+                    'error',
+                    'Edit Failed'
+                );
             }
         }
 
@@ -2669,36 +2837,52 @@
             event.preventDefault();
             
             try {
+                // Get form elements
                 const productId = document.getElementById('productId').value;
-                const name = document.getElementById('productName').value.trim();
-                const price = parseFloat(document.getElementById('productPrice').value);
-                const category = document.getElementById('productCategory').value;
-                const description = document.getElementById('productDescription').value.trim();
+                const productName = document.getElementById('productName');
+                const productPrice = document.getElementById('productPrice');
+                const productCategory = document.getElementById('productCategory');
+                
+                // Validate form elements exist
+                if (!productName || !productPrice || !productCategory) {
+                    showNotification('Form elements not found', 'error', 'Form Error');
+                    return;
+                }
+
+                // Get values and validate
+                const name = productName.value.trim();
+                const price = parseFloat(productPrice.value);
+                const category = productCategory.value;
 
                 // Validation checks
                 if (!name) {
                     showNotification('Please enter a product name', 'warning', 'Missing Information');
-                    document.getElementById('productName').focus();
+                    productName.focus();
                     return;
                 }
 
-                if (!price || price <= 0) {
+                if (!price || price <= 0 || isNaN(price)) {
                     showNotification('Please enter a valid price', 'warning', 'Invalid Price');
-                    document.getElementById('productPrice').focus();
+                    productPrice.focus();
                     return;
                 }
 
                 if (!category) {
                     showNotification('Please select a category', 'warning', 'Missing Information');
-                    document.getElementById('productCategory').focus();
+                    productCategory.focus();
                     return;
                 }
+
+                // Show loading state
+                const submitBtn = document.querySelector('.submit-btn');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
 
                 const productData = {
                     name,
                     price,
                     category,
-                    description,
                     available: true
                 };
                 
@@ -2725,6 +2909,7 @@
                     'Product Saved'
                 );
                 
+                // Reset form and refresh data
                 resetProductForm();
                 await Promise.all([
                     displayProducts(),
@@ -2737,16 +2922,55 @@
                     'error',
                     'Save Failed'
                 );
+            } finally {
+                // Reset button state
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> <span id="submitButtonText">Add Product</span>';
+                submitBtn.disabled = false;
             }
         }
 
         function resetProductForm() {
-            document.getElementById('productForm').reset();
-            document.getElementById('productId').value = '';
-            document.getElementById('formTitle').textContent = 'Add New Product';
-            document.getElementById('submitButtonText').textContent = 'Add Product';
-            document.getElementById('cancelButton').style.display = 'none';
-            document.getElementById('productForm').style.display = 'none';
+            try {
+                const form = document.getElementById('productForm');
+                const productId = document.getElementById('productId');
+                const formTitle = document.getElementById('formTitle');
+                const submitButtonText = document.getElementById('submitButtonText');
+                const cancelButton = document.getElementById('cancelButton');
+
+                // Reset form if it exists
+                if (form) {
+                    form.reset();
+                    form.style.display = 'block';  // Keep the form visible
+                }
+
+                // Reset product ID if element exists
+                if (productId) {
+                    productId.value = '';
+                }
+
+                // Update form title if element exists
+                if (formTitle) {
+                    formTitle.textContent = 'Add New Product';
+                }
+
+                // Update submit button text if element exists
+                if (submitButtonText) {
+                    submitButtonText.textContent = 'Add Product';
+                }
+
+                // Update cancel button if element exists
+                if (cancelButton) {
+                    cancelButton.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error resetting product form:', error);
+                showNotification(
+                    'Error resetting the form. Please refresh the page.',
+                    'error',
+                    'Form Reset Error'
+                );
+            }
         }
 
         // Replace showToast function with showMessage
@@ -2987,36 +3211,52 @@
             event.preventDefault();
             
             try {
+                // Get form elements
                 const productId = document.getElementById('productId').value;
-                const name = document.getElementById('productName').value.trim();
-                const price = parseFloat(document.getElementById('productPrice').value);
-                const category = document.getElementById('productCategory').value;
-                const description = document.getElementById('productDescription').value.trim();
+                const productName = document.getElementById('productName');
+                const productPrice = document.getElementById('productPrice');
+                const productCategory = document.getElementById('productCategory');
+                
+                // Validate form elements exist
+                if (!productName || !productPrice || !productCategory) {
+                    showNotification('Form elements not found', 'error', 'Form Error');
+                    return;
+                }
+
+                // Get values and validate
+                const name = productName.value.trim();
+                const price = parseFloat(productPrice.value);
+                const category = productCategory.value;
 
                 // Validation checks
                 if (!name) {
                     showNotification('Please enter a product name', 'warning', 'Missing Information');
-                    document.getElementById('productName').focus();
+                    productName.focus();
                     return;
                 }
 
-                if (!price || price <= 0) {
+                if (!price || price <= 0 || isNaN(price)) {
                     showNotification('Please enter a valid price', 'warning', 'Invalid Price');
-                    document.getElementById('productPrice').focus();
+                    productPrice.focus();
                     return;
                 }
 
                 if (!category) {
                     showNotification('Please select a category', 'warning', 'Missing Information');
-                    document.getElementById('productCategory').focus();
+                    productCategory.focus();
                     return;
                 }
+
+                // Show loading state
+                const submitBtn = document.querySelector('.submit-btn');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
 
                 const productData = {
                     name,
                     price,
                     category,
-                    description,
                     available: true
                 };
                 
@@ -3043,6 +3283,7 @@
                     'Product Saved'
                 );
                 
+                // Reset form and refresh data
                 resetProductForm();
                 await Promise.all([
                     displayProducts(),
@@ -3055,6 +3296,11 @@
                     'error',
                     'Save Failed'
                 );
+            } finally {
+                // Reset button state
+                const submitBtn = document.querySelector('.submit-btn');
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> <span id="submitButtonText">Add Product</span>';
+                submitBtn.disabled = false;
             }
         }
 
@@ -3215,5 +3461,7 @@
             </style>
         `);
     </script>
+    <!-- Add the script reference before the closing body tag -->
+    <script src="admin-orders.js"></script>
 </body>
 </html> 

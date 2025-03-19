@@ -2084,9 +2084,6 @@
             const card = document.createElement('div');
             card.className = `order-card ${order.status}`;
             
-            // Store order data as a JSON string in a data attribute
-            card.dataset.orderData = JSON.stringify(order);
-            
             const formattedTime = new Date(order.timestamp).toLocaleString('en-US', {
                 dateStyle: 'medium',
                 timeStyle: 'short'
@@ -2140,7 +2137,7 @@
                                 <i class="fas fa-check"></i> Complete Order
                             </button>
                         ` : ''}
-                        <button onclick="printReceipt(this)" class="action-btn" style="flex: 1; background: var(--primary-color); color: white;">
+                        <button onclick="printReceipt('${order._id}')" class="action-btn" style="flex: 1; background: var(--primary-color); color: white;">
                             <i class="fas fa-print"></i> Print Receipt
                         </button>
                     </div>
@@ -3367,17 +3364,13 @@
             return receipt;
         }
 
-        // Update the printReceipt function to use the order data from the card
-        function printReceipt(button) {
+        // Add print receipt function
+        async function printReceipt(orderId) {
             try {
-                // Get the order card element
-                const orderCard = button.closest('.order-card');
-                if (!orderCard) {
-                    throw new Error('Order data not found');
-                }
-
-                // Get order data from the data attribute
-                const order = JSON.parse(orderCard.dataset.orderData);
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+                if (!response.ok) throw new Error('Failed to fetch order details');
+                
+                const order = await response.json();
                 const receipt = createPrintReceipt(order);
                 
                 // Remove any existing receipt

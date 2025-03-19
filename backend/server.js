@@ -134,6 +134,23 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
+// Add GET endpoint for single order
+app.get('/api/orders/:id', async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.json(order);
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid order ID format' });
+    }
+    res.status(500).json({ error: 'Error fetching order' });
+  }
+});
+
 app.post('/api/orders', async (req, res) => {
   try {
     const order = new Order(req.body);

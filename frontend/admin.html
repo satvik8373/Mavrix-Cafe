@@ -2158,7 +2158,7 @@
                     </div>
                     <div class="order-actions">
                         <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
+                        <button onclick="event.preventDefault(); if(!window.isPrinting) printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
                             <i class="fas fa-print"></i> Print
                         </button>
                     </div>
@@ -3327,9 +3327,19 @@
             </style>
         `);
 
-        // Enhanced print receipt function
+        // Enhanced print receipt function with single print prevention
         function printReceipt(order) {
             try {
+                // Check if already printing
+                if (window.isPrinting) {
+                    return;
+                }
+                window.isPrinting = true;
+
+                // Remove any existing receipts first
+                const existingReceipts = document.querySelectorAll('.print-receipt');
+                existingReceipts.forEach(r => r.remove());
+
                 // Create receipt HTML
                 const receipt = document.createElement('div');
                 receipt.className = 'receipt print-receipt';
@@ -3384,22 +3394,62 @@
                     </div>
                 `;
                 
-                // Remove any existing receipts
-                const existingReceipts = document.querySelectorAll('.print-receipt');
-                existingReceipts.forEach(r => r.remove());
-                
                 // Add receipt to body
                 document.body.appendChild(receipt);
+                
+                // Add print styles to ensure only one copy
+                const printStyles = document.createElement('style');
+                printStyles.id = 'print-styles';
+                printStyles.innerHTML = `
+                    @media print {
+                        body * {
+                            visibility: hidden;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        
+                        .print-receipt, .print-receipt * {
+                            visibility: visible;
+                        }
+                        
+                        .print-receipt {
+                            position: fixed;
+                            left: 50%;
+                            top: 0;
+                            transform: translateX(-50%);
+                            width: 80mm;
+                            padding: 10mm;
+                            margin: 0 auto;
+                        }
+
+                        @page {
+                            size: 80mm auto;
+                            margin: 0;
+                        }
+
+                        .no-print {
+                            display: none !important;
+                        }
+                    }
+                `;
+                document.head.appendChild(printStyles);
                 
                 // Print with delay to ensure proper rendering
                 setTimeout(() => {
                     window.print();
-                    // Remove receipt after printing
-                    setTimeout(() => receipt.remove(), 1000);
+                    
+                    // Cleanup after printing
+                    setTimeout(() => {
+                        receipt.remove();
+                        printStyles.remove();
+                        window.isPrinting = false;
+                    }, 1000);
                 }, 300);
+
             } catch (error) {
                 console.error('Error printing receipt:', error);
                 showNotification('Failed to print receipt', 'error', 'Print Error');
+                window.isPrinting = false;
             }
         }
     </script>

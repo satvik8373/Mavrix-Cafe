@@ -2284,17 +2284,60 @@
             displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
         }
 
-        // Password validation
-        const ADMIN_PASSWORD = '837337';
-        const passwordScreen = document.getElementById('passwordScreen');
-        const passwordInput = document.getElementById('passwordInput');
-        const passwordMessage = document.getElementById('passwordMessage');
-        const submitPassword = document.getElementById('submitPassword');
-        const adminContent = document.getElementById('adminContent');
-        const digitInputs = [...passwordInput.getElementsByClassName('digit-input')];
+        // Add this at the beginning of the script
+        const ADMIN_PASSWORD = '837337'; // Admin password
 
-        // Handle digit input
+        // Check for existing authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+            if (isAuthenticated) {
+                showAdminContent();
+            } else {
+                // Check for stored password in localStorage
+                const storedPassword = localStorage.getItem('adminPassword');
+                if (storedPassword === ADMIN_PASSWORD) {
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    showAdminContent();
+                }
+            }
+        });
+
+        // Function to show admin content
+        function showAdminContent() {
+            const passwordScreen = document.getElementById('passwordScreen');
+            const adminContent = document.getElementById('adminContent');
+            
+            // Show success message
+            const passwordMessage = document.getElementById('passwordMessage');
+            passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
+            passwordMessage.style.color = '#2ecc71';
+            
+            // Animate container out
+            const container = document.querySelector('.password-container');
+            container.style.animation = 'fadeOutDown 0.5s ease forwards';
+            
+            // Hide password screen with delay
+            setTimeout(() => {
+                passwordScreen.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    passwordScreen.style.display = 'none';
+                    adminContent.classList.add('visible');
+                    initializeAdmin();
+                }, 300);
+            }, 500);
+        }
+
+        // Handle digit input and validation
+        const passwordInput = document.getElementById('passwordInput');
+        const digitInputs = [...passwordInput.getElementsByClassName('digit-input')];
+        const submitPassword = document.getElementById('submitPassword');
+
         digitInputs.forEach((input, index) => {
+            // Auto-focus first input on page load
+            if (index === 0) {
+                input.focus();
+            }
+
             input.addEventListener('input', (e) => {
                 const value = e.target.value;
                 
@@ -2304,9 +2347,15 @@
                     return;
                 }
 
-                // Move to next input
+                // Auto-move to next input
                 if (value && index < digitInputs.length - 1) {
                     digitInputs[index + 1].focus();
+                }
+
+                // Check if all digits are filled
+                if (index === digitInputs.length - 1 && value) {
+                    const enteredPassword = digitInputs.map(input => input.value).join('');
+                    validatePassword(enteredPassword);
                 }
 
                 // Enable submit button if all digits are filled
@@ -2319,41 +2368,28 @@
                 if (e.key === 'Backspace' && !input.value && index > 0) {
                     digitInputs[index - 1].focus();
                 }
+                // Handle Enter key
+                if (e.key === 'Enter' && !submitPassword.disabled) {
+                    const enteredPassword = digitInputs.map(input => input.value).join('');
+                    validatePassword(enteredPassword);
+                }
             });
         });
 
-        // Handle password submission
-        submitPassword.addEventListener('click', validatePassword);
-
-        function validatePassword() {
-            const enteredPassword = digitInputs.map(input => input.value).join('');
-            
+        // Enhanced password validation
+        function validatePassword(enteredPassword) {
             if (enteredPassword === ADMIN_PASSWORD) {
-                // Show success message before transitioning
-                passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
-                passwordMessage.style.color = '#2ecc71';
-                
-                // Store authentication in session storage
+                // Store authentication
                 sessionStorage.setItem('adminAuthenticated', 'true');
+                localStorage.setItem('adminPassword', ADMIN_PASSWORD);
                 
-                // Animate container out
-                const container = document.querySelector('.password-container');
-                container.style.animation = 'fadeOutDown 0.5s ease forwards';
-                
-                // Hide password screen with delay
-                setTimeout(() => {
-                    passwordScreen.style.animation = 'fadeOut 0.3s ease forwards';
-                    setTimeout(() => {
-                        passwordScreen.style.display = 'none';
-                        adminContent.classList.add('visible');
-                        if (typeof initializeAdmin === 'function') {
-                            initializeAdmin();
-                        }
-                    }, 300);
-                }, 500);
+                // Show admin content
+                showAdminContent();
             } else {
                 // Show error message and shake effect
+                const passwordMessage = document.getElementById('passwordMessage');
                 passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password. Please try again.';
+                passwordMessage.style.color = '#e74c3c';
                 passwordInput.classList.add('shake');
                 
                 // Clear inputs
@@ -2369,6 +2405,29 @@
                 }, 500);
             }
         }
+
+        // Handle paste event for password
+        passwordInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numbers = pastedText.replace(/\D/g, '').slice(0, 6).split('');
+            
+            numbers.forEach((num, index) => {
+                if (index < digitInputs.length) {
+                    digitInputs[index].value = num;
+                    if (index === numbers.length - 1) {
+                        const enteredPassword = digitInputs.map(input => input.value).join('');
+                        validatePassword(enteredPassword);
+                    }
+                }
+            });
+        });
+
+        // Submit button click handler
+        submitPassword.addEventListener('click', () => {
+            const enteredPassword = digitInputs.map(input => input.value).join('');
+            validatePassword(enteredPassword);
+        });
 
         // Handle paste event
         passwordInput.addEventListener('paste', (e) => {

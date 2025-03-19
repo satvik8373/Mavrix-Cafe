@@ -2,111 +2,127 @@
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        currency: 'INR'
     }).format(amount);
 }
 
 function generateReceiptHTML(order) {
     try {
         const date = new Date(order.timestamp).toLocaleString('en-IN', {
-            dateStyle: 'short',
+            dateStyle: 'medium',
             timeStyle: 'short'
-        }).split(',');
+        });
 
         const itemsHTML = order.items.map(item => `
-            <tr style="border-bottom: 1px dotted #ddd;">
+            <tr>
                 <td style="text-align: left; padding: 8px 0;">${item.name}</td>
-                <td style="text-align: center; padding: 8px 0;">${item.quantity}</td>
+                <td style="text-align: center; padding: 8px 0;">×${item.quantity}</td>
                 <td style="text-align: right; padding: 8px 0;">${formatCurrency(item.price * item.quantity)}</td>
             </tr>
         `).join('');
 
-        // Calculate GST
-        const gstRate = 0.025; // 2.5% SGST and 2.5% CGST
-        const subtotal = order.totalAmount / (1 + (gstRate * 2));
-        const sgst = subtotal * gstRate;
-        const cgst = subtotal * gstRate;
-        const roundOff = order.totalAmount - (subtotal + sgst + cgst);
+        const subtotal = order.totalAmount;
+        const tax = subtotal * 0.05; // 5% tax
+        const total = subtotal + tax;
 
         return `
-            <div class="receipt" style="font-family: 'Arial', sans-serif; width: 80mm; padding: 10px; color: #000;">
-                <!-- Logo and Header -->
-                <div style="text-align: center; margin-bottom: 10px;">
-                    <div style="border: 2px solid #000; border-radius: 50%; width: 60px; height: 60px; margin: 0 auto; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
-                        <span style="font-size: 24px; font-weight: bold;">MC</span>
+            <div class="receipt" style="font-family: 'Courier New', monospace; width: 300px; padding: 20px; background: white;">
+                <!-- Store Logo and Header -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" style="margin: 0 auto;">
+                            <path fill="#2c3e50" d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z" />
+                        </svg>
                     </div>
-                    <h2 style="margin: 5px 0; font-size: 20px;">Mavrix Cafe</h2>
-                    <p style="margin: 2px 0; font-size: 12px;">Mavrix Cafe, Sahkari Jin</p>
-                    <p style="margin: 2px 0; font-size: 12px;">Contact: +91 9558268373</p>
-                    <p style="margin: 2px 0; font-size: 12px;">GST No: 24AAWFT2171R1ZA</p>
+                    <h2 style="margin: 0; font-size: 24px; color: #2c3e50;">Mavrix Cafe</h2>
+                    <p style="margin: 5px 0; color: #666; font-size: 12px;">Your Premium Coffee Destination</p>
+                    <div style="margin: 15px 0; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 10px 0;">
+                        <p style="margin: 0; font-size: 14px;">123 Coffee Street, Bangalore</p>
+                        <p style="margin: 5px 0; font-size: 14px;">Tel: +91 80 1234 5678</p>
+                        <p style="margin: 0; font-size: 14px;">GST No: 29ABCDE1234F1Z5</p>
+                    </div>
                 </div>
 
                 <!-- Order Details -->
-                <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin: 10px 0; font-size: 12px;">
-                    <table style="width: 100%;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <table style="width: 100%; margin-bottom: 10px;">
                         <tr>
-                            <td>Date: ${date[0]}</td>
-                            <td style="text-align: right;">Time: ${date[1]}</td>
+                            <td style="font-size: 14px;">Order #:</td>
+                            <td style="text-align: right; font-weight: bold;">${order._id.slice(-6).toUpperCase()}</td>
                         </tr>
                         <tr>
-                            <td>Bill No: ${order._id.slice(-6).toUpperCase()}</td>
-                            <td style="text-align: right;">Table: ${order.tableNumber}</td>
+                            <td style="font-size: 14px;">Date:</td>
+                            <td style="text-align: right;">${date}</td>
                         </tr>
                         <tr>
-                            <td colspan="2">Name: ${order.customerName}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">Phone: ${order.phoneNumber}</td>
+                            <td style="font-size: 14px;">Table:</td>
+                            <td style="text-align: right;">${order.tableNumber}</td>
                         </tr>
                     </table>
                 </div>
 
-                <!-- Items Table -->
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid #000;">
-                            <th style="text-align: left; padding: 5px 0;">Item</th>
-                            <th style="text-align: center; padding: 5px 0;">Qty</th>
-                            <th style="text-align: right; padding: 5px 0;">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHTML}
-                    </tbody>
-                </table>
-
-                <!-- Totals Section -->
-                <div style="margin-top: 10px; font-size: 12px;">
+                <!-- Customer Details -->
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Customer Information</h3>
                     <table style="width: 100%;">
                         <tr>
-                            <td style="text-align: right;">Sub Total:</td>
-                            <td style="text-align: right; width: 80px;">${formatCurrency(subtotal)}</td>
+                            <td style="font-size: 14px;">Name:</td>
+                            <td style="text-align: right;">${order.customerName}</td>
                         </tr>
                         <tr>
-                            <td style="text-align: right;">SGST 2.5%:</td>
-                            <td style="text-align: right;">${formatCurrency(sgst)}</td>
+                            <td style="font-size: 14px;">Phone:</td>
+                            <td style="text-align: right;">${order.phoneNumber}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Order Items -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Order Details</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #ddd;">
+                                <th style="text-align: left; padding: 8px 0;">Item</th>
+                                <th style="text-align: center; padding: 8px 0;">Qty</th>
+                                <th style="text-align: right; padding: 8px 0;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHTML}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Payment Summary -->
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="padding: 4px 0;">Subtotal:</td>
+                            <td style="text-align: right;">${formatCurrency(subtotal)}</td>
                         </tr>
                         <tr>
-                            <td style="text-align: right;">CGST 2.5%:</td>
-                            <td style="text-align: right;">${formatCurrency(cgst)}</td>
+                            <td style="padding: 4px 0;">GST (5%):</td>
+                            <td style="text-align: right;">${formatCurrency(tax)}</td>
                         </tr>
-                        <tr>
-                            <td style="text-align: right;">Round off:</td>
-                            <td style="text-align: right;">${formatCurrency(roundOff)}</td>
-                        </tr>
-                        <tr style="font-weight: bold;">
-                            <td style="text-align: right; padding-top: 5px;">Grand Total:</td>
-                            <td style="text-align: right; padding-top: 5px; border-top: 1px dashed #000;">${formatCurrency(order.totalAmount)}</td>
+                        <tr style="font-weight: bold; font-size: 1.1em;">
+                            <td style="padding: 8px 0; border-top: 1px dashed #ccc;">Total:</td>
+                            <td style="text-align: right; border-top: 1px dashed #ccc;">${formatCurrency(total)}</td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Footer -->
-                <div style="text-align: center; margin-top: 15px; font-size: 12px;">
-                    <p style="margin: 5px 0;">Thank You Visit Again!!!!</p>
-                    <p style="margin: 5px 0;">Cash on Delivery</p>
+                <div style="text-align: center; margin-top: 20px; color: #666;">
+                    <p style="margin: 5px 0; font-size: 14px;">Thank you for choosing Mavrix Cafe!</p>
+                    <p style="margin: 5px 0; font-size: 12px;">We hope to serve you again soon.</p>
+                    <div style="margin-top: 15px; font-size: 12px;">
+                        <p style="margin: 0;">Follow us on social media</p>
+                        <p style="margin: 5px 0;">@mavrixcafe</p>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 10px; color: #999;">
+                        <p style="margin: 0;">This is a computer generated receipt</p>
+                        <p style="margin: 5px 0;">No signature required</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -134,7 +150,7 @@ function printReceipt(order) {
             <!DOCTYPE html>
             <html>
                 <head>
-                    <title>Print Receipt</title>
+                    <title>Print Receipt - Mavrix Cafe</title>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
@@ -142,25 +158,19 @@ function printReceipt(order) {
                             size: 80mm auto;
                             margin: 0;
                         }
-                        @media print {
-                            body {
-                                width: 80mm;
-                                margin: 0;
-                                padding: 0;
-                            }
-                            .receipt {
-                                width: 100% !important;
-                            }
-                        }
                         body {
                             margin: 0;
                             padding: 0;
                             background: white;
                         }
-                        * {
-                            box-sizing: border-box;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
+                        @media print {
+                            body {
+                                width: 80mm;
+                            }
+                            .receipt {
+                                width: 100% !important;
+                                padding: 10px !important;
+                            }
                         }
                     </style>
                 </head>

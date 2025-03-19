@@ -2110,9 +2110,6 @@
                         </button>
                     </div>
                 </div>
-                
-                <!-- Hidden receipt template -->
-                ${generateReceiptHTML(order)}
             `;
             return card;
         }
@@ -3236,6 +3233,45 @@
                 }
             </style>
         `);
+
+        // Update the print receipt function to generate receipt on demand
+        async function printReceipt(orderId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch order details');
+                }
+                const order = await response.json();
+
+                // Create a new window for printing
+                const printWindow = window.open('', '_blank');
+                const receiptContent = generateReceiptHTML(order);
+                const printTemplate = `<!DOCTYPE html>
+                    <html>
+                        <head>
+                            <title>Invoice #${orderId.slice(-6).toUpperCase()}</title>
+                            <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39&display=swap" rel="stylesheet">
+                        </head>
+                        <body>
+                            ${receiptContent}
+                            <script>
+                                window.onload = function() {
+                                    window.print();
+                                    window.onafterprint = function() {
+                                        window.close();
+                                    };
+                                };
+                            </script>
+                        </body>
+                    </html>`;
+                
+                printWindow.document.write(printTemplate);
+                printWindow.document.close();
+            } catch (error) {
+                console.error('Error printing receipt:', error);
+                showNotification('Failed to print receipt', 'error', 'Print Error');
+            }
+        }
     </script>
 </body>
 </html> 

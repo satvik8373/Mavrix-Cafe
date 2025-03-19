@@ -149,21 +149,72 @@ function printReceipt(order) {
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
                         @page {
-                            size: 80mm auto;
+                            size: 98.4mm 225.4mm; /* Envelope #9 size */
                             margin: 0;
                         }
-                        body {
+                        
+                        html, body {
                             margin: 0;
                             padding: 0;
                             background: white;
+                            width: 98.4mm; /* Envelope #9 width */
+                            min-height: 225.4mm; /* Envelope #9 height */
+                            display: flex;
+                            justify-content: center;
+                            align-items: flex-start;
                         }
+                        
+                        .receipt {
+                            width: 90mm !important; /* Slightly smaller than envelope width for margins */
+                            margin: 4.2mm auto !important; /* Center horizontally with equal margins */
+                            padding: 2mm !important;
+                            box-sizing: border-box !important;
+                        }
+                        
                         @media print {
-                            body {
-                                width: 80mm;
+                            html {
+                                zoom: 1; /* Reset any browser zoom */
                             }
+                            
+                            body {
+                                width: 98.4mm !important;
+                                min-height: 225.4mm !important;
+                                margin: 0 auto !important;
+                                padding: 0 !important;
+                                print-color-adjust: exact;
+                                -webkit-print-color-adjust: exact;
+                            }
+                            
                             .receipt {
-                                width: 100% !important;
-                                padding: 10px !important;
+                                box-shadow: none !important;
+                                margin: 4.2mm auto !important;
+                                padding: 2mm !important;
+                                width: 90mm !important;
+                                page-break-inside: avoid !important;
+                            }
+                            
+                            /* Ensure no page breaks within sections */
+                            table, tr, td, th, thead, tbody {
+                                page-break-inside: avoid !important;
+                            }
+                            
+                            /* Ensure background colors print */
+                            * {
+                                print-color-adjust: exact !important;
+                                -webkit-print-color-adjust: exact !important;
+                            }
+                        }
+                        
+                        /* Print preview adjustments */
+                        @media screen {
+                            body {
+                                background: #f0f0f0;
+                                min-height: 100vh;
+                                padding: 20px 0;
+                            }
+                            
+                            .receipt {
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                             }
                         }
                     </style>
@@ -178,9 +229,16 @@ function printReceipt(order) {
         iframe.contentDocument.write(htmlContent);
         iframe.contentDocument.close();
         
-        // Wait for content to load
+        // Wait for content to load and ensure proper rendering
         setTimeout(() => {
             try {
+                // Set up print settings
+                const printSettings = {
+                    scale: 1,
+                    margin: 0,
+                    paperSize: { width: 98.4, height: 225.4, unit: 'mm' }
+                };
+                
                 // Print the iframe content
                 iframe.contentWindow.print();
                 

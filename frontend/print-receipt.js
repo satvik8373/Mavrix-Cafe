@@ -6,16 +6,11 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-function generateUPIQRCode(amount, orderId) {
-    // UPI ID for the cafe (replace with your actual UPI ID)
-    const upiId = 'mavrixcafe@ybl';
-    const merchantName = 'Mavrix Cafe';
-    
+function generateQRCodeURL(amount, upiID = 'mavrixcafe@upi') {
     // Create UPI payment URL
-    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&tr=${orderId}&tn=Order%20Payment&cu=INR`;
-    
-    // Return QR code image URL using Google Charts API
-    return `https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=${encodeURIComponent(upiUrl)}`;
+    const upiURL = `upi://pay?pa=${upiID}&pn=Mavrix%20Cafe&am=${amount}&cu=INR&tn=Order%20Payment`;
+    // Return QR code URL using a QR code generation service
+    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiURL)}`;
 }
 
 function generateReceiptHTML(order) {
@@ -27,9 +22,9 @@ function generateReceiptHTML(order) {
 
         const itemsHTML = order.items.map(item => `
             <tr>
-                <td style="text-align: left; padding: 8px 0;">${item.name}</td>
-                <td style="text-align: center; padding: 8px 0;">×${item.quantity}</td>
-                <td style="text-align: right; padding: 8px 0;">${formatCurrency(item.price * item.quantity)}</td>
+                <td style="text-align: left; padding: 4px 0;">${item.name}</td>
+                <td style="text-align: center; padding: 4px 0;">×${item.quantity}</td>
+                <td style="text-align: right; padding: 4px 0;">${formatCurrency(item.price * item.quantity)}</td>
             </tr>
         `).join('');
 
@@ -37,69 +32,66 @@ function generateReceiptHTML(order) {
         const tax = subtotal * 0.05; // 5% tax
         const total = subtotal + tax;
 
-        // Generate QR code for the total amount
-        const qrCodeUrl = generateUPIQRCode(total, order._id);
-
         return `
-            <div class="receipt" style="font-family: 'Courier New', monospace; width: 300px; padding: 20px; background: white;">
+            <div class="receipt" style="font-family: 'Courier New', monospace; width: 300px; padding: 10px; background: white;">
                 <!-- Store Logo and Header -->
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="margin-bottom: 15px;">
-                        <svg width="60" height="60" viewBox="0 0 24 24" style="margin: 0 auto;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="margin-bottom: 10px;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" style="margin: 0 auto;">
                             <path fill="#2c3e50" d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z" />
                         </svg>
                     </div>
-                    <h2 style="margin: 0; font-size: 24px; color: #2c3e50;">Mavrix Cafe</h2>
-                    <p style="margin: 5px 0; color: #666; font-size: 12px;">Your Premium Coffee Destination</p>
-                    <div style="margin: 15px 0; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 10px 0;">
-                        <p style="margin: 0; font-size: 14px;">123 Coffee Street, Bangalore</p>
-                        <p style="margin: 5px 0; font-size: 14px;">Tel: +91 80 1234 5678</p>
-                        <p style="margin: 0; font-size: 14px;">GST No: 29ABCDE1234F1Z5</p>
+                    <h2 style="margin: 0; font-size: 20px; color: #2c3e50;">Mavrix Cafe</h2>
+                    <p style="margin: 2px 0; color: #666; font-size: 10px;">Your Premium Coffee Destination</p>
+                    <div style="margin: 8px 0; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 5px 0;">
+                        <p style="margin: 0; font-size: 12px;">123 Coffee Street, Bangalore</p>
+                        <p style="margin: 2px 0; font-size: 12px;">Tel: +91 80 1234 5678</p>
+                        <p style="margin: 0; font-size: 12px;">GST No: 29ABCDE1234F1Z5</p>
                     </div>
                 </div>
 
                 <!-- Order Details -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <table style="width: 100%; margin-bottom: 10px;">
+                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                    <table style="width: 100%; margin-bottom: 5px; font-size: 12px;">
                         <tr>
-                            <td style="font-size: 14px;">Order #:</td>
+                            <td>Order #:</td>
                             <td style="text-align: right; font-weight: bold;">${order._id.slice(-6).toUpperCase()}</td>
                         </tr>
                         <tr>
-                            <td style="font-size: 14px;">Date:</td>
+                            <td>Date:</td>
                             <td style="text-align: right;">${date}</td>
                         </tr>
                         <tr>
-                            <td style="font-size: 14px;">Table:</td>
+                            <td>Table:</td>
                             <td style="text-align: right;">${order.tableNumber}</td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Customer Details -->
-                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Customer Information</h3>
-                    <table style="width: 100%;">
+                <div style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #2c3e50;">Customer Information</h3>
+                    <table style="width: 100%; font-size: 12px;">
                         <tr>
-                            <td style="font-size: 14px;">Name:</td>
+                            <td>Name:</td>
                             <td style="text-align: right;">${order.customerName}</td>
                         </tr>
                         <tr>
-                            <td style="font-size: 14px;">Phone:</td>
+                            <td>Phone:</td>
                             <td style="text-align: right;">${order.phoneNumber}</td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Order Items -->
-                <div style="margin-bottom: 20px;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Order Details</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
+                <div style="margin-bottom: 10px;">
+                    <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #2c3e50;">Order Details</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                         <thead>
                             <tr style="border-bottom: 1px solid #ddd;">
-                                <th style="text-align: left; padding: 8px 0;">Item</th>
-                                <th style="text-align: center; padding: 8px 0;">Qty</th>
-                                <th style="text-align: right; padding: 8px 0;">Amount</th>
+                                <th style="text-align: left; padding: 4px 0;">Item</th>
+                                <th style="text-align: center; padding: 4px 0;">Qty</th>
+                                <th style="text-align: right; padding: 4px 0;">Amount</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,39 +101,34 @@ function generateReceiptHTML(order) {
                 </div>
 
                 <!-- Payment Summary -->
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <table style="width: 100%;">
+                <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+                    <table style="width: 100%; font-size: 12px;">
                         <tr>
-                            <td style="padding: 4px 0;">Subtotal:</td>
+                            <td style="padding: 2px 0;">Subtotal:</td>
                             <td style="text-align: right;">${formatCurrency(subtotal)}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;">GST (5%):</td>
+                            <td style="padding: 2px 0;">GST (5%):</td>
                             <td style="text-align: right;">${formatCurrency(tax)}</td>
                         </tr>
-                        <tr style="font-weight: bold; font-size: 1.1em;">
-                            <td style="padding: 8px 0; border-top: 1px dashed #ccc;">Total:</td>
+                        <tr style="font-weight: bold;">
+                            <td style="padding: 4px 0; border-top: 1px dashed #ccc;">Total:</td>
                             <td style="text-align: right; border-top: 1px dashed #ccc;">${formatCurrency(total)}</td>
                         </tr>
                     </table>
                 </div>
 
-                <!-- Payment QR Code -->
-                <div style="text-align: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">Scan to Pay</h3>
-                    <img src="${qrCodeUrl}" alt="Payment QR Code" style="width: 150px; height: 150px; margin: 10px 0;">
-                    <p style="margin: 5px 0; font-size: 12px; color: #666;">Scan this QR code to pay via UPI</p>
-                    <p style="margin: 5px 0; font-size: 12px; color: #666;">UPI ID: mavrixcafe@ybl</p>
+                <!-- UPI QR Code -->
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <p style="margin: 0 0 5px 0; font-size: 12px; font-weight: bold;">Scan to Pay</p>
+                    <img src="${generateQRCodeURL(total)}" alt="UPI QR Code" style="width: 100px; height: 100px; margin: 0 auto;">
+                    <p style="margin: 5px 0 0 0; font-size: 10px;">UPI ID: mavrixcafe@upi</p>
                 </div>
 
                 <!-- Footer -->
-                <div style="text-align: center; margin-top: 20px; color: #666;">
-                    <p style="margin: 5px 0; font-size: 14px;">Thank you for choosing Mavrix Cafe!</p>
-                    <p style="margin: 5px 0; font-size: 12px;">We hope to serve you again soon.</p>
-                    <div style="margin-top: 15px; font-size: 10px; color: #999;">
-                        <p style="margin: 0;">This is a computer generated receipt</p>
-                        <p style="margin: 5px 0;">No signature required</p>
-                    </div>
+                <div style="text-align: center; color: #666;">
+                    <p style="margin: 2px 0; font-size: 12px;">Thank you for choosing Mavrix Cafe!</p>
+                    <p style="margin: 2px 0; font-size: 10px;">We hope to serve you again soon.</p>
                 </div>
             </div>
         `;

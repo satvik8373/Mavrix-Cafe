@@ -2111,26 +2111,28 @@
                 const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to update order status');
+                    throw new Error(errorData.error || 'Failed to fetch order details');
                 }
                 
-                showNotification(
-                    `Order #${orderId.slice(-6).toUpperCase()} marked as ${status}`,
-                    'success',
-                    'Order Updated'
-                );
-                
-                // Refresh the orders display and stats
-                await Promise.all([
-                    displayOrders(),
-                    updateStats()
-                ]);
+                const order = await response.json();
+                if (!order) {
+                    throw new Error('Order data is empty');
+                }
+
+                // Validate required fields for printing
+                if (!order.items || !order.totalAmount || !order.customerName) {
+                    throw new Error('Order data is incomplete');
+                }
+
+                // Call the printReceipt function from print-receipt.js
+                printReceipt(order);
+                showNotification('Preparing receipt for printing...', 'success', 'Print Receipt');
             } catch (error) {
-                console.error('Error updating order status:', error);
+                console.error('Error printing receipt:', error);
                 showNotification(
-                    error.message || 'Could not update order status',
+                    error.message || 'Error printing receipt. Please try again.',
                     'error',
-                    'Update Failed'
+                    'Print Failed'
                 );
             }
         }

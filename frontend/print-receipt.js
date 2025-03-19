@@ -13,10 +13,18 @@ function generateReceiptHTML(order) {
             timeStyle: 'short'
         });
 
+        const itemsHTML = order.items.map(item => `
+            <tr>
+                <td style="text-align: left; padding: 4px 0;">${item.name}</td>
+                <td style="text-align: center; padding: 4px 0;">×${item.quantity}</td>
+                <td style="text-align: right; padding: 4px 0;">${formatCurrency(item.price * item.quantity)}</td>
+            </tr>
+        `).join('');
+
         return `
             <div class="receipt" style="font-family: 'Courier New', monospace; width: 300px; padding: 20px;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0;">Mavrix Cafe</h2>
+                    <h2 style="margin: 0; font-size: 24px;">Mavrix Cafe</h2>
                     <p style="margin: 5px 0;">Order Receipt</p>
                     <p style="margin: 5px 0;">Date: ${date}</p>
                     <p style="margin: 5px 0;">Order #${order._id.slice(-6).toUpperCase()}</p>
@@ -32,19 +40,13 @@ function generateReceiptHTML(order) {
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th style="text-align: left;">Item</th>
-                                <th style="text-align: center;">Qty</th>
-                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: left; padding: 4px 0;">Item</th>
+                                <th style="text-align: center; padding: 4px 0;">Qty</th>
+                                <th style="text-align: right; padding: 4px 0;">Price</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${order.items.map(item => `
-                                <tr>
-                                    <td style="text-align: left;">${item.name}</td>
-                                    <td style="text-align: center;">×${item.quantity}</td>
-                                    <td style="text-align: right;">${formatCurrency(item.price * item.quantity)}</td>
-                                </tr>
-                            `).join('')}
+                            ${itemsHTML}
                         </tbody>
                     </table>
                 </div>
@@ -86,6 +88,8 @@ function printReceipt(order) {
             <html>
                 <head>
                     <title>Print Receipt</title>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <style>
                         @page {
                             size: 80mm 200mm;
@@ -96,6 +100,10 @@ function printReceipt(order) {
                                 width: 80mm;
                                 margin: 0;
                                 padding: 0;
+                            }
+                            .receipt {
+                                width: 100% !important;
+                                padding: 10px !important;
                             }
                         }
                     </style>
@@ -111,7 +119,7 @@ function printReceipt(order) {
         iframe.contentDocument.close();
         
         // Wait for content to load
-        iframe.onload = () => {
+        setTimeout(() => {
             try {
                 // Print the iframe content
                 iframe.contentWindow.print();
@@ -122,11 +130,11 @@ function printReceipt(order) {
                 }, 1000);
             } catch (error) {
                 console.error('Error during print operation:', error);
-                showNotification('Error printing receipt. Please try again.', 'error');
+                showNotification('Error printing receipt. Please try again.', 'error', 'Print Failed');
             }
-        };
+        }, 500);
     } catch (error) {
         console.error('Error in printReceipt:', error);
-        showNotification('Error preparing receipt for print. Please try again.', 'error');
+        showNotification('Error preparing receipt for print. Please try again.', 'error', 'Print Failed');
     }
 } 

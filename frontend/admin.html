@@ -373,27 +373,8 @@
         }
 
         .action-btn {
-            padding: 0.8rem 1.2rem;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
+            padding: 0.75rem;
+            font-size: 0.9rem;
         }
 
         .edit-btn {
@@ -1684,130 +1665,46 @@
 
         /* ... existing styles ... */
 
-        /* Add print styles */
+        .order-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .print-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .print-btn:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+        }
+
+        .print-btn i {
+            font-size: 1rem;
+        }
+
         @media print {
             body * {
                 visibility: hidden;
             }
-            .print-receipt, .print-receipt * {
+            .print-content * {
                 visibility: visible;
             }
-            .print-receipt {
-                position: fixed;
-                left: 50%;
+            .print-content {
+                position: absolute;
+                left: 0;
                 top: 0;
-                transform: translateX(-50%);
-                width: 80mm;
-                padding: 10mm;
-                background: white;
-                box-shadow: none;
-                border: none;
             }
-        }
-
-        /* Receipt Styles */
-        .receipt {
-            font-family: 'Courier New', monospace;
-            width: 80mm;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
-            padding: 10mm;
-        }
-
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 10mm;
-            border-bottom: 2px dashed #000;
-            padding-bottom: 5mm;
-        }
-
-        .receipt-header h2 {
-            font-size: 1.4em;
-            margin: 0;
-            font-weight: bold;
-        }
-
-        .receipt-header p {
-            margin: 2mm 0;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .receipt-details {
-            margin: 5mm 0;
-            padding: 5mm 0;
-            border-bottom: 1px dashed #000;
-        }
-
-        .receipt-details p {
-            margin: 2mm 0;
-            font-size: 0.9em;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .receipt-items {
-            width: 100%;
-            margin: 5mm 0;
-            border-collapse: collapse;
-        }
-
-        .receipt-items th {
-            border-bottom: 1px solid #000;
-            padding: 2mm 0;
-            text-align: left;
-            font-size: 0.9em;
-        }
-
-        .receipt-items td {
-            padding: 2mm 0;
-            text-align: left;
-            font-size: 0.9em;
-        }
-
-        .receipt-items .amount {
-            text-align: right;
-        }
-
-        .receipt-total {
-            margin: 5mm 0;
-            padding: 5mm 0;
-            border-top: 2px dashed #000;
-            text-align: right;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-
-        .receipt-footer {
-            text-align: center;
-            margin-top: 10mm;
-            padding-top: 5mm;
-            border-top: 1px dashed #000;
-            font-size: 0.9em;
-        }
-
-        .receipt-footer p {
-            margin: 1mm 0;
-            color: #666;
-        }
-
-        /* Add QR Code to receipt */
-        .receipt-qr {
-            text-align: center;
-            margin-top: 5mm;
-        }
-
-        .receipt-qr img {
-            width: 50mm;
-            height: 50mm;
-        }
-
-        @page {
-            size: 80mm auto;
-            margin: 0;
         }
     </style>
 </head>
@@ -2157,8 +2054,8 @@
                     </div>
                     <div class="order-actions">
                         <span class="status-badge ${order.status}">${order.status}</span>
-                        <button onclick="event.stopPropagation(); printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
-                            <i class="fas fa-print"></i> Print Receipt
+                        <button onclick="printReceipt(${JSON.stringify(order)})" class="print-btn">
+                            <i class="fas fa-print"></i> Print
                         </button>
                     </div>
                 </div>
@@ -2197,7 +2094,7 @@
                     </div>
                     
                     ${order.status === 'pending' ? `
-                        <button onclick="completeOrder('${order._id}')" class="complete-btn no-print">
+                        <button onclick="completeOrder('${order._id}')" class="complete-btn">
                             <i class="fas fa-check"></i> Complete Order
                         </button>
                     ` : ''}
@@ -3326,122 +3223,8 @@
             </style>
         `);
 
-        // Enhanced print receipt function with duplicate prevention
-        function printReceipt(order) {
-            try {
-                // Check if a receipt is already being printed
-                if (document.querySelector('.print-receipt')) {
-                    return;
-                }
-
-                // Create receipt HTML
-                const receipt = document.createElement('div');
-                receipt.className = 'receipt print-receipt';
-                receipt.id = `receipt-${order._id}`;
-                
-                const formattedDate = new Date(order.timestamp).toLocaleString('en-US', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short'
-                });
-                
-                receipt.innerHTML = `
-                    <div class="receipt-header">
-                        <h2>Mavrix Cafe</h2>
-                        <p>Order #${order._id.slice(-6).toUpperCase()}</p>
-                        <p>${formattedDate}</p>
-                    </div>
-                    
-                    <div class="receipt-details">
-                        <p><span>Customer:</span> <span>${order.customerName}</span></p>
-                        <p><span>Table:</span> <span>${order.tableNumber}</span></p>
-                        <p><span>Phone:</span> <span>${order.phoneNumber}</span></p>
-                    </div>
-                    
-                    <table class="receipt-items">
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Qty</th>
-                                <th class="amount">Price</th>
-                                <th class="amount">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${order.items.map(item => `
-                                <tr>
-                                    <td>${item.name}</td>
-                                    <td>${item.quantity}</td>
-                                    <td class="amount">₹${item.price.toFixed(2)}</td>
-                                    <td class="amount">₹${(item.price * item.quantity).toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    
-                    <div class="receipt-total">
-                        <p>Total Amount: ₹${order.totalAmount.toFixed(2)}</p>
-                    </div>
-                    
-                    <div class="receipt-footer">
-                        <p>Thank you for dining with us!</p>
-                        <p>Visit us again</p>
-                        <p>${new Date().toLocaleDateString()}</p>
-                    </div>
-                `;
-
-                // Add print-specific styles
-                const printStyles = document.createElement('style');
-                printStyles.textContent = `
-                    @media print {
-                        body * {
-                            visibility: hidden;
-                        }
-                        .print-receipt, .print-receipt * {
-                            visibility: visible;
-                        }
-                        .print-receipt {
-                            position: fixed;
-                            left: 50%;
-                            top: 0;
-                            transform: translateX(-50%);
-                            width: 80mm;
-                            padding: 10mm;
-                            background: white;
-                            box-shadow: none;
-                            border: none;
-                        }
-                        .no-print {
-                            display: none !important;
-                        }
-                        @page {
-                            size: 80mm auto;
-                            margin: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(printStyles);
-                
-                // Remove any existing receipts
-                const existingReceipts = document.querySelectorAll('.print-receipt');
-                existingReceipts.forEach(r => r.remove());
-                
-                // Add receipt to body
-                document.body.appendChild(receipt);
-                
-                // Print with delay to ensure proper rendering
-                setTimeout(() => {
-                    window.print();
-                    // Remove receipt and styles after printing
-                    setTimeout(() => {
-                        receipt.remove();
-                        printStyles.remove();
-                    }, 1000);
-                }, 300);
-            } catch (error) {
-                console.error('Error printing receipt:', error);
-                showNotification('Failed to print receipt', 'error', 'Print Error');
-            }
-        }
+        // Add this import at the beginning of the script section
+        import { printReceipt } from './print-receipt.js';
     </script>
 </body>
 </html> 

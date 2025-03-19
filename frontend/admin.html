@@ -1689,11 +1689,9 @@
             body * {
                 visibility: hidden;
             }
-            
             .print-receipt, .print-receipt * {
                 visibility: visible;
             }
-            
             .print-receipt {
                 position: fixed;
                 left: 50%;
@@ -1704,10 +1702,6 @@
                 background: white;
                 box-shadow: none;
                 border: none;
-            }
-
-            .no-print {
-                display: none !important;
             }
         }
 
@@ -1809,6 +1803,11 @@
         .receipt-qr img {
             width: 50mm;
             height: 50mm;
+        }
+
+        @page {
+            size: 80mm auto;
+            margin: 0;
         }
     </style>
 </head>

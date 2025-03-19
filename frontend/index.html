@@ -905,6 +905,123 @@
             50% { opacity: 1; }
             100% { opacity: 0.6; }
         }
+
+        /* Toast and Validation Styles */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            color: var(--text-primary);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            max-width: 300px;
+            pointer-events: auto;
+            animation: slideInRight 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.slide-out {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--success-color);
+        }
+
+        .toast.error::before {
+            background: var(--secondary-color);
+        }
+
+        .toast.warning::before {
+            background: var(--accent-color);
+        }
+
+        .toast-icon {
+            font-size: 1.1rem;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success-color);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--secondary-color);
+        }
+
+        .toast.warning .toast-icon {
+            color: var(--accent-color);
+        }
+
+        .toast-message {
+            flex: 1;
+            padding-right: 8px;
+        }
+
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .toast-container {
+                top: auto;
+                bottom: 70px;
+                left: 20px;
+                right: 20px;
+            }
+
+            .toast {
+                width: 100%;
+                max-width: none;
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1001,6 +1118,9 @@
             <div class="loading-text" id="loadingText">Preparing your order...</div>
         </div>
     </div>
+
+    <!-- Add toast container div -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
         let cart = [];
@@ -1152,30 +1272,29 @@
 
         // Show toast message
         function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                right: 20px;
-                background: ${type === 'success' ? 'var(--success-color)' : 'var(--secondary-color)'};
-                color: white;
-                padding: 1rem 2rem;
-                border-radius: var(--border-radius);
-                box-shadow: var(--shadow);
-                animation: slideIn 0.3s ease;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            `;
-            toast.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
-                ${message}
-            `;
-            document.body.appendChild(toast);
+            toast.className = `toast ${type}`;
             
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'error' ? 'exclamation-circle' : 
+                        'exclamation-triangle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after delay
             setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
+                toast.classList.add('slide-out');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }

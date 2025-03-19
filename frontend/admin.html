@@ -373,8 +373,27 @@
         }
 
         .action-btn {
-            padding: 0.75rem;
-            font-size: 0.9rem;
+            padding: 0.8rem 1.2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
         }
 
         .edit-btn {
@@ -1676,11 +1695,15 @@
             }
             
             .print-receipt {
-                position: absolute;
-                left: 0;
+                position: fixed;
+                left: 50%;
                 top: 0;
-                width: 80mm; /* Standard receipt width */
+                transform: translateX(-50%);
+                width: 80mm;
                 padding: 10mm;
+                background: white;
+                box-shadow: none;
+                border: none;
             }
 
             .no-print {
@@ -1692,43 +1715,63 @@
         .receipt {
             font-family: 'Courier New', monospace;
             width: 80mm;
-            padding: 10mm;
-            margin: 0 auto;
             background: white;
-            display: none;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            padding: 10mm;
         }
 
         .receipt-header {
             text-align: center;
             margin-bottom: 10mm;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 5mm;
         }
 
         .receipt-header h2 {
-            font-size: 1.2em;
+            font-size: 1.4em;
             margin: 0;
+            font-weight: bold;
         }
 
         .receipt-header p {
             margin: 2mm 0;
             font-size: 0.9em;
+            color: #666;
         }
 
         .receipt-details {
             margin: 5mm 0;
-            padding: 2mm 0;
-            border-top: 1px dashed #000;
+            padding: 5mm 0;
             border-bottom: 1px dashed #000;
+        }
+
+        .receipt-details p {
+            margin: 2mm 0;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
         }
 
         .receipt-items {
             width: 100%;
             margin: 5mm 0;
+            border-collapse: collapse;
         }
 
-        .receipt-items th,
-        .receipt-items td {
+        .receipt-items th {
+            border-bottom: 1px solid #000;
+            padding: 2mm 0;
             text-align: left;
-            padding: 1mm 0;
+            font-size: 0.9em;
+        }
+
+        .receipt-items td {
+            padding: 2mm 0;
+            text-align: left;
+            font-size: 0.9em;
         }
 
         .receipt-items .amount {
@@ -1737,475 +1780,37 @@
 
         .receipt-total {
             margin: 5mm 0;
-            padding: 2mm 0;
-            border-top: 1px dashed #000;
+            padding: 5mm 0;
+            border-top: 2px dashed #000;
             text-align: right;
             font-weight: bold;
+            font-size: 1.1em;
         }
 
         .receipt-footer {
             text-align: center;
             margin-top: 10mm;
+            padding-top: 5mm;
+            border-top: 1px dashed #000;
             font-size: 0.9em;
         }
 
-        /* Enhanced Button Styles */
-        .action-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            text-transform: capitalize;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .receipt-footer p {
+            margin: 1mm 0;
+            color: #666;
         }
 
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
+        /* Add QR Code to receipt */
+        .receipt-qr {
+            text-align: center;
+            margin-top: 5mm;
         }
 
-        .action-btn:hover::before {
-            transform: translateX(100%);
-        }
-
-        .action-btn i {
-            font-size: 1.1rem;
-            transition: transform 0.3s ease;
-        }
-
-        .action-btn:hover i {
-            transform: scale(1.1);
-        }
-
-        /* Primary Button */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), #34495e);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #34495e, var(--primary-color));
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Success Button */
-        .btn-success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.2);
-        }
-
-        /* Warning Button */
-        .btn-warning {
-            background: linear-gradient(135deg, #f1c40f, #f39c12);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #f39c12, #f1c40f);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(241, 196, 15, 0.2);
-        }
-
-        /* Danger Button */
-        .btn-danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #c0392b, #e74c3c);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.2);
-        }
-
-        /* Print Button */
-        .print-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: var(--border-radius);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .print-btn:hover {
-            background: linear-gradient(135deg, #2980b9, #3498db);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
-        }
-
-        /* Complete Order Button */
-        .complete-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            border: none;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            margin-top: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .complete-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.2), rgba(255,255,255,0));
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .complete-btn:hover::before {
-            transform: translateX(100%);
-        }
-
-        .complete-btn:hover {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-        }
-
-        .complete-btn i {
-            font-size: 1.2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .complete-btn:hover i {
-            transform: scale(1.1);
-        }
-
-        /* Filter Buttons */
-        .filter-btn {
-            padding: 0.8rem 1.5rem;
-            border: none;
-            background: var(--background-color);
-            color: var(--text-secondary);
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .filter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Ripple effect */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        /* Loading state */
-        .btn-loading {
-            position: relative;
-            pointer-events: none;
-            opacity: 0.8;
-        }
-
-        .btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Mobile Responsive Adjustments */
-        @media (max-width: 768px) {
-            .action-btn, .filter-btn, .tab-btn {
-                padding: 0.7rem 1.2rem;
-                font-size: 0.9rem;
-            }
-
-            .action-btn i, .filter-btn i, .tab-btn i {
-                font-size: 1rem;
-            }
-
-            .complete-btn {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
+        .receipt-qr img {
+            width: 50mm;
+            height: 50mm;
         }
     </style>
-    
-    <script>
-        // API Configuration
-        const API_BASE_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api'
-            : 'https://mavrix-cafe-api.onrender.com/api';
-
-        // Global variables
-        const ADMIN_PASSWORD = '837337';
-        let lastOrderTimestamp = new Date().toISOString();
-        let isPageVisible = true;
-        let orderSound = null;
-
-        // Toast Notification
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.add('show');
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }, 100);
-        }
-
-        // Enhanced Notification
-        function showNotification(message, type = 'success', title = '') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            
-            let icon = 'check-circle';
-            switch (type) {
-                case 'error':
-                    icon = 'exclamation-circle';
-                    title = title || 'Error';
-                    break;
-                case 'warning':
-                    icon = 'exclamation-triangle';
-                    title = title || 'Warning';
-                    break;
-                default:
-                    title = title || 'Success';
-            }
-
-            notification.innerHTML = `
-                <i class="fas fa-${icon}"></i>
-                <div class="notification-content">
-                    <div class="notification-title">${title}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            notification.addEventListener('click', () => notification.remove());
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease forwards';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
-        // Initialize admin dashboard
-        async function initializeAdmin() {
-            try {
-                setupTouchHandling();
-                initializeSound();
-                
-                await Promise.all([
-                    displayProducts(),
-                    displayOrders()
-                ]);
-                
-                setTimeout(async () => {
-                    await updateStats();
-                    setInterval(checkNewOrders, 5000);
-                    setInterval(async () => {
-                        if (isPageVisible) {
-                            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-                            if (activeTab === 'dashboard') {
-                                await updateStats();
-                            }
-                        }
-                    }, 30000);
-                }, 500);
-            } catch (error) {
-                console.error('Error initializing admin dashboard:', error);
-                showNotification('Error initializing dashboard', 'error', 'Initialization Failed');
-            }
-        }
-
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-            if (isAuthenticated) {
-                showAdminContent();
-            } else {
-                const storedPassword = localStorage.getItem('adminPassword');
-                if (storedPassword === ADMIN_PASSWORD) {
-                    sessionStorage.setItem('adminAuthenticated', 'true');
-                    showAdminContent();
-                }
-            }
-
-            setupFilterButtons();
-            setupTouchHandling();
-        });
-
-        // Handle page visibility
-        document.addEventListener('visibilitychange', () => {
-            isPageVisible = document.visibilityState === 'visible';
-            if (isPageVisible) {
-                refreshData();
-            }
-        });
-
-        // Initialize sound
-        function initializeSound() {
-            orderSound = document.getElementById('newOrderSound');
-            document.addEventListener('click', () => {
-                if (orderSound) {
-                    orderSound.play().then(() => {
-                        orderSound.pause();
-                        orderSound.currentTime = 0;
-                    }).catch(console.error);
-                }
-            }, { once: true });
-        }
-
-        // Setup touch handling
-        function setupTouchHandling() {
-            let lastTouchEnd = 0;
-            document.addEventListener('touchend', (event) => {
-                const now = Date.now();
-                if (now - lastTouchEnd <= 300) {
-                    event.preventDefault();
-                }
-                lastTouchEnd = now;
-            }, false);
-
-            document.addEventListener('touchmove', (event) => {
-                if (event.touches.length > 1) {
-                    event.preventDefault();
-                }
-            }, { passive: false });
-
-            const tabContainer = document.querySelector('.tab-container');
-            if (tabContainer) {
-                let isScrolling = false;
-                let startX;
-                let scrollLeft;
-
-                tabContainer.addEventListener('touchstart', (e) => {
-                    isScrolling = true;
-                    startX = e.touches[0].pageX - tabContainer.offsetLeft;
-                    scrollLeft = tabContainer.scrollLeft;
-                });
-
-                tabContainer.addEventListener('touchmove', (e) => {
-                    if (!isScrolling) return;
-                    e.preventDefault();
-                    const x = e.touches[0].pageX - tabContainer.offsetLeft;
-                    const walk = (x - startX) * 2;
-                    tabContainer.scrollLeft = scrollLeft - walk;
-                });
-
-                tabContainer.addEventListener('touchend', () => {
-                    isScrolling = false;
-                });
-            }
-        }
-
-        // Add ripple effect to buttons
-        function setupRippleEffect() {
-            const buttons = document.querySelectorAll('.action-btn, .filter-btn, .tab-btn, .complete-btn');
-            
-            buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    const ripple = document.createElement('div');
-                    ripple.classList.add('ripple');
-                    
-                    const rect = this.getBoundingClientRect();
-                    const size = Math.max(rect.width, rect.height);
-                    const x = e.clientX - rect.left - size/2;
-                    const y = e.clientY - rect.top - size/2;
-                    
-                    ripple.style.width = ripple.style.height = `${size}px`;
-                    ripple.style.left = `${x}px`;
-                    ripple.style.top = `${y}px`;
-                    
-                    this.appendChild(ripple);
-                    
-                    setTimeout(() => ripple.remove(), 600);
-                });
-            });
-        }
-
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            setupRippleEffect();
-            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
-            if (isAuthenticated) {
-                showAdminContent();
-            }
-        });
-    </script>
 </head>
 <body>
     <!-- Password Screen -->
@@ -2441,5 +2046,1362 @@
             </a>
         </div>
     </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api'
+            : 'https://mavrix-cafe-api.onrender.com/api';
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }, 100);
+        }
+
+        // Fetch menu items
+        async function displayProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                const products = await response.json();
+                
+                const productsContainer = document.getElementById('productGrid');
+                productsContainer.innerHTML = '';
+                
+                products.forEach(product => {
+                    const productCard = createProductCard(product);
+                    productsContainer.appendChild(productCard);
+                });
+            } catch (error) {
+                console.error('Error displaying products:', error);
+                showToast('Error loading products', 'error');
+            }
+        }
+
+        // Create product card
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-header">
+                    <h3>${product.name}</h3>
+                    <span class="product-price">₹${product.price.toFixed(2)}</span>
+                </div>
+                <span class="product-category">${product.category}</span>
+                <div class="product-actions">
+                    <button onclick="editProduct('${product._id}')" class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="toggleAvailability('${product._id}', ${!product.available})" 
+                        class="action-btn toggle-btn ${product.available ? '' : 'unavailable'}">
+                        <i class="fas ${product.available ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                        ${product.available ? 'Available' : 'Unavailable'}
+                    </button>
+                    <button onclick="deleteProductConfirm('${product._id}')" class="action-btn delete-btn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            return card;
+        }
+
+        // Fetch orders
+        async function displayOrders(filter = 'all') {
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                const orders = await response.json();
+                
+                const filteredOrders = filter === 'all' 
+                    ? orders 
+                    : orders.filter(order => order.status === filter);
+                
+                const ordersContainer = document.getElementById('ordersGrid');
+                ordersContainer.innerHTML = '';
+                
+                filteredOrders.forEach(order => {
+                    const orderCard = createOrderCard(order);
+                    ordersContainer.appendChild(orderCard);
+                });
+            } catch (error) {
+                console.error('Error displaying orders:', error);
+                showToast('Error loading orders', 'error');
+            }
+        }
+
+        // Create order card with improved design
+        function createOrderCard(order) {
+            const card = document.createElement('div');
+            card.className = `order-card ${order.status}`;
+            
+            const formattedTime = new Date(order.timestamp).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+            
+            card.innerHTML = `
+                <div class="order-header">
+                    <div class="order-title">
+                        <h3>Order #${order._id.slice(-6).toUpperCase()}</h3>
+                        <span class="order-time">${formattedTime}</span>
+                    </div>
+                    <div class="order-actions">
+                        <span class="status-badge ${order.status}">${order.status}</span>
+                        <button onclick="printReceipt(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn print-btn no-print">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="order-content">
+                    <div class="order-customer">
+                        <div class="info-group">
+                            <i class="fas fa-user"></i>
+                            <span>${order.customerName}</span>
+                        </div>
+                        <div class="info-group">
+                            <i class="fas fa-phone"></i>
+                            <span>${order.phoneNumber}</span>
+                        </div>
+                        <div class="info-group">
+                            <i class="fas fa-table"></i>
+                            <span>Table ${order.tableNumber}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-items">
+                        <h4><i class="fas fa-utensils"></i> Items</h4>
+                        <div class="items-list">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-quantity">×${item.quantity}</span>
+                                    <span class="item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="order-total">
+                            <span>Total Amount</span>
+                            <span>₹${order.totalAmount.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    
+                    ${order.status === 'pending' ? `
+                        <button onclick="completeOrder('${order._id}')" class="complete-btn no-print">
+                            <i class="fas fa-check"></i> Complete Order
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            return card;
+        }
+
+        // Update order status
+        async function updateOrderStatus(orderId, status) {
+            try {
+                if (!orderId) {
+                    showNotification('Invalid order ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update order status');
+                }
+                
+                showNotification(
+                    `Order #${orderId.slice(-6).toUpperCase()} marked as ${status}`,
+                    'success',
+                    'Order Updated'
+                );
+                
+                // Refresh the orders display and stats
+                await Promise.all([
+                    displayOrders(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showNotification(
+                    error.message || 'Could not update order status',
+                    'error',
+                    'Update Failed'
+                );
+            }
+        }
+
+        // Complete order
+        async function completeOrder(orderId) {
+            await updateOrderStatus(orderId, 'completed');
+        }
+
+        // Update dashboard stats
+        async function updateStats() {
+            try {
+                const [ordersResponse, menuResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/orders`),
+                    fetch(`${API_BASE_URL}/menu`)
+                ]);
+                
+                if (!ordersResponse.ok || !menuResponse.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                const orders = await ordersResponse.json();
+                const menuItems = await menuResponse.json();
+                
+                // Calculate statistics
+                const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+                const totalOrders = orders.length;
+                const activeItems = menuItems.filter(item => item.available).length;
+                const pendingOrders = orders.filter(order => order.status === 'pending').length;
+                const completedToday = orders.filter(order => {
+                    const orderDate = new Date(order.timestamp);
+                    const today = new Date();
+                    return order.status === 'completed' && 
+                           orderDate.toDateString() === today.toDateString();
+                }).length;
+                
+                // Safely update DOM elements
+                const updateElement = (id, value) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                };
+
+                // Update statistics
+                updateElement('revenueValue', totalRevenue.toFixed(2));
+                updateElement('ordersValue', totalOrders);
+                updateElement('scansValue', totalOrders); // Using orders as proxy for scans
+                updateElement('customersValue', new Set(orders.map(o => o.phoneNumber)).size);
+                updateElement('pendingOrdersCount', pendingOrders);
+                updateElement('completedOrdersCount', completedToday);
+                updateElement('totalProductsCount', menuItems.length);
+
+                // Calculate and display top products
+                const productSales = {};
+                orders.forEach(order => {
+                    order.items.forEach(item => {
+                        if (!productSales[item.name]) {
+                            productSales[item.name] = { quantity: 0, revenue: 0 };
+                        }
+                        productSales[item.name].quantity += item.quantity;
+                        productSales[item.name].revenue += item.price * item.quantity;
+                    });
+                });
+
+                const topProducts = Object.entries(productSales)
+                    .sort(([,a], [,b]) => b.revenue - a.revenue)
+                    .slice(0, 5);
+
+                const topProductsContainer = document.getElementById('topProducts');
+                if (topProductsContainer) {
+                    topProductsContainer.innerHTML = topProducts.length ? topProducts.map(([name, data]) => `
+                        <div class="top-item">
+                            <div class="top-item-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div class="top-item-info">
+                                <div class="top-item-title">${name}</div>
+                                <div class="top-item-value">₹${data.revenue.toFixed(2)} • ${data.quantity} sold</div>
+                            </div>
+                        </div>
+                    `).join('') : '<p>No sales data available</p>';
+                }
+
+                // Calculate and display top customers
+                const customerSales = {};
+                orders.forEach(order => {
+                    if (!customerSales[order.phoneNumber]) {
+                        customerSales[order.phoneNumber] = {
+                            name: order.customerName,
+                            visits: 0,
+                            spent: 0
+                        };
+                    }
+                    customerSales[order.phoneNumber].visits++;
+                    customerSales[order.phoneNumber].spent += order.totalAmount;
+                });
+
+                const topCustomers = Object.entries(customerSales)
+                    .sort(([,a], [,b]) => b.spent - a.spent)
+                    .slice(0, 5);
+
+                const topCustomersContainer = document.getElementById('topCustomers');
+                if (topCustomersContainer) {
+                    topCustomersContainer.innerHTML = topCustomers.length ? topCustomers.map(([phone, data]) => `
+                        <div class="top-item">
+                            <div class="top-item-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="top-item-info">
+                                <div class="top-item-title">${data.name}</div>
+                                <div class="top-item-value">₹${data.spent.toFixed(2)} • ${data.visits} visits</div>
+                            </div>
+                        </div>
+                    `).join('') : '<p>No customer data available</p>';
+                }
+            } catch (error) {
+                console.error('Error updating stats:', error);
+                showToast('Error updating dashboard statistics', 'error');
+            }
+        }
+
+        // Initialize admin dashboard
+        async function initializeAdmin() {
+            try {
+                setupTouchHandling();
+                // Initialize sound
+                initializeSound();
+                
+                // First display products and orders
+                await Promise.all([
+                    displayProducts(),
+                    displayOrders()
+                ]);
+                
+                // Then update stats after a short delay
+                setTimeout(async () => {
+                    await updateStats();
+                    
+                    // Set up auto-refresh for orders and stats
+                    setInterval(checkNewOrders, 5000); // Check for new orders every 5 seconds
+                    setInterval(async () => {
+                        if (isPageVisible) {
+                            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                            if (activeTab === 'dashboard') {
+                                await updateStats();
+                            }
+                        }
+                    }, 30000); // Update stats every 30 seconds
+                }, 500);
+            } catch (error) {
+                console.error('Error initializing admin dashboard:', error);
+                showMessage('Error initializing dashboard', 'error');
+            }
+        }
+
+        // Setup filter buttons
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filter = button.dataset.filter;
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    displayOrders(filter);
+                });
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAdmin();
+            setupFilterButtons();
+        });
+
+        // Update time frame
+        function updateTimeFrame(timeframe) {
+            // Update active button
+            document.querySelectorAll('.time-filter button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(timeframe)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update dashboard data
+            updateStats();
+            displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
+        }
+
+        // Add this at the beginning of the script
+        const ADMIN_PASSWORD = '837337'; // Admin password
+
+        // Check for existing authentication on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+            if (isAuthenticated) {
+                showAdminContent();
+            } else {
+                // Check for stored password in localStorage
+                const storedPassword = localStorage.getItem('adminPassword');
+                if (storedPassword === ADMIN_PASSWORD) {
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    showAdminContent();
+                }
+            }
+        });
+
+        // Function to show admin content
+        function showAdminContent() {
+            const passwordScreen = document.getElementById('passwordScreen');
+            const adminContent = document.getElementById('adminContent');
+            
+            // Show success message
+            const passwordMessage = document.getElementById('passwordMessage');
+            passwordMessage.innerHTML = '<i class="fas fa-check-circle" style="color: #2ecc71;"></i> Access granted!';
+            passwordMessage.style.color = '#2ecc71';
+            
+            // Animate container out
+            const container = document.querySelector('.password-container');
+            container.style.animation = 'fadeOutDown 0.5s ease forwards';
+            
+            // Hide password screen with delay
+            setTimeout(() => {
+                passwordScreen.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => {
+                    passwordScreen.style.display = 'none';
+                    adminContent.classList.add('visible');
+                    initializeAdmin();
+                }, 300);
+            }, 500);
+        }
+
+        // Handle digit input and validation
+        const passwordInput = document.getElementById('passwordInput');
+        const digitInputs = [...passwordInput.getElementsByClassName('digit-input')];
+        const submitPassword = document.getElementById('submitPassword');
+
+        digitInputs.forEach((input, index) => {
+            // Auto-focus first input on page load
+            if (index === 0) {
+                input.focus();
+            }
+
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Allow only numbers
+                if (!/^\d*$/.test(value)) {
+                    input.value = '';
+                    return;
+                }
+
+                // Auto-move to next input
+                if (value && index < digitInputs.length - 1) {
+                    digitInputs[index + 1].focus();
+                }
+
+                // Check if all digits are filled
+                if (index === digitInputs.length - 1 && value) {
+                    const enteredPassword = digitInputs.map(input => input.value).join('');
+                    validatePassword(enteredPassword);
+                }
+
+                // Enable submit button if all digits are filled
+                const isComplete = digitInputs.every(input => input.value.length === 1);
+                submitPassword.disabled = !isComplete;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    digitInputs[index - 1].focus();
+                }
+                // Handle Enter key
+                if (e.key === 'Enter' && !submitPassword.disabled) {
+                    const enteredPassword = digitInputs.map(input => input.value).join('');
+                    validatePassword(enteredPassword);
+                }
+            });
+        });
+
+        // Enhanced password validation
+        function validatePassword(enteredPassword) {
+            if (enteredPassword === ADMIN_PASSWORD) {
+                // Store authentication
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                localStorage.setItem('adminPassword', ADMIN_PASSWORD);
+                
+                // Show admin content
+                showAdminContent();
+            } else {
+                // Show error message and shake effect
+                const passwordMessage = document.getElementById('passwordMessage');
+                passwordMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Incorrect password. Please try again.';
+                passwordMessage.style.color = '#e74c3c';
+                passwordInput.classList.add('shake');
+                
+                // Clear inputs
+                digitInputs.forEach(input => {
+                    input.value = '';
+                });
+                digitInputs[0].focus();
+                submitPassword.disabled = true;
+
+                // Remove shake class after animation
+                setTimeout(() => {
+                    passwordInput.classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        // Handle paste event for password
+        passwordInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numbers = pastedText.replace(/\D/g, '').slice(0, 6).split('');
+            
+            numbers.forEach((num, index) => {
+                if (index < digitInputs.length) {
+                    digitInputs[index].value = num;
+                    if (index === numbers.length - 1) {
+                        const enteredPassword = digitInputs.map(input => input.value).join('');
+                        validatePassword(enteredPassword);
+                    }
+                }
+            });
+        });
+
+        // Submit button click handler
+        submitPassword.addEventListener('click', () => {
+            const enteredPassword = digitInputs.map(input => input.value).join('');
+            validatePassword(enteredPassword);
+        });
+
+        // Handle paste event
+        passwordInput.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numbers = pastedText.replace(/\D/g, '').slice(0, 6).split('');
+            
+            numbers.forEach((num, index) => {
+                if (index < digitInputs.length) {
+                    digitInputs[index].value = num;
+                }
+            });
+
+            // Enable submit button if all digits are filled
+            const isComplete = digitInputs.every(input => input.value.length === 1);
+            submitPassword.disabled = !isComplete;
+
+            if (isComplete) {
+                digitInputs[5].focus();
+            } else {
+                digitInputs[numbers.length].focus();
+            }
+        });
+
+        // Add keyboard support for Enter key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !submitPassword.disabled) {
+                validatePassword();
+            }
+        });
+
+        // Tab Management
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                
+                // Update active tab button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Update active tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabId}Tab`) {
+                        content.classList.add('active');
+                    }
+                });
+
+                // Refresh content based on active tab
+                if (tabId === 'dashboard') {
+                    updateStats();
+                } else if (tabId === 'orders') {
+                    displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
+                } else if (tabId === 'products') {
+                    displayProducts();
+                }
+            });
+        });
+
+        // Add function to refresh data
+        async function refreshData() {
+            try {
+                await displayOrders(document.querySelector('.filter-btn.active').dataset.filter);
+                await displayProducts();
+                await updateStats();
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        }
+
+        // Add new refresh handling function
+        async function handleRefresh() {
+            const refreshButton = document.getElementById('refreshButton');
+            refreshButton.classList.add('refreshing');
+            await refreshData();
+            setTimeout(() => {
+                refreshButton.classList.remove('refreshing');
+            }, 1000);
+        }
+
+        // Product Management Functions
+        async function editProduct(productId) {
+            try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch product');
+                }
+                
+                const product = await response.json();
+                
+                // Update form with product data
+                document.getElementById('productId').value = productId;
+                document.getElementById('productName').value = product.name || '';
+                document.getElementById('productPrice').value = product.price || '';
+                document.getElementById('productCategory').value = product.category || 'drinks';
+                document.getElementById('productDescription').value = product.description || '';
+                
+                // Update form UI
+                document.getElementById('formTitle').textContent = 'Edit Product';
+                document.getElementById('submitButtonText').textContent = 'Update Product';
+                document.getElementById('cancelButton').style.display = 'block';
+                
+                // Show the form
+                document.getElementById('productForm').style.display = 'block';
+                document.getElementById('productName').focus();
+            } catch (error) {
+                console.error('Error editing product:', error);
+                showMessage(error.message || 'Error loading product details', 'error');
+            }
+        }
+
+        async function toggleAvailability(productId, newAvailability) {
+            try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ available: newAvailability })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update product availability');
+                }
+                
+                showNotification(
+                    `Product is now ${newAvailability ? 'available' : 'unavailable'}`,
+                    'success',
+                    'Availability Updated'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                showMessage(error.message || 'Error updating product availability', 'error');
+            }
+        }
+
+        function deleteProductConfirm(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                deleteProduct(productId);
+            }
+        }
+
+        async function deleteProduct(productId) {
+            try {
+                if (!productId || productId.length < 24) {
+                    showMessage('Invalid product ID', 'error');
+                    return;
+                }
+
+                if (!confirm('Are you sure you want to delete this product?')) {
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete product');
+                }
+                
+                showNotification(
+                    'Product has been deleted successfully',
+                    'success',
+                    'Product Deleted'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showMessage(error.message || 'Error deleting product', 'error');
+            }
+        }
+
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            
+            try {
+                const productId = document.getElementById('productId').value;
+                const name = document.getElementById('productName').value.trim();
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const category = document.getElementById('productCategory').value;
+                const description = document.getElementById('productDescription').value.trim();
+
+                // Validation checks
+                if (!name) {
+                    showNotification('Please enter a product name', 'warning', 'Missing Information');
+                    document.getElementById('productName').focus();
+                    return;
+                }
+
+                if (!price || price <= 0) {
+                    showNotification('Please enter a valid price', 'warning', 'Invalid Price');
+                    document.getElementById('productPrice').focus();
+                    return;
+                }
+
+                if (!category) {
+                    showNotification('Please select a category', 'warning', 'Missing Information');
+                    document.getElementById('productCategory').focus();
+                    return;
+                }
+
+                const productData = {
+                    name,
+                    price,
+                    category,
+                    description,
+                    available: true
+                };
+                
+                const url = productId 
+                    ? `${API_BASE_URL}/menu/${productId}`
+                    : `${API_BASE_URL}/menu`;
+                    
+                const response = await fetch(url, {
+                    method: productId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save product');
+                }
+                
+                showNotification(
+                    `${name} has been ${productId ? 'updated' : 'added'} successfully`,
+                    'success',
+                    'Product Saved'
+                );
+                
+                resetProductForm();
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification(
+                    error.message || 'Could not save product',
+                    'error',
+                    'Save Failed'
+                );
+            }
+        }
+
+        function resetProductForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('formTitle').textContent = 'Add New Product';
+            document.getElementById('submitButtonText').textContent = 'Add Product';
+            document.getElementById('cancelButton').style.display = 'none';
+            document.getElementById('productForm').style.display = 'none';
+        }
+
+        // Replace showToast function with showMessage
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+
+        function setupMobileOptimizations() {
+            // Prevent double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (event) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Prevent pinch zoom
+            document.addEventListener('touchmove', (event) => {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+
+            // Handle tab scrolling on mobile
+            const tabContainer = document.querySelector('.tab-container');
+            let isScrolling = false;
+            let startX;
+            let scrollLeft;
+
+            tabContainer.addEventListener('touchstart', (e) => {
+                isScrolling = true;
+                startX = e.touches[0].pageX - tabContainer.offsetLeft;
+                scrollLeft = tabContainer.scrollLeft;
+            });
+
+            tabContainer.addEventListener('touchmove', (e) => {
+                if (!isScrolling) return;
+                e.preventDefault();
+                const x = e.touches[0].pageX - tabContainer.offsetLeft;
+                const walk = (x - startX) * 2;
+                tabContainer.scrollLeft = scrollLeft - walk;
+            });
+
+            tabContainer.addEventListener('touchend', () => {
+                isScrolling = false;
+            });
+        }
+
+        // Add these variables at the top of the script
+        let lastOrderTimestamp = new Date().toISOString();
+        let isPageVisible = true;
+        let orderSound = null;
+
+        // Initialize sound
+        function initializeSound() {
+            orderSound = document.getElementById('newOrderSound');
+            // Enable sound only after user interaction
+            document.addEventListener('click', () => {
+                if (orderSound) {
+                    orderSound.play().then(() => {
+                        orderSound.pause();
+                        orderSound.currentTime = 0;
+                    }).catch(console.error);
+                }
+            }, { once: true });
+        }
+
+        // Show new order alert
+        function showNewOrderAlert(order) {
+            const alert = document.createElement('div');
+            alert.className = 'new-order-alert';
+            alert.innerHTML = `
+                <i class="fas fa-bell"></i>
+                <div class="alert-content">
+                    <h4>New Order Received!</h4>
+                    <p>Table ${order.tableNumber} - ${order.customerName}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Play sound if page is not visible
+            if (!isPageVisible && orderSound) {
+                orderSound.play().catch(console.error);
+            }
+            
+            // Remove alert after animation
+            alert.addEventListener('click', () => {
+                alert.remove();
+                // Switch to orders tab
+                const ordersTab = document.querySelector('[data-tab="orders"]');
+                if (ordersTab) ordersTab.click();
+            });
+            
+            setTimeout(() => alert.remove(), 4000);
+        }
+
+        // Check for new orders
+        async function checkNewOrders() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                
+                const orders = await response.json();
+                const newOrders = orders.filter(order => {
+                    const orderTime = new Date(order.timestamp);
+                    const lastCheck = new Date(lastOrderTimestamp);
+                    return orderTime > lastCheck && order.status === 'pending';
+                });
+                
+                if (newOrders.length > 0) {
+                    // Update timestamp to latest order
+                    lastOrderTimestamp = new Date().toISOString();
+                    
+                    // Show alerts for new orders
+                    newOrders.forEach(order => {
+                        showNewOrderAlert(order);
+                    });
+                    
+                    // Refresh displays
+                    await Promise.all([
+                        displayOrders(),
+                        updateStats()
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error checking for new orders:', error);
+            }
+        }
+
+        // Handle page visibility
+        document.addEventListener('visibilitychange', () => {
+            isPageVisible = document.visibilityState === 'visible';
+            if (isPageVisible) {
+                // Refresh data when page becomes visible
+                refreshData();
+            }
+        });
+
+        function showNotification(message, type = 'success', title = '') {
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notification => {
+                notification.remove();
+            });
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let icon = 'check-circle';
+            switch (type) {
+                case 'error':
+                    icon = 'exclamation-circle';
+                    title = title || 'Error';
+                    break;
+                case 'warning':
+                    icon = 'exclamation-triangle';
+                    title = title || 'Warning';
+                    break;
+                default:
+                    title = title || 'Success';
+            }
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}"></i>
+                <div class="notification-content">
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification on click
+            notification.addEventListener('click', () => notification.remove());
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease forwards';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Update the order status function with improved validation
+        async function updateOrderStatus(orderId, status) {
+            try {
+                if (!orderId) {
+                    showNotification('Invalid order ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update order status');
+                }
+                
+                showNotification(
+                    `Order #${orderId.slice(-6).toUpperCase()} marked as ${status}`,
+                    'success',
+                    'Order Updated'
+                );
+                
+                // Refresh the orders display and stats
+                await Promise.all([
+                    displayOrders(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                showNotification(
+                    error.message || 'Could not update order status',
+                    'error',
+                    'Update Failed'
+                );
+            }
+        }
+
+        // Update the product submission validation
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            
+            try {
+                const productId = document.getElementById('productId').value;
+                const name = document.getElementById('productName').value.trim();
+                const price = parseFloat(document.getElementById('productPrice').value);
+                const category = document.getElementById('productCategory').value;
+                const description = document.getElementById('productDescription').value.trim();
+
+                // Validation checks
+                if (!name) {
+                    showNotification('Please enter a product name', 'warning', 'Missing Information');
+                    document.getElementById('productName').focus();
+                    return;
+                }
+
+                if (!price || price <= 0) {
+                    showNotification('Please enter a valid price', 'warning', 'Invalid Price');
+                    document.getElementById('productPrice').focus();
+                    return;
+                }
+
+                if (!category) {
+                    showNotification('Please select a category', 'warning', 'Missing Information');
+                    document.getElementById('productCategory').focus();
+                    return;
+                }
+
+                const productData = {
+                    name,
+                    price,
+                    category,
+                    description,
+                    available: true
+                };
+                
+                const url = productId 
+                    ? `${API_BASE_URL}/menu/${productId}`
+                    : `${API_BASE_URL}/menu`;
+                    
+                const response = await fetch(url, {
+                    method: productId ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save product');
+                }
+                
+                showNotification(
+                    `${name} has been ${productId ? 'updated' : 'added'} successfully`,
+                    'success',
+                    'Product Saved'
+                );
+                
+                resetProductForm();
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error saving product:', error);
+                showNotification(
+                    error.message || 'Could not save product',
+                    'error',
+                    'Save Failed'
+                );
+            }
+        }
+
+        // Update the delete product validation
+        async function deleteProduct(productId) {
+            try {
+                if (!productId) {
+                    showNotification('Invalid product ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete product');
+                }
+                
+                showNotification(
+                    'Product has been deleted successfully',
+                    'success',
+                    'Product Deleted'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showNotification(
+                    error.message || 'Could not delete product',
+                    'error',
+                    'Delete Failed'
+                );
+            }
+        }
+
+        // Update the availability toggle validation
+        async function toggleAvailability(productId, newAvailability) {
+            try {
+                if (!productId) {
+                    showNotification('Invalid product ID', 'error', 'Validation Error');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/menu/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ available: newAvailability })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to update availability');
+                }
+                
+                showNotification(
+                    `Product is now ${newAvailability ? 'available' : 'unavailable'}`,
+                    'success',
+                    'Availability Updated'
+                );
+                
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                showNotification(
+                    error.message || 'Could not update availability',
+                    'error',
+                    'Update Failed'
+                );
+            }
+        }
+
+        // Add touch event handling for mobile
+        function setupTouchHandling() {
+            // Prevent zoom on double tap
+            let lastTapTime = 0;
+            document.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+                if (tapLength < 500 && tapLength > 0) {
+                    e.preventDefault();
+                }
+                lastTapTime = currentTime;
+            });
+
+            // Improve scrolling on iOS
+            document.addEventListener('touchmove', (e) => {
+                if (e.target.closest('.tab-container, .orders-grid, .product-grid')) {
+                    e.stopPropagation();
+                }
+            }, { passive: true });
+
+            // Add active state for touch devices
+            const buttons = document.querySelectorAll('button, .action-btn, .tab-btn');
+            buttons.forEach(button => {
+                button.addEventListener('touchstart', () => {
+                    button.classList.add('active-touch');
+                });
+                button.addEventListener('touchend', () => {
+                    button.classList.remove('active-touch');
+                });
+            });
+        }
+
+        // Add this at the beginning of the script section
+        // Check for existing authentication
+        document.addEventListener('DOMContentLoaded', () => {
+            const isAuthenticated = sessionStorage.getItem('adminAuthenticated') === 'true';
+            if (isAuthenticated) {
+                // Hide password screen and show admin content
+                const passwordScreen = document.getElementById('passwordScreen');
+                const adminContent = document.getElementById('adminContent');
+                
+                passwordScreen.style.display = 'none';
+                adminContent.classList.add('visible');
+                
+                // Initialize admin dashboard
+                initializeAdmin();
+            }
+        });
+
+        // Add this CSS class
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .active-touch {
+                    opacity: 0.8;
+                    transform: scale(0.98);
+                }
+                
+                /* Improve touch targets */
+                button, .action-btn, .tab-btn {
+                    min-height: 44px;
+                    min-width: 44px;
+                }
+                
+                /* Prevent text selection on touch */
+                * {
+                    -webkit-tap-highlight-color: transparent;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    user-select: none;
+                }
+                
+                /* Allow text selection in input fields */
+                input, textarea {
+                    -webkit-user-select: text;
+                    user-select: text;
+                }
+            </style>
+        `);
+
+        // Enhanced print receipt function
+        function printReceipt(order) {
+            try {
+                // Create receipt HTML
+                const receipt = document.createElement('div');
+                receipt.className = 'receipt print-receipt';
+                
+                const formattedDate = new Date(order.timestamp).toLocaleString('en-US', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                });
+                
+                receipt.innerHTML = `
+                    <div class="receipt-header">
+                        <h2>Mavrix Cafe</h2>
+                        <p>Order #${order._id.slice(-6).toUpperCase()}</p>
+                        <p>${formattedDate}</p>
+                    </div>
+                    
+                    <div class="receipt-details">
+                        <p><span>Customer:</span> <span>${order.customerName}</span></p>
+                        <p><span>Table:</span> <span>${order.tableNumber}</span></p>
+                        <p><span>Phone:</span> <span>${order.phoneNumber}</span></p>
+                    </div>
+                    
+                    <table class="receipt-items">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th class="amount">Price</th>
+                                <th class="amount">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items.map(item => `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td class="amount">₹${item.price.toFixed(2)}</td>
+                                    <td class="amount">₹${(item.price * item.quantity).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="receipt-total">
+                        <p>Total Amount: ₹${order.totalAmount.toFixed(2)}</p>
+                    </div>
+                    
+                    <div class="receipt-footer">
+                        <p>Thank you for dining with us!</p>
+                        <p>Visit us again</p>
+                        <p>${new Date().toLocaleDateString()}</p>
+                    </div>
+                `;
+                
+                // Remove any existing receipts
+                const existingReceipts = document.querySelectorAll('.print-receipt');
+                existingReceipts.forEach(r => r.remove());
+                
+                // Add receipt to body
+                document.body.appendChild(receipt);
+                
+                // Print with delay to ensure proper rendering
+                setTimeout(() => {
+                    window.print();
+                    // Remove receipt after printing
+                    setTimeout(() => receipt.remove(), 1000);
+                }, 300);
+            } catch (error) {
+                console.error('Error printing receipt:', error);
+                showNotification('Failed to print receipt', 'error', 'Print Error');
+            }
+        }
+    </script>
 </body>
 </html> 

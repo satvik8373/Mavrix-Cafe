@@ -1481,6 +1481,58 @@
                 padding: 1rem;
             }
         }
+
+        @keyframes orderAlert {
+            0% { transform: translateX(100%); opacity: 0; }
+            10% { transform: translateX(0); opacity: 1; }
+            90% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        .new-order-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: orderAlert 4s ease-in-out;
+            cursor: pointer;
+        }
+
+        .new-order-alert i {
+            font-size: 1.5rem;
+            color: var(--warning-color);
+        }
+
+        .new-order-alert .alert-content {
+            flex: 1;
+        }
+
+        .new-order-alert h4 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .new-order-alert p {
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .new-order-alert {
+                width: 90%;
+                left: 5%;
+                right: 5%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1504,6 +1556,11 @@
             </button>
         </div>
     </div>
+
+    <!-- Add this right after the opening body tag -->
+    <audio id="newOrderSound" preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
 
     <!-- Admin Content -->
     <div class="admin-content" id="adminContent">
@@ -2010,28 +2067,33 @@
         // Initialize admin dashboard
         async function initializeAdmin() {
             try {
+                // Initialize sound
+                initializeSound();
+                
                 // First display products and orders
                 await Promise.all([
                     displayProducts(),
                     displayOrders()
                 ]);
                 
-                // Then update stats after a short delay to ensure DOM elements are ready
+                // Then update stats after a short delay
                 setTimeout(async () => {
                     await updateStats();
                     
-                    // Set up auto-refresh
-                    setInterval(() => {
-                        const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-                        if (activeTab === 'dashboard') {
-                            updateStats();
+                    // Set up auto-refresh for orders and stats
+                    setInterval(checkNewOrders, 5000); // Check for new orders every 5 seconds
+                    setInterval(async () => {
+                        if (isPageVisible) {
+                            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                            if (activeTab === 'dashboard') {
+                                await updateStats();
+                            }
                         }
-                        displayOrders();
-                    }, 30000); // Refresh every 30 seconds
+                    }, 30000); // Update stats every 30 seconds
                 }, 500);
             } catch (error) {
                 console.error('Error initializing admin dashboard:', error);
-                showToast('Error initializing dashboard', 'error');
+                showMessage('Error initializing dashboard', 'error');
             }
         }
 
@@ -2380,8 +2442,12 @@
                 
                 showMessage(`Product ${productId ? 'updated' : 'added'} successfully`);
                 resetProductForm();
-                await displayProducts();
-                updateStats();
+                
+                // Immediately refresh the products display and stats
+                await Promise.all([
+                    displayProducts(),
+                    updateStats()
+                ]);
             } catch (error) {
                 console.error('Error saving product:', error);
                 showMessage(error.message || 'Error saving product', 'error');
@@ -2452,6 +2518,97 @@
                 isScrolling = false;
             });
         }
+
+        // Add these variables at the top of the script
+        let lastOrderTimestamp = new Date().toISOString();
+        let isPageVisible = true;
+        let orderSound = null;
+
+        // Initialize sound
+        function initializeSound() {
+            orderSound = document.getElementById('newOrderSound');
+            // Enable sound only after user interaction
+            document.addEventListener('click', () => {
+                if (orderSound) {
+                    orderSound.play().then(() => {
+                        orderSound.pause();
+                        orderSound.currentTime = 0;
+                    }).catch(console.error);
+                }
+            }, { once: true });
+        }
+
+        // Show new order alert
+        function showNewOrderAlert(order) {
+            const alert = document.createElement('div');
+            alert.className = 'new-order-alert';
+            alert.innerHTML = `
+                <i class="fas fa-bell"></i>
+                <div class="alert-content">
+                    <h4>New Order Received!</h4>
+                    <p>Table ${order.tableNumber} - ${order.customerName}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(alert);
+            
+            // Play sound if page is not visible
+            if (!isPageVisible && orderSound) {
+                orderSound.play().catch(console.error);
+            }
+            
+            // Remove alert after animation
+            alert.addEventListener('click', () => {
+                alert.remove();
+                // Switch to orders tab
+                const ordersTab = document.querySelector('[data-tab="orders"]');
+                if (ordersTab) ordersTab.click();
+            });
+            
+            setTimeout(() => alert.remove(), 4000);
+        }
+
+        // Check for new orders
+        async function checkNewOrders() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders`);
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                
+                const orders = await response.json();
+                const newOrders = orders.filter(order => {
+                    const orderTime = new Date(order.timestamp);
+                    const lastCheck = new Date(lastOrderTimestamp);
+                    return orderTime > lastCheck && order.status === 'pending';
+                });
+                
+                if (newOrders.length > 0) {
+                    // Update timestamp to latest order
+                    lastOrderTimestamp = new Date().toISOString();
+                    
+                    // Show alerts for new orders
+                    newOrders.forEach(order => {
+                        showNewOrderAlert(order);
+                    });
+                    
+                    // Refresh displays
+                    await Promise.all([
+                        displayOrders(),
+                        updateStats()
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error checking for new orders:', error);
+            }
+        }
+
+        // Handle page visibility
+        document.addEventListener('visibilitychange', () => {
+            isPageVisible = document.visibilityState === 'visible';
+            if (isPageVisible) {
+                // Refresh data when page becomes visible
+                refreshData();
+            }
+        });
     </script>
 </body>
 </html> 

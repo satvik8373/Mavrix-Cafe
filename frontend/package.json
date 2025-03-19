@@ -4,11 +4,15 @@
   "description": "Restaurant Management System Frontend",
   "private": true,
   "scripts": {
-    "build": "echo 'No build step needed'"
+    "build": "echo 'No build step needed'",
+    "dev": "http-server . -p 5000 -c-1"
   },
   "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
   "engines": {
     "node": ">=14.0.0"
   },
   "license": "MIT"
-} 
+}

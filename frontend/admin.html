@@ -1664,6 +1664,116 @@
         }
 
         /* ... existing styles ... */
+
+        /* Add print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            
+            .receipt-print, .receipt-print * {
+                visibility: visible;
+            }
+            
+            .receipt-print {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 80mm; /* Standard thermal receipt width */
+                padding: 10mm;
+            }
+
+            .receipt-print .receipt-header {
+                text-align: center;
+                margin-bottom: 10mm;
+            }
+
+            .receipt-print .receipt-items {
+                border-top: 1px dashed #000;
+                border-bottom: 1px dashed #000;
+                padding: 5mm 0;
+                margin: 5mm 0;
+            }
+
+            .receipt-print .receipt-total {
+                text-align: right;
+                font-weight: bold;
+                margin-top: 5mm;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Receipt Modal Styles */
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .receipt-modal.show {
+            display: flex;
+        }
+
+        .receipt-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 80mm;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .receipt-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .receipt-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .receipt-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .receipt-btn.print {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .receipt-btn.print:hover {
+            background: #34495e;
+        }
+
+        // ... existing styles ...
     </style>
 </head>
 <body>
@@ -2010,7 +2120,12 @@
                         <h3>Order #${order._id.slice(-6).toUpperCase()}</h3>
                         <span class="order-time">${formattedTime}</span>
                     </div>
-                    <span class="status-badge ${order.status}">${order.status}</span>
+                    <div class="order-actions">
+                        <span class="status-badge ${order.status}">${order.status}</span>
+                        <button onclick="showReceiptModal(${JSON.stringify(order).replace(/"/g, '&quot;')})" class="action-btn">
+                            <i class="fas fa-receipt"></i> Print
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="order-content">
@@ -3175,6 +3290,100 @@
                 }
             </style>
         `);
+
+        // Add this function to create the receipt HTML
+        function generateReceiptHTML(order) {
+            const date = new Date(order.timestamp).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+            
+            return `
+                <div class="receipt-print">
+                    <div class="receipt-header">
+                        <h2>Mavrix Cafe</h2>
+                        <p>Order #${order._id.slice(-6).toUpperCase()}</p>
+                        <p>${date}</p>
+                    </div>
+                    
+                    <div class="receipt-customer">
+                        <p>Customer: ${order.customerName}</p>
+                        <p>Table: ${order.tableNumber}</p>
+                        <p>Phone: ${order.phoneNumber}</p>
+                    </div>
+                    
+                    <div class="receipt-items">
+                        <table style="width: 100%">
+                            <thead>
+                                <tr>
+                                    <th style="text-align: left">Item</th>
+                                    <th style="text-align: center">Qty</th>
+                                    <th style="text-align: right">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${order.items.map(item => `
+                                    <tr>
+                                        <td>${item.name}</td>
+                                        <td style="text-align: center">${item.quantity}</td>
+                                        <td style="text-align: right">₹${(item.price * item.quantity).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="receipt-total">
+                        <p><strong>Total Amount: ₹${order.totalAmount.toFixed(2)}</strong></p>
+                    </div>
+                    
+                    <div class="receipt-footer" style="text-align: center; margin-top: 20px;">
+                        <p>Thank you for visiting!</p>
+                        <p>Please visit again</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add this function to show the receipt modal
+        function showReceiptModal(order) {
+            // Create modal if it doesn't exist
+            let modal = document.querySelector('.receipt-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.className = 'receipt-modal';
+                document.body.appendChild(modal);
+            }
+            
+            // Generate receipt content
+            modal.innerHTML = `
+                <div class="receipt-content">
+                    <button class="receipt-close" onclick="closeReceiptModal()">×</button>
+                    ${generateReceiptHTML(order)}
+                    <div class="receipt-actions no-print">
+                        <button class="receipt-btn print" onclick="printReceipt()">
+                            <i class="fas fa-print"></i> Print Receipt
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Show modal
+            modal.classList.add('show');
+        }
+
+        // Add this function to close the receipt modal
+        function closeReceiptModal() {
+            const modal = document.querySelector('.receipt-modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Add this function to handle printing
+        function printReceipt() {
+            window.print();
+        }
     </script>
 </body>
 </html> 

@@ -730,7 +730,7 @@
     <div class="menu-container">
         <header class="header">
             <div class="header-content">
-                <h1><i class="fas fa-coffee"></i> Mavrix Cafe</h1>
+                <h1><i class="fas fa-coffee"></i> <span class="store-name">Mavrix Cafe</span></h1>
                 <p>Delicious food & beverages at your table</p>
                 <div class="table-info">
                     <i class="fas fa-table"></i> Table <span id="tableNumber">-</span>
@@ -1192,7 +1192,7 @@
                     
                     // Show success message
                     showNotification(
-                        'Your order has been placed successfully! We will notify you when it\'s ready.',
+                        `Your order has been placed successfully! ${localStorage.getItem('storeName') || 'Mavrix Cafe'} will notify you when it's ready.`,
                         'success',
                         'Order Placed'
                     );
@@ -1354,9 +1354,20 @@
             }, { once: true });
         }
 
+        // Add this near the beginning of your script section
+        function loadStoreName() {
+            const storeName = localStorage.getItem('storeName') || 'Mavrix Cafe';
+            document.querySelectorAll('.store-name').forEach(el => {
+                el.textContent = storeName;
+            });
+            // Also update the document title
+            document.title = storeName;
+        }
+
         // Initialize the page
         window.addEventListener('DOMContentLoaded', async () => {
             try {
+                loadStoreName();
                 getTableNumber();
                 await displayMenuItems('all');
                 setupCategoryTabs();

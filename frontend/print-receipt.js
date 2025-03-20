@@ -8,6 +8,18 @@ function formatCurrency(amount) {
 
 function generateReceiptHTML(order) {
     try {
+        // Get all store details from localStorage
+        const storeDetails = {
+            name: localStorage.getItem('storeName') || 'Mavrix Cafe',
+            tagline: localStorage.getItem('storeTagline') || 'Your Premium Coffee Destination',
+            address: localStorage.getItem('storeAddress') || '123 Coffee Street, Bangalore',
+            phone: localStorage.getItem('storePhone') || '+91 80 1234 5678',
+            gst: localStorage.getItem('storeGST') || '29ABCDE1234F1Z5',
+            email: localStorage.getItem('storeEmail') || 'info@mavrixcafe.com',
+            thankYouMessage: localStorage.getItem('thankYouMessage') || 'Thank you for choosing',
+            footerMessage: localStorage.getItem('footerMessage') || 'We hope to serve you again soon'
+        };
+        
         const date = new Date(order.timestamp).toLocaleString('en-IN', {
             dateStyle: 'medium',
             timeStyle: 'short'
@@ -34,12 +46,13 @@ function generateReceiptHTML(order) {
                             <path fill="#2c3e50" d="M2,21V19H20V21H2M20,8V5H18V8H20M20,3A2,2 0 0,1 22,5V8A2,2 0 0,1 20,10H18V13A4,4 0 0,1 14,17H8A4,4 0 0,1 4,13V3H20M16,5H6V13A2,2 0 0,0 8,15H14A2,2 0 0,0 16,13V5Z" />
                         </svg>
                     </div>
-                    <h2 style="margin: 0; font-size: 24px; color: #2c3e50;">Mavrix Cafe</h2>
-                    <p style="margin: 5px 0; color: #666; font-size: 12px;">Your Premium Coffee Destination</p>
+                    <h2 style="margin: 0; font-size: 24px; color: #2c3e50;">${storeDetails.name}</h2>
+                    <p style="margin: 5px 0; color: #666; font-size: 12px;">${storeDetails.tagline}</p>
                     <div style="margin: 15px 0; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 10px 0;">
-                        <p style="margin: 0; font-size: 14px;">123 Coffee Street, Bangalore</p>
-                        <p style="margin: 5px 0; font-size: 14px;">Tel: +91 80 1234 5678</p>
-                        <p style="margin: 0; font-size: 14px;">GST No: 29ABCDE1234F1Z5</p>
+                        <p style="margin: 0; font-size: 14px;">${storeDetails.address}</p>
+                        <p style="margin: 5px 0; font-size: 14px;">Tel: ${storeDetails.phone}</p>
+                        <p style="margin: 5px 0; font-size: 14px;">Email: ${storeDetails.email}</p>
+                        <p style="margin: 0; font-size: 14px;">GST No: ${storeDetails.gst}</p>
                     </div>
                 </div>
 
@@ -113,10 +126,8 @@ function generateReceiptHTML(order) {
 
                 <!-- Footer -->
                 <div style="text-align: center; margin-top: 20px; color: #666;">
-                    <p style="margin: 5px 0; font-size: 14px;">Thank you for choosing Mavrix Cafe!</p>
-                    <p style="margin: 5px 0; font-size: 12px;">We hope to serve you again soon.</p>
-                    
-                    
+                    <p style="margin: 5px 0; font-size: 14px;">${storeDetails.thankYouMessage} ${storeDetails.name}!</p>
+                    <p style="margin: 5px 0; font-size: 12px;">${storeDetails.footerMessage}</p>
                 </div>
             </div>
         `;
@@ -128,11 +139,9 @@ function generateReceiptHTML(order) {
 
 function printReceipt(order) {
     try {
-        // Validate order object
-        if (!order || typeof order !== 'object') {
-            throw new Error('Invalid order data');
-        }
-
+        // Get store name for the title
+        const storeName = localStorage.getItem('storeName') || 'Mavrix Cafe';
+        
         // Create a hidden iframe for printing
         const iframe = document.createElement('iframe');
         iframe.style.display = 'none';
@@ -143,114 +152,114 @@ function printReceipt(order) {
         const htmlContent = `
             <!DOCTYPE html>
             <html>
-                <head>
-                    <title>Print Receipt - Mavrix Cafe</title>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <style>
-                        @page {
-                            size: 98.4mm 225.4mm; /* Envelope #9 size */
-                            margin: 0;
-                        }
-                        
-                        html {
-                            height: 100%;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            background: white;
-                            min-height: fit-content;
-                            height: auto;
-                            width: 98.4mm;
-                            position: relative;
-                            box-sizing: border-box;
+            <head>
+                <title>${storeName} - Receipt</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    @page {
+                        size: 98.4mm 225.4mm; /* Envelope #9 size */
+                        margin: 0;
+                    }
+                    
+                    html {
+                        height: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                        min-height: fit-content;
+                        height: auto;
+                        width: 98.4mm;
+                        position: relative;
+                        box-sizing: border-box;
+                    }
+                    
+                    .receipt {
+                        width: 90mm !important;
+                        margin: 0 auto !important;
+                        padding: 10px 5px !important;
+                        box-sizing: border-box !important;
+                        background: white;
+                        height: fit-content;
+                    }
+                    
+                    @media print {
+                        html, body {
+                            width: 98.4mm !important;
+                            height: auto !important;
+                            min-height: 0 !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
                         }
                         
                         .receipt {
-                            width: 90mm !important;
                             margin: 0 auto !important;
-                            padding: 10px 5px !important;
-                            box-sizing: border-box !important;
-                            background: white;
-                            height: fit-content;
+                            padding: 5px !important;
+                            width: 90mm !important;
+                            height: auto !important;
+                            page-break-after: avoid !important;
+                            page-break-before: avoid !important;
                         }
                         
-                        @media print {
-                            html, body {
-                                width: 98.4mm !important;
-                                height: auto !important;
-                                min-height: 0 !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                            }
-                            
-                            .receipt {
-                                margin: 0 auto !important;
-                                padding: 5px !important;
-                                width: 90mm !important;
-                                height: auto !important;
-                                page-break-after: avoid !important;
-                                page-break-before: avoid !important;
-                            }
-                            
-                            /* Compact spacing for print */
-                            .receipt > div {
-                                margin-bottom: 8px !important;
-                            }
-                            
-                            .receipt h2 {
-                                font-size: 18px !important;
-                                margin: 5px 0 !important;
-                            }
-                            
-                            .receipt h3 {
-                                font-size: 14px !important;
-                                margin: 5px 0 !important;
-                            }
-                            
-                            .receipt p {
-                                margin: 3px 0 !important;
-                                line-height: 1.2 !important;
-                            }
-                            
-                            .receipt table {
-                                margin: 5px 0 !important;
-                            }
-                            
-                            .receipt td, .receipt th {
-                                padding: 3px 0 !important;
-                            }
-                            
-                            /* Remove any page breaks */
-                            * {
-                                page-break-inside: avoid !important;
-                            }
+                        /* Compact spacing for print */
+                        .receipt > div {
+                            margin-bottom: 8px !important;
                         }
                         
-                        /* Print preview adjustments */
-                        @media screen {
-                            body {
-                                background: #f0f0f0;
-                                padding: 20px 0;
-                                min-height: fit-content;
-                            }
-                            
-                            .receipt {
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                            }
+                        .receipt h2 {
+                            font-size: 18px !important;
+                            margin: 5px 0 !important;
                         }
-                    </style>
-                </head>
-                <body>
-                    ${receiptHTML}
-                </body>
+                        
+                        .receipt h3 {
+                            font-size: 14px !important;
+                            margin: 5px 0 !important;
+                        }
+                        
+                        .receipt p {
+                            margin: 3px 0 !important;
+                            line-height: 1.2 !important;
+                        }
+                        
+                        .receipt table {
+                            margin: 5px 0 !important;
+                        }
+                        
+                        .receipt td, .receipt th {
+                            padding: 3px 0 !important;
+                        }
+                        
+                        /* Remove any page breaks */
+                        * {
+                            page-break-inside: avoid !important;
+                        }
+                    }
+                    
+                    /* Print preview adjustments */
+                    @media screen {
+                        body {
+                            background: #f0f0f0;
+                            padding: 20px 0;
+                            min-height: fit-content;
+                        }
+                        
+                        .receipt {
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                ${receiptHTML}
+            </body>
             </html>
         `;
-        
+
         iframe.contentDocument.open();
         iframe.contentDocument.write(htmlContent);
         iframe.contentDocument.close();

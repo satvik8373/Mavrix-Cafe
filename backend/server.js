@@ -187,6 +187,57 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Data Management Endpoints
+app.post('/api/orders/import', async (req, res) => {
+    try {
+        const orders = req.body;
+        if (!Array.isArray(orders)) {
+            return res.status(400).json({ message: 'Invalid data format. Expected array of orders.' });
+        }
+
+        await Order.deleteMany({}); // Clear existing orders
+        await Order.insertMany(orders);
+        
+        res.json({ message: 'Orders imported successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to import orders', error: error.message });
+    }
+});
+
+app.post('/api/menu/import', async (req, res) => {
+    try {
+        const menuItems = req.body;
+        if (!Array.isArray(menuItems)) {
+            return res.status(400).json({ message: 'Invalid data format. Expected array of menu items.' });
+        }
+
+        await MenuItem.deleteMany({}); // Clear existing menu items
+        await MenuItem.insertMany(menuItems);
+        
+        res.json({ message: 'Menu items imported successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to import menu items', error: error.message });
+    }
+});
+
+app.delete('/api/orders/all', async (req, res) => {
+    try {
+        await Order.deleteMany({});
+        res.json({ message: 'All orders deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete orders', error: error.message });
+    }
+});
+
+app.delete('/api/menu/all', async (req, res) => {
+    try {
+        await MenuItem.deleteMany({});
+        res.json({ message: 'All menu items deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete menu items', error: error.message });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

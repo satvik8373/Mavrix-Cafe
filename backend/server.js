@@ -36,28 +36,18 @@ const app = express();
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CORS_ORIGIN || 'https://mavrix-cafe.onrender.com']
-    : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    ? [process.env.CORS_ORIGIN || 'https://mavrix-cafe.onrender.com', 'https://mavrix-cafe.vercel.app']
+    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Default route
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Mavrix Cafe API Server',
-    status: 'running',
-    endpoints: {
-      menu: '/api/menu',
-      orders: '/api/orders',
-      health: '/health'
-    }
-  });
-});
+
 
 // MongoDB Connection
 const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/mavrix-cafe';
@@ -67,14 +57,15 @@ const startServer = () => {
   const PORT = process.env.PORT || 5000;
   
   // Create server instance
-  const server = app.listen(PORT, '127.0.0.1', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Mavrix Cafe API Server running on port ${PORT}`);
+    console.log(`🌐 Server bound to: 0.0.0.0:${PORT}`);
     console.log(`📱 Authentication: ${twilioClient ? 'Twilio SMS Enabled' : 'Development Mode (Test Codes)'}`);
-    console.log(`🔗 Health Check: http://localhost:${PORT}/health`);
+    console.log(`🔗 Health Check: http://0.0.0.0:${PORT}/health`);
     console.log(`📋 API Endpoints:`);
-    console.log(`   - Menu: http://localhost:${PORT}/api/menu`);
-    console.log(`   - Orders: http://localhost:${PORT}/api/orders`);
-    console.log(`   - Auth: http://localhost:${PORT}/api/auth/send-verification`);
+    console.log(`   - Menu: http://0.0.0.0:${PORT}/api/menu`);
+    console.log(`   - Orders: http://0.0.0.0:${PORT}/api/orders`);
+    console.log(`   - Auth: http://0.0.0.0:${PORT}/api/auth/send-verification`);
     console.log(`✅ Server is ready to accept requests!`);
   });
 
@@ -546,6 +537,17 @@ app.get('/health', (req, res) => {
     port: process.env.PORT || 5000,
     timestamp: new Date().toISOString(),
     message: mongoStatus === 'connected' ? 'All systems operational' : 'Running without database'
+  });
+});
+
+// Root endpoint for Render health checks
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Mavrix Cafe API Server is running',
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    port: process.env.PORT || 5000,
+    host: '0.0.0.0'
   });
 });
 

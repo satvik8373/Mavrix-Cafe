@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJTSURBVFhH7ZY9aBRBFMf/b3Zv70zOYGI+zKcSFYkiKGIhWogIFhYWFhYWFhYiFlpYWFhYWFhYiIWIhYVYWFiIhYiFhYVoEOMXUZSoURM1yea83dt9b9YLmJzJ7d2exRH8wcLOzrz3/8/Me7MD/Nd6qFKpzIrIaQBTANIACgCyAKYBHAJwWEQKhmFcBXDDNM3QNM1uEKyq6jgRPQKQB/ASwHsAGwDWAXwB8A3ALoAdAFsi8gbAMoAFAHcty5oIw3DQYDQYDNIAzgC4DOAZEW0CqAN4ISKfiMgQkTwRTQI4BuA4gBMishBF0W0Aj4UQtXK5XPd9P9Vut/eHYBjGJIDLInIJwEsielqtVt/5vt/p9XqRZVlGLpezXNe1HccxbNu2TNM0wzA0ANQBvAbwDsAigIthGH7udDrJECRWPQvgOoB5InoSBMGbVqvl9/v9SETNOI5/EtEPpdQPpdS2UmqLmTeYeY2ZV5h5mZmXmPk5Ec0R0QwzZ5IgGGPVFwDcIqKnQRAsNZvNn0qpSCkVxXEcMXOklIqjKAqVUoFS6jszvwLwQEROEtEhABkA6TiO9wIwxqrPA7ijlJoLgmC52Wz2lVIDZh4wcz+O48+2bS8y8z0ROQfgKIAJABkRsX3fdxqNxu8QjFU/A+C+UupREASfW61WD8CAmQfMvMvMn0TkIYDTAI4AyItISkRs13WtQqGQchzHGIZgmOYZEbkC4LFS6h4zPxCRBQDzABaZ+RmAJwDuALgG4CSAvIhkRMTUdf1Xmv8Jfb/6BVg8qRjL8dhnAAAAAElFTkSuQmCC">
+    <link rel="shortcut icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJTSURBVFhH7ZY9aBRBFMf/b3Zv70zOYGI+zKcSFYkiKGIhWogIFhYWFhYWFhYiFlpYWFhYWFhYiIWIhYVYWFiIhYiFhYVoEOMXUZSoURM1yea83dt9b9YLmJzJ7d2exRH8wcLOzrz3/8/Me7MD/Nd6qFKpzIrIaQBTANIACgCyAKYBHAJwWEQKhmFcBXDDNM3QNM1uEKyq6jgRPQKQB/ASwHsAGwDWAXwB8A3ALoAdAFsi8gbAMoAFAHcty5oIw3DQYDQYDNIAzgC4DOAZEW0CqAN4ISKfiMgQkTwRTQI4BuA4gBMishBF0W0Aj4UQtXK5XPd9P9Vut/eHYBjGJIDLInIJwEsielqtVt/5vt/p9XqRZVlGLpezXNe1HccxbNu2TNM0wzA0ANQBvAbwDsAigIthGH7udDrJECRWPQvgOoB5InoSBMGbVqvl9/v9SETNOI5/EtEPpdQPpdS2UmqLmTeYeY2ZV5h5mZmXmPk5Ec0R0QwzZ5IgGGPVFwDcIqKnQRAsNZvNn0qpSCkVxXEcMXOklIqjKAqVUoFS6jszvwLwQEROEtEhABkA6TiO9wIwxqrPA7ijlJoLgmC52Wz2lVIDZh4wcz+O48+2bS8y8z0ROQfgKIAJABkRsX3fdxqNxu8QjFU/A+C+UupREASfW61WD8CAmQfMvMvMn0TkIYDTAI4AyItISkRs13WtQqGQchzHGIZgmOYZEbkC4LFS6h4zPxCRBQDzABaZ+RmAJwDuALgG4CSAvIhkRMTUdf1Xmv8Jfb/6BVg8qRjL8dhnAAAAAElFTkSuQmCC">
+
+    <title>Mavrix Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --success-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            position: fixed;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        .menu-container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            padding-bottom: 100px; /* Space for cart preview */
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: visible;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .table-info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .category-tabs {
+            position: relative;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .category-tabs-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .category-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 0 2rem;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scroll-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .scroll-arrow:hover {
+            background: #34495e;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .scroll-arrow.left {
+            left: 0.5rem;
+        }
+
+        .scroll-arrow.right {
+            right: 0.5rem;
+        }
+
+        .scroll-arrow.hidden {
+            display: none;
+        }
+
+        .category-tab {
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-tab:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .category-tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 100%;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-item-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            margin: 0;
+        }
+
+        .menu-item-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            white-space: nowrap;
+            padding: 0.3rem 0.8rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+        }
+
+        .menu-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--background-color);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .quantity-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.5rem;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            color: var(--secondary-color);
+        }
+
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .add-to-cart {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .add-to-cart:hover {
+            background: #34495e;
+        }
+
+        .add-to-cart:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .unavailable-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .cart-preview {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .cart-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .user-profile-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-profile-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .user-menu {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-hover);
+            padding: 1.5rem;
+            min-width: 250px;
+            z-index: 999;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--background-color);
+            margin-bottom: 1rem;
+        }
+
+        .user-info i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .user-info span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .menu-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .menu-actions button {
+            background: none;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .menu-actions button:hover {
+            background: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        /* My Orders Page */
+        .orders-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background-color);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .orders-page-header {
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .orders-page-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .orders-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .orders-page-header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+
+            .orders-page-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .orders-container {
+                padding: 1rem 0.5rem;
+            }
+
+            .order-header {
+                padding: 0.8rem 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .order-header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .order-items {
+                padding: 0.8rem 1rem;
+            }
+
+            .order-item-detail {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+                padding: 0.6rem 0;
+            }
+        }
+
+        /* Desktop Enhanced Design */
+        @media (min-width: 769px) {
+            .orders-container {
+                padding: 3rem 2rem;
+            }
+
+            .order-item {
+                margin-bottom: 1.5rem;
+            }
+
+            .order-header:hover {
+                background: var(--primary-color);
+                color: white;
+            }
+
+            .order-header:hover .order-status {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .order-item {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .order-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .order-item.pending {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .order-item.completed {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .order-header {
+            background: var(--background-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .order-header:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .order-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .order-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .order-header p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .order-header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .order-status {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .order-status.pending {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .order-status.completed {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .order-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .order-toggle:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
+        }
+
+        .order-toggle.rotated {
+            transform: rotate(180deg);
+        }
+
+        .order-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+        }
+
+        .order-details.expanded {
+            max-height: 500px;
+        }
+
+        .order-items {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .order-item-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+
+        .order-item-detail:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-detail span:first-child {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .order-item-detail span:last-child {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .order-total {
+            background: var(--background-color);
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eee;
+            text-align: right;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .cart-count {
+            background: white;
+            color: var(--primary-color);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        #orderModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            max-width: 600px;
+            width: 90%;
+            margin: 2rem auto;
+            padding: 2rem;
+            position: relative;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid var(--background-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .close-modal {
+            background: var(--background-color);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .cart-items {
+            margin: 0 0 2rem 0;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .cart-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .cart-item-price {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-item-total {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .cart-item .remove-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-item .remove-item:hover {
+            color: var(--secondary-color);
+            background: rgba(231, 76, 60, 0.1);
+            transform: scale(1.1);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .customer-form {
+            margin-top: 2rem;
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid transparent;
+            background: white;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        }
+
+        .submit-order {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .submit-order:hover {
+            background: #219a52;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .submit-order:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .menu-container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .table-info {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .category-tab {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .menu-item {
+                padding: 1rem;
+            }
+
+            .menu-item-title {
+                font-size: 1.1rem;
+            }
+
+            .menu-item-price {
+                font-size: 1.1rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            .quantity-control {
+                padding: 0.3rem;
+            }
+
+            .quantity-btn {
+                padding: 0.2rem 0.4rem;
+            }
+
+            .add-to-cart {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .cart-preview {
+                bottom: env(safe-area-inset-bottom, 1rem);
+                right: 1rem;
+                left: 1rem;
+                padding: 0.8rem 1.5rem;
+                border-radius: calc(var(--border-radius) * 0.75);
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 1rem auto;
+                padding: 1.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .cart-items {
+                max-height: 40vh;
+            }
+
+            .cart-item {
+                padding: 1rem;
+            }
+
+            .cart-item-title {
+                font-size: 1rem;
+            }
+
+            .cart-total {
+                padding: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .form-group input {
+                padding: 0.8rem;
+            }
+
+            .submit-order {
+                padding: 1rem;
+            }
+
+            input[type="number"],
+            input[type="text"],
+            input[type="tel"] {
+                font-size: 16px; /* Prevents iOS zoom on input focus */
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .menu-container {
+                padding: 20px 40px;
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                gap: 2rem;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .menu-container {
+                padding: 20px 60px;
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                gap: 2.5rem;
+            }
+        }
+
+        /* Add smooth momentum scrolling for iOS */
+        .menu-container,
+        .modal-content,
+        .category-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Prevent pull-to-refresh and overscroll effects */
+        .menu-container {
+            overscroll-behavior-y: contain;
+        }
+
+        /* Add loading animation styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-text, .error-text {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .error-text {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+
+
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .loading-content p {
+            margin-top: 20px;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        #teaCupAnimation {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+                <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-coffee"></i> <span class="store-name">Mavrix Cafe</span></h1>       
+                <p>Delicious food & beverages at your table</p>
+                <div class="table-info">
+                    <i class="fas fa-table"></i> Table <span id="tableNumber">-</span>
+                </div>
+            </div>
+            
+            <!-- User Profile Button -->
+            <div class="user-profile-btn" onclick="toggleUserMenu()">
+                <i class="fas fa-user"></i>
+            </div>
+        </header>
+
+        <div class="category-tabs-container">
+            <button class="scroll-arrow left" onclick="scrollCategories('left')" id="leftArrow">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-arrow right" onclick="scrollCategories('right')" id="rightArrow">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="category-tabs">
+                <div class="category-scroll" id="categoryScroll">
+                    <button class="category-tab active" data-category="all">
+                        <i class="fas fa-th-list"></i> All Items
+                    </button>
+                    <button class="category-tab" data-category="drinks">
+                        <i class="fas fa-coffee"></i> Drinks
+                    </button>
+                    <button class="category-tab" data-category="food">
+                        <i class="fas fa-utensils"></i> Food
+                    </button>
+                    <button class="category-tab" data-category="desserts">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+
+        <div class="cart-preview" onclick="openOrderModal()">
+            <i class="fas fa-shopping-cart"></i>
+            <span>View Cart</span>
+            <div class="cart-count" id="cartCount">0</div>
+        </div>
+
+        <!-- User Menu -->
+        <div class="user-menu" id="userMenu">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="menuUserName">Guest</span>
+            </div>
+            <div class="menu-actions">
+                <button onclick="viewMyOrders()">
+                    <i class="fas fa-list"></i> My Orders
+                </button>
+                <button onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+    </div>
+
+    <div id="orderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shopping-bag"></i> Your Order</h2>
+                <button class="close-modal" onclick="closeOrderModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-total">
+                <span><i class="fas fa-receipt"></i> Total Amount:</span>
+                <span id="cartTotal">₹0.00</span>
+            </div>
+            <form id="orderForm" onsubmit="submitOrder(event)" class="customer-form">
+                <div class="form-group">
+                    <label for="customerName"><i class="fas fa-user"></i> Your Name</label>
+                    <input type="text" id="customerName" required placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone"><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" id="customerPhone" required placeholder="Enter your phone number">
+                </div>
+                <button type="submit" class="submit-order">
+                    <i class="fas fa-paper-plane"></i> Place Order
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div id="teaCupAnimation"></div>
+            <p>Preparing your order...</p>
+        </div>
+    </div>
+
+    <!-- My Orders Page -->
+    <div id="ordersPage" class="orders-page">
+        <div class="orders-page-header">
+            <button class="back-btn" onclick="closeOrdersPage()">
+                <i class="fas fa-arrow-left"></i> Back to Menu
+            </button>
+            <h2><i class="fas fa-list"></i> My Orders</h2>
+        </div>
+        <div class="orders-container">
+            <div id="ordersList">
+                <div class="loading-text">Loading your orders...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration and Libraries -->
+    <script src="config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    <script>
+        let cart = [];
+        let tableNumber = null;
+        let currentCategory = 'all';
+        let userData = null;
+        let authToken = null;
+
+        // Get table number from URL
+        function getTableNumber() {
+            const params = new URLSearchParams(window.location.search);
+            tableNumber = params.get('table');
+            if (tableNumber) {
+                document.getElementById('tableNumber').textContent = tableNumber;
+            }
+        }
+
+        // API Configuration
+        const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:5000/api';
+
+        // Fetch products from API
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/menu`);
+                if (!response.ok) throw new Error('Failed to fetch menu items');
+                const products = await response.json();
+                
+                // Organize products by category
+                const organizedProducts = {
+                    drinks: products.filter(p => p.category === 'drinks'),
+                    food: products.filter(p => p.category === 'food'),
+                    desserts: products.filter(p => p.category === 'desserts')
+                };
+                
+                // Store in localStorage
+                localStorage.setItem('cafeProducts', JSON.stringify(organizedProducts));
+                return organizedProducts;
+            } catch (error) {
+                return { drinks: [], food: [], desserts: [] };
+            }
+        }
+
+        // Get products from localStorage or API
+        async function getProducts() {
+            try {
+                let products = localStorage.getItem('cafeProducts');
+                if (!products) {
+                    return await fetchProducts();
+                } else {
+                    products = JSON.parse(products);
+                    // Refresh products in background
+                    fetchProducts().catch(() => {});
+                    return products;
+                }
+            } catch (error) {
+                return await fetchProducts();
+            }
+        }
+
+        // Display menu items
+        async function displayMenuItems(category = 'all') {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '<div class="loading-text">Loading menu items...</div>';
+            
+            try {
+                const products = await getProducts();
+                menuGrid.innerHTML = '';
+
+                Object.entries(products).forEach(([productCategory, items]) => {
+                    if (category === 'all' || category === productCategory) {
+                        items.forEach(item => {
+                            const menuItem = document.createElement('div');
+                            menuItem.className = 'menu-item';
+                            
+                            // Get quantity from cart if exists
+                            const cartItem = cart.find(ci => ci._id === item._id);
+                            const currentQty = cartItem ? cartItem.quantity : 0;
+                            
+                            menuItem.innerHTML = `
+                                ${!item.available ? '<span class="unavailable-badge">Currently Unavailable</span>' : ''}
+                                <div class="menu-item-header">
+                                    <h3 class="menu-item-title">${item.name}</h3>
+                                    <span class="menu-item-price">₹${item.price.toFixed(2)}</span>
+                                </div>
+                                <div class="menu-item-actions">
+                                    <div class="quantity-control" style="display: flex; align-items: center; gap: 8px;">
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', -1)" 
+                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
+                                            ${currentQty === 0 ? 'disabled' : ''}>
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <span id="quantity-${item._id}" class="quantity-display" 
+                                            style="min-width: 30px; text-align: center; font-weight: bold;">
+                                            ${currentQty}
+                                        </span>
+                                        <button class="quantity-btn" onclick="updateQuantity('${item._id}', 1)"
+                                            style="width: 32px; height: 32px; border-radius: 50%; border: none; background: #f0f0f0; cursor: pointer;"
+                                            ${!item.available ? 'disabled' : ''}>
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    ${currentQty > 0 ? `
+                                        <button class="add-to-cart update-cart" onclick="updateCart('${item._id}')"
+                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                                            <i class="fas fa-shopping-cart"></i> Update Cart
+                                        </button>
+                                    ` : `
+                                        <button class="add-to-cart" onclick="updateQuantity('${item._id}', 1)" ${!item.available ? 'disabled' : ''}
+                                            style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+                                        <i class="fas fa-plus"></i> Add to Cart
+                                    </button>
+                                    `}
+                                </div>
+                            `;
+                            menuGrid.appendChild(menuItem);
+                        });
+                    }
+                });
+            } catch (error) {
+                menuGrid.innerHTML = '<div class="error-text">Failed to load menu items. Please try again later.</div>';
+            }
+        }
+
+        // Update quantity and cart
+        function updateQuantity(itemId, change) {
+            const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+            let currentQty = parseInt(quantityDisplay.textContent);
+            let newQty = currentQty + change;
+            
+            // Ensure quantity stays between 0 and 10
+            newQty = Math.max(0, Math.min(10, newQty));
+            
+            // Update display
+            quantityDisplay.textContent = newQty;
+            
+            // Update buttons state
+            const parentDiv = quantityDisplay.closest('.menu-item-actions');
+            const minusBtn = parentDiv.querySelector('.quantity-btn:first-child');
+            minusBtn.disabled = newQty === 0;
+            
+            // Auto-update cart
+            updateCart(itemId, newQty);
+        }
+
+        // Update cart with new quantity
+        async function updateCart(itemId, quantity) {
+            try {
+                const products = await getProducts();
+                let product = null;
+                
+                // Find the product
+                for (const category in products) {
+                    const found = products[category].find(p => p._id === itemId);
+                    if (found) {
+                        product = found;
+                        break;
+                    }
+                }
+
+                if (product && product.available) {
+                    const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+                    const currentQty = parseInt(quantityDisplay.textContent);
+                    
+                    // Remove item if quantity is 0
+                    if (currentQty === 0) {
+                        cart = cart.filter(item => item._id !== itemId);
+                    } else {
+                        // Update or add item
+                        const existingItem = cart.find(item => item._id === itemId);
+                    if (existingItem) {
+                            existingItem.quantity = currentQty;
+                    } else {
+                        cart.push({
+                                _id: itemId,
+                            name: product.name,
+                            price: product.price,
+                                quantity: currentQty
+                        });
+                    }
+                    }
+                    
+                    updateCartCount();
+                    displayCartItems();
+
+                    
+                    // Refresh menu display to update buttons
+                    await displayMenuItems(currentCategory || 'all');
+                }
+            } catch (error) {
+
+            }
+        }
+
+        
+
+        // Update cart count
+        function updateCartCount() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+
+        // Open order modal
+        function openOrderModal() {
+            if (cart.length === 0) {
+
+                return;
+            }
+            
+            document.getElementById('orderModal').style.display = 'block';
+            displayCartItems();
+        }
+
+        // Close order modal
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        // Display cart items
+        function displayCartItems() {
+            const cartItems = document.getElementById('cartItems');
+            const cartTotal = document.getElementById('cartTotal');
+            cartItems.innerHTML = '';
+            
+            let total = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.name}</div>
+                        <div class="cart-item-price">
+                            <i class="fas fa-tag"></i> ₹${item.price.toFixed(2)} × ${item.quantity}
+                        </div>
+                    </div>
+                    <div class="cart-item-total">₹${itemTotal.toFixed(2)}</div>
+                    <button class="remove-item" onclick="removeFromCart('${item._id}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+            
+            cartTotal.textContent = `₹${total.toFixed(2)}`;
+        }
+
+        // Remove from cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item._id !== itemId);
+            updateCartCount();
+            displayCartItems();
+            
+            if (cart.length === 0) {
+                closeOrderModal();
+            }
+        }
+
+        // Initialize tea cup animation
+        let teaCupAnim = null;
+
+        // Load the animation data
+        fetch('tea-cup.json')
+            .then(response => response.json())
+            .then(animationData => {
+                teaCupAnim = lottie.loadAnimation({
+                    container: document.getElementById('teaCupAnimation'),
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: false,
+                    animationData: animationData
+                });
+            })
+            .catch(error => {});
+
+        async function submitOrder(event) {
+            event.preventDefault();
+            
+            const customerName = document.getElementById('customerName').value.trim();
+            const phoneNumber = document.getElementById('customerPhone').value.trim();
+            
+            // Enhanced validation
+            if (!customerName || customerName.length < 2) {
+                showNotification('Please enter a valid name (at least 2 characters)', 'error', 'Validation Error');
+                return;
+            }
+            
+            if (!phoneNumber || !/^\d{10}$/.test(phoneNumber)) {
+                showNotification('Please enter a valid 10-digit phone number', 'error', 'Validation Error');
+                return;
+            }
+            
+            if (!tableNumber) {
+                showNotification('Table number is required. Please scan the QR code again.', 'error', 'Validation Error');
+                return;
+            }
+            
+            if (cart.length === 0) {
+                showNotification('Your cart is empty', 'error', 'Cart Empty');
+                return;
+            }
+
+            // Show loading overlay with animation
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+            if (teaCupAnim) {
+                teaCupAnim.play();
+            }
+
+            try {
+                // Prepare order data
+                const orderData = {
+                    customerName,
+                    phoneNumber,
+                    tableNumber: parseInt(tableNumber),
+                    items: cart.map(item => ({
+                        itemId: item._id,
+                        name: item.name,
+                        price: parseFloat(item.price),
+                        quantity: parseInt(item.quantity)
+                    })),
+                    totalAmount: parseFloat(cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)),
+                    status: 'pending'
+                };
+
+
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                };
+
+                // Add authorization header if user is logged in
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/orders`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(orderData)
+                });
+
+                const responseText = await response.text();
+
+                let orderResponse;
+                try {
+                    orderResponse = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error('Invalid response from server');
+                }
+
+                if (!response.ok) {
+                    throw new Error(orderResponse.error || 'Failed to place order');
+                }
+
+                // Clear cart and form
+                cart = [];
+                updateCartCount();
+                document.getElementById('orderForm').reset();
+                
+                // Hide loading overlay and stop animation after a delay
+                setTimeout(() => {
+                    if (teaCupAnim) {
+                        teaCupAnim.stop();
+                    }
+                    loadingOverlay.style.display = 'none';
+                    
+                    // Show success message
+                    showNotification(
+                        `Your order has been placed successfully! ${localStorage.getItem('storeName') || 'Mavrix Cafe'} will notify you when it's ready.`,
+                        'success',
+                        'Order Placed'
+                    );
+                    closeOrderModal();
+                }, 2000);
+
+            } catch (error) {
+                
+                // Hide loading overlay and stop animation
+                if (teaCupAnim) {
+                    teaCupAnim.stop();
+                }
+                loadingOverlay.style.display = 'none';
+                
+                showNotification(
+                    error.message || 'Failed to place order. Please try again.',
+                    'error',
+                    'Order Failed'
+                );
+            }
+        }
+
+        // Add a more robust showNotification function
+        function showNotification(message, type = 'success', title = '') {
+            const toast = document.createElement('div');
+            toast.className = `message message-${type}`;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                background: ${type === 'success' ? '#2ecc71' : '#e74c3c'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                min-width: 300px;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+
+            const titleElement = title ? `<div style="font-weight: bold; margin-bottom: 5px;">${title}</div>` : '';
+            toast.innerHTML = `
+                ${titleElement}
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Add slide-in animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Add category scrolling functionality
+        function scrollCategories(direction) {
+            const scroll = document.getElementById('categoryScroll');
+            const scrollAmount = 200;
+            
+            if (direction === 'left') {
+                scroll.scrollLeft -= scrollAmount;
+            } else {
+                scroll.scrollLeft += scrollAmount;
+            }
+            
+            updateScrollArrows();
+        }
+
+        function updateScrollArrows() {
+            const scroll = document.getElementById('categoryScroll');
+            const leftArrow = document.getElementById('leftArrow');
+            const rightArrow = document.getElementById('rightArrow');
+            
+            // Show/hide left arrow
+            if (scroll.scrollLeft <= 0) {
+                leftArrow.classList.add('hidden');
+            } else {
+                leftArrow.classList.remove('hidden');
+            }
+            
+            // Show/hide right arrow
+            if (scroll.scrollLeft >= (scroll.scrollWidth - scroll.clientWidth - 5)) {
+                rightArrow.classList.add('hidden');
+            } else {
+                rightArrow.classList.remove('hidden');
+            }
+        }
+
+        // Setup category tabs
+        function setupCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    displayMenuItems(currentCategory);
+                });
+            });
+        }
+
+        // Add these new functions
+        function requestFullscreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        }
+
+        function setupMobileOptimizations() {
+            // Prevent double-tap zoom
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', (event) => {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+
+            // Prevent pinch zoom
+            document.addEventListener('touchmove', (event) => {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
+
+            // Request fullscreen on first user interaction for iOS
+            document.addEventListener('touchstart', function initiateFullscreen() {
+                requestFullscreen();
+                document.removeEventListener('touchstart', initiateFullscreen);
+            }, { once: true });
+        }
+
+        // Add this near the beginning of your script section
+        function loadStoreName() {
+            const storeName = localStorage.getItem('storeName') || 'Mavrix Cafe';
+            document.querySelectorAll('.store-name').forEach(el => {
+                el.textContent = storeName;
+            });
+            // Also update the document title
+            document.title = storeName;
+        }
+
+        // Authentication Functions
+        function checkAuthStatus() {
+            authToken = localStorage.getItem('authToken');
+            const storedUserData = localStorage.getItem('userData');
+            
+            if (authToken && storedUserData) {
+                try {
+                    userData = JSON.parse(storedUserData);
+                    updateUserInterface();
+                } catch (error) {
+                    // Invalid user data, clear storage
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('userData');
+                    updateUserInterface();
+                }
+            } else {
+                updateUserInterface();
+            }
+        }
+
+                function updateUserInterface() {
+            const menuUserNameElement = document.getElementById('menuUserName');
+
+            if (userData) {
+                menuUserNameElement.textContent = userData.name;
+            } else {
+                menuUserNameElement.textContent = 'Guest';
+            }
+        }
+
+        function toggleUserMenu() {
+            const userMenu = document.getElementById('userMenu');
+            userMenu.classList.toggle('show');
+        }
+
+                function viewMyOrders() {
+            if (!userData) {
+                // Redirect to login page
+                const urlParams = new URLSearchParams(window.location.search);
+                const table = urlParams.get('table');
+                const loginUrl = table ? `/login.html?table=${table}` : '/login.html';
+                window.location.href = loginUrl;
+                return;
+            }
+
+            document.getElementById('ordersPage').style.display = 'block';
+            loadUserOrders();
+        }
+
+        function closeOrdersPage() {
+            document.getElementById('ordersPage').style.display = 'none';
+        }
+
+        function toggleOrderDetails(orderId) {
+            const orderDetails = document.getElementById(`orderDetails-${orderId}`);
+            const toggleBtn = document.getElementById(`toggleBtn-${orderId}`);
+            
+            if (orderDetails.classList.contains('expanded')) {
+                orderDetails.classList.remove('expanded');
+                toggleBtn.classList.remove('rotated');
+            } else {
+                orderDetails.classList.add('expanded');
+                toggleBtn.classList.add('rotated');
+            }
+        }
+
+        async function loadUserOrders() {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '<div class="loading-text">Loading your orders...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+
+                const orders = await response.json();
+                
+                if (orders.length === 0) {
+                    ordersList.innerHTML = '<div class="loading-text">No orders found</div>';
+                    return;
+                }
+
+                ordersList.innerHTML = '';
+                orders.forEach(order => {
+                    const orderElement = createOrderElement(order);
+                    ordersList.appendChild(orderElement);
+                });
+            } catch (error) {
+                ordersList.innerHTML = '<div class="error-text">Failed to load orders</div>';
+            }
+        }
+
+                function createOrderElement(order) {
+            const orderDiv = document.createElement('div');
+            orderDiv.className = `order-item ${order.status}`;
+
+            const orderDate = new Date(order.timestamp).toLocaleString();
+            const statusText = order.status === 'pending' ? 'Processing' : 'Completed';
+
+            orderDiv.innerHTML = `
+                <div class="order-header" onclick="toggleOrderDetails('${order._id}')">
+                    <div class="order-header-left">
+                        <h3>Order #${order._id.slice(-6)}</h3>
+                        <p>${orderDate} • Table ${order.tableNumber}</p>
+                    </div>
+                    <div class="order-header-right">
+                        <span class="order-status ${order.status}">${statusText}</span>
+                        <button class="order-toggle" id="toggleBtn-${order._id}">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="order-details" id="orderDetails-${order._id}">
+                    <div class="order-items">
+                        ${order.items.map(item => `
+                            <div class="order-item-detail">
+                                <span>${item.name} × ${item.quantity}</span>
+                                <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">
+                        Total: ₹${order.totalAmount.toFixed(2)}
+                    </div>
+                </div>
+            `;
+
+            return orderDiv;
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            userData = null;
+            authToken = null;
+            updateUserInterface();
+            document.getElementById('userMenu').classList.remove('show');
+
+            
+            // Redirect to login page after logout
+            const urlParams = new URLSearchParams(window.location.search);
+            const table = urlParams.get('table');
+            const loginUrl = table ? `/login.html?table=${table}` : '/login.html';
+            setTimeout(() => {
+                window.location.href = loginUrl;
+            }, 1000);
+        }
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const userMenu = document.getElementById('userMenu');
+            const userProfileBtn = document.querySelector('.user-profile-btn');
+            
+            if (!userMenu.contains(e.target) && !userProfileBtn.contains(e.target)) {
+                userMenu.classList.remove('show');
+            }
+        });
+
+        // Initialize the page
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                checkAuthStatus();
+                loadStoreName();
+                getTableNumber();
+                await displayMenuItems('all');
+                setupCategoryTabs();
+                updateScrollArrows();
+                setupMobileOptimizations();
+                
+                // Add scroll event listener
+                const categoryScroll = document.getElementById('categoryScroll');
+                if (categoryScroll) {
+                    categoryScroll.addEventListener('scroll', updateScrollArrows);
+                }
+                
+                // Add resize event listener
+                window.addEventListener('resize', updateScrollArrows);
+            } catch (error) {
+
+            }
+        });
+    </script>
+</body>
+</html> 

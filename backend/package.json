@@ -1,0 +1,27 @@
+{
+  "name": "mavrix-cafe-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Mavrix Cafe",
+  "main": "server.js",
+  "scripts": {
+    "start": "node start-server.js",
+    "dev": "nodemon start-server.js",
+    "prod": "NODE_ENV=production node start-server.js",
+    "init-db": "node init-db.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "twilio": "^4.19.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["cafe", "restaurant", "api", "nodejs", "express", "mongodb"],
+  "author": "Mavrix Cafe",
+  "license": "MIT"
+}

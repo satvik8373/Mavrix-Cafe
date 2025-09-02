@@ -267,7 +267,7 @@ app.post('/api/auth/verify-code', async (req, res) => {
             { expiresIn: '7d' }
           );
 
-          console.log(`✅ User ${user.name} verified successfully`);
+          console.log(` User ${user.name} verified successfully`);
 
           res.json({
             message: 'Phone number verified successfully',
@@ -552,6 +552,33 @@ app.get('/', (req, res) => {
 });
 
 // Data Management Endpoints
+// Admin: List users with login data
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const users = await User.find({}, {
+      name: 1,
+      phoneNumber: 1,
+      isVerified: 1,
+      createdAt: 1,
+      lastLogin: 1,
+      orders: 1
+    }).sort({ lastLogin: -1 }).lean();
+
+    const result = users.map(u => ({
+      _id: u._id,
+      name: u.name,
+      phoneNumber: u.phoneNumber,
+      isVerified: !!u.isVerified,
+      createdAt: u.createdAt,
+      lastLogin: u.lastLogin,
+      ordersCount: Array.isArray(u.orders) ? u.orders.length : 0
+    }));
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
 app.post('/api/orders/import', async (req, res) => {
     try {
         const orders = req.body;

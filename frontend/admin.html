@@ -3966,11 +3966,14 @@
                             if (!name || !username || !password) throw new Error('All fields are required');
                             const res = await fetch(`${API_BASE_URL}/admin/staff`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
+                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('adminJwt') || localStorage.getItem('authToken') || ''}` },
                                 body: JSON.stringify({ name, username, password })
                             });
                             if (!res.ok) throw new Error('Create failed');
                             if (msg) { msg.style.display = 'block'; msg.textContent = 'Staff created'; msg.className = 'message message-success'; }
+                            document.getElementById('staffName').value='';
+                            document.getElementById('staffUsername').value='';
+                            document.getElementById('staffPassword').value='';
                             loadUsers();
                         } catch (err) {
                             if (msg) { msg.style.display = 'block'; msg.textContent = err.message || 'Error'; msg.className = 'message message-error'; }
@@ -3988,13 +3991,13 @@
                 const tbody = document.getElementById('usersTableBody');
                 if (!tbody) return;
                 if (!users.length) {
-                    tbody.innerHTML = '<tr><td colspan="6">No users found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7">No users found</td></tr>';
                     return;
                 }
                 tbody.innerHTML = users.map(u => `
                     <tr>
                         <td>${escapeHtml(u.name || '')}</td>
-                        <td>${escapeHtml(u.phoneNumber || '')}</td>
+                        <td>${escapeHtml(u.phoneNumber || u.username || '')}</td>
                         <td>${u.isVerified ? 'Yes' : 'No'}</td>
                         <td>${u.ordersCount || 0}</td>
                         <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
@@ -4004,7 +4007,7 @@
                 `).join('');
             } catch (e) {
                 const tbody = document.getElementById('usersTableBody');
-                if (tbody) tbody.innerHTML = '<tr><td colspan="6">Error loading users</td></tr>';
+                if (tbody) tbody.innerHTML = '<tr><td colspan="7">Error loading users</td></tr>';
             }
         }
 

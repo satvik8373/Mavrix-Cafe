@@ -11,7 +11,6 @@ const { MenuItem } = require('./models/MenuItem');
 const { Order } = require('./models/Order');
 const User = require('./models/User');
 const auth = require('./middleware/auth');
-const { requireRole } = require('./middleware/auth');
 
 dotenv.config();
 
@@ -576,7 +575,7 @@ app.get('/', (req, res) => {
 
 // Data Management Endpoints
 // Admin: List users with login data
-app.get('/api/admin/users', auth, requireRole('admin'), async (req, res) => {
+app.get('/api/admin/users', async (req, res) => {
   try {
     const users = await User.find({}, {
       name: 1,
@@ -584,7 +583,9 @@ app.get('/api/admin/users', auth, requireRole('admin'), async (req, res) => {
       isVerified: 1,
       createdAt: 1,
       lastLogin: 1,
-      orders: 1
+      orders: 1,
+      role: 1,
+      username: 1
     }).sort({ lastLogin: -1 }).lean();
 
     const result = users.map(u => ({
@@ -594,7 +595,9 @@ app.get('/api/admin/users', auth, requireRole('admin'), async (req, res) => {
       isVerified: !!u.isVerified,
       createdAt: u.createdAt,
       lastLogin: u.lastLogin,
-      ordersCount: Array.isArray(u.orders) ? u.orders.length : 0
+      ordersCount: Array.isArray(u.orders) ? u.orders.length : 0,
+      role: u.role,
+      username: u.username
     }));
 
     res.json(result);
@@ -603,48 +606,71 @@ app.get('/api/admin/users', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
-// Admin: create staff (admin only)
-app.post('/api/admin/staff', auth, requireRole('admin'), async (req, res) => {
+// Admin: Create staff user (admin only)
+app.post('/api/admin/staff', auth, (req, res, next) => require('./middleware/auth').adminAuth(req, res, next), async (req, res) => {
   try {
-    const { name, username, password } = req.body;
+    const { name, username, password } = req.body || {};
     if (!name || !username || !password) {
-      return res.status(400).json({ error: 'name, username, password are required' });
+      return res.status(400).json({ error: 'Name, username and password are required' });
     }
-    const existing = await User.findOne({ username, role: 'staff' });
-    if (existing) return res.status(409).json({ error: 'Username already exists' });
-    const passwordHash = await bcrypt.hash(password, 10);
-    const staff = await User.create({ name, username, passwordHash, role: 'staff', isVerified: true });
-    res.status(201).json({ id: staff._id, name: staff.name, username: staff.username, role: staff.role });
-  } catch (e) {
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+    const hashed = await bcrypt.hash(password, 10);
+    const staff = await User.create({
+      role: 'staff',
+      name,
+      username,
+      password: hashed,
+      isVerified: true
+    });
+    res.status(201).json({
+      _id: staff._id,
+      name: staff.name,
+      username: staff.username,
+      role: staff.role,
+      createdAt: staff.createdAt
+    });
+  } catch (error) {
     res.status(500).json({ error: 'Failed to create staff' });
   }
 });
 
-// Staff login
+// Staff login (username/password)
 app.post('/api/auth/staff/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'username and password required' });
-    const staff = await User.findOne({ username, role: 'staff', active: true });
-    if (!staff) return res.status(401).json({ error: 'Invalid credentials' });
-    const ok = await bcrypt.compare(password, staff.passwordHash || '');
-    if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
-    staff.lastLogin = new Date();
-    await staff.save();
-    const token = jwt.sign({ userId: staff._id }, process.env.JWT_SECRET || 'your_jwt_secret_here', { expiresIn: '7d' });
-    res.json({ token, user: { id: staff._id, name: staff.name, role: staff.role } });
-  } catch (e) {
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+    const user = await User.findOne({ username }).select('+password');
+    if (!user || (user.role !== 'staff' && user.role !== 'admin')) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    const ok = await bcrypt.compare(password, user.password || '');
+    if (!ok) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    user.lastLogin = new Date();
+    await user.save();
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET || 'your_jwt_secret_here', { expiresIn: '7d' });
+    res.json({
+      token,
+      user: { _id: user._id, name: user.name, username: user.username, role: user.role }
+    });
+  } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
 });
 
-// Staff: view orders (read-only)
-app.get('/api/staff/orders', auth, requireRole('staff', 'admin'), async (req, res) => {
+// Staff-only: view orders
+app.get('/api/staff/orders', auth, (req, res, next) => require('./middleware/auth').staffAuth(req, res, next), async (req, res) => {
   try {
-    const orders = await Order.find().sort({ timestamp: -1 }).lean();
+    const orders = await Order.find().sort({ timestamp: -1 });
     res.json(orders);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch orders' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching orders' });
   }
 });
 app.post('/api/orders/import', async (req, res) => {

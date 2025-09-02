@@ -1355,6 +1355,41 @@
             border-left-color: var(--success-color);
         }
 
+        /* Users/Staff tab styles */
+        .users-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .users-table-wrapper {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: auto;
+        }
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+        }
+        .users-table thead th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: var(--background-color);
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 1px solid #eceff1;
+        }
+        .users-table tbody td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            color: var(--text-primary);
+        }
+        .users-table tbody tr:hover {
+            background: #fafbfc;
+        }
+
         .order-header {
             padding: 1.5rem;
             background: var(--background-color);
@@ -3909,16 +3944,6 @@
                     <div class="users-header">
                         <h2>Users</h2>
                         <button class="action-btn" id="refreshUsersBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
-                        <button class="action-btn" id="openAddStaff"><i class="fas fa-user-plus"></i> Add Staff</button>
-                    </div>
-                    <div class="add-staff" id="addStaffForm" style="display:none;">
-                        <div class="form-row">
-                            <input id="staffName" placeholder="Name" />
-                            <input id="staffUsername" placeholder="Username" />
-                            <input id="staffPassword" type="password" placeholder="Password" />
-                            <button class="action-btn" id="createStaffBtn"><i class="fas fa-save"></i> Create</button>
-                        </div>
-                        <div id="addStaffMsg" class="message" style="display:none;"></div>
                     </div>
                     <div class="users-table-wrapper">
                         <table class="users-table">
@@ -3930,11 +3955,10 @@
                                     <th>Orders</th>
                                     <th>Created</th>
                                     <th>Last Login</th>
-                                    <th>Role</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <tr><td colspan="7">Loading...</td></tr>
+                                <tr><td colspan="6">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -3942,85 +3966,11 @@
                 const tabsContainer = document.querySelector('#adminContent') || document.body;
                 tabsContainer.appendChild(usersContent);
 
-                btn.addEventListener('click', () => {
-                    // Switch tabs
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    btn.classList.add('active');
-                    usersContent.classList.add('active');
-                    loadUsers();
-                });
-
-                usersContent.addEventListener('click', async (e) => {
-                    if (e.target && e.target.id === 'refreshUsersBtn') {
-                        loadUsers();
-                    } else if (e.target && e.target.id === 'openAddStaff') {
-                        const f = document.getElementById('addStaffForm');
-                        if (f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
-                    } else if (e.target && e.target.id === 'createStaffBtn') {
-                        const name = document.getElementById('staffName').value.trim();
-                        const username = document.getElementById('staffUsername').value.trim();
-                        const password = document.getElementById('staffPassword').value.trim();
-                        const msg = document.getElementById('addStaffMsg');
-                        try {
-                            if (!name || !username || !password) throw new Error('All fields are required');
-                            const res = await fetch(`${API_BASE_URL}/admin/staff`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('adminJwt') || localStorage.getItem('authToken') || ''}` },
-                                body: JSON.stringify({ name, username, password })
-                            });
-                            if (!res.ok) throw new Error('Create failed');
-                            if (msg) { msg.style.display = 'block'; msg.textContent = 'Staff created'; msg.className = 'message message-success'; }
-                            document.getElementById('staffName').value='';
-                            document.getElementById('staffUsername').value='';
-                            document.getElementById('staffPassword').value='';
-                            loadUsers();
-                        } catch (err) {
-                            if (msg) { msg.style.display = 'block'; msg.textContent = err.message || 'Error'; msg.className = 'message message-error'; }
-                        }
-                    }
-                });
-            }
-        });
-
-        async function loadUsers() {
-            try {
-                const res = await fetch(`${API_BASE_URL}/admin/users`);
-                if (!res.ok) throw new Error('Failed to fetch users');
-                const users = await res.json();
-                const tbody = document.getElementById('usersTableBody');
-                if (!tbody) return;
-                if (!users.length) {
-                    tbody.innerHTML = '<tr><td colspan="7">No users found</td></tr>';
-                    return;
-                }
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${escapeHtml(u.name || '')}</td>
-                        <td>${escapeHtml(u.phoneNumber || u.username || '')}</td>
-                        <td>${u.isVerified ? 'Yes' : 'No'}</td>
-                        <td>${u.ordersCount || 0}</td>
-                        <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
-                        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}</td>
-                        <td>${escapeHtml(u.role || 'user')}</td>
-                    </tr>
-                `).join('');
-            } catch (e) {
-                const tbody = document.getElementById('usersTableBody');
-                if (tbody) tbody.innerHTML = '<tr><td colspan="7">Error loading users</td></tr>';
-            }
-        }
-
-        // Inject Staff tab and content if not present, and wire handlers
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabsHeader = document.querySelector('.admin-tabs')
-                || document.querySelector('.tab-container')
-                || document.querySelector('.tab-buttons');
-            if (tabsHeader && !document.querySelector('[data-tab="staff"]')) {
+                // Add a separate Staff tab
                 const staffBtn = document.createElement('button');
                 staffBtn.className = 'tab-btn';
                 staffBtn.dataset.tab = 'staff';
-                staffBtn.innerHTML = '<i class="fas fa-user-tie"></i> Staff';
+                staffBtn.textContent = 'Staff';
                 tabsHeader.appendChild(staffBtn);
 
                 const staffContent = document.createElement('div');
@@ -4056,9 +4006,24 @@
                                 <tr><td colspan="5">Loading...</td></tr>
                             </tbody>
                         </table>
-                    </div>`;
-                const tabsContainer = document.querySelector('#adminContent') || document.body;
+                    </div>
+                `;
                 tabsContainer.appendChild(staffContent);
+
+                btn.addEventListener('click', () => {
+                    // Switch tabs
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    usersContent.classList.add('active');
+                    loadUsers();
+                });
+
+                usersContent.addEventListener('click', async (e) => {
+                    if (e.target && e.target.id === 'refreshUsersBtn') {
+                        loadUsers();
+                    }
+                });
 
                 staffBtn.addEventListener('click', () => {
                     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -4100,21 +4065,52 @@
             }
         });
 
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/users`);
+                if (!res.ok) throw new Error('Failed to fetch users');
+                const users = await res.json();
+                const tbody = document.getElementById('usersTableBody');
+                if (!tbody) return;
+                if (!users.length) {
+                    tbody.innerHTML = '<tr><td colspan="6">No users found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${escapeHtml(u.name || '')}</td>
+                        <td>${escapeHtml(u.phoneNumber || u.username || '')}</td>
+                        <td>${u.isVerified ? 'Yes' : 'No'}</td>
+                        <td>${u.ordersCount || 0}</td>
+                        <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
+                        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}</td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                const tbody = document.getElementById('usersTableBody');
+                if (tbody) tbody.innerHTML = '<tr><td colspan="6">Error loading users</td></tr>';
+            }
+        }
+
         async function loadStaff() {
             try {
-                const res = await fetch(`${API_BASE_URL}/admin/staff`, { headers: { 'Authorization': `Bearer ${sessionStorage.getItem('adminJwt') || localStorage.getItem('authToken') || ''}` }});
+                const res = await fetch(`${API_BASE_URL}/admin/users`);
                 if (!res.ok) throw new Error('Failed to fetch staff');
-                const staff = await res.json();
+                const users = await res.json();
+                const staff = users.filter(u => (u.role === 'staff' || u.role === 'admin'));
                 const tbody = document.getElementById('staffTableBody');
                 if (!tbody) return;
-                if (!staff.length) { tbody.innerHTML = '<tr><td colspan="5">No staff found</td></tr>'; return; }
-                tbody.innerHTML = staff.map(s => `
+                if (!staff.length) {
+                    tbody.innerHTML = '<tr><td colspan="5">No staff found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = staff.map(u => `
                     <tr>
-                        <td>${escapeHtml(s.name||'')}</td>
-                        <td>${escapeHtml(s.username||'')}</td>
-                        <td>${escapeHtml(s.role||'staff')}</td>
-                        <td>${s.createdAt ? new Date(s.createdAt).toLocaleString() : '-'}</td>
-                        <td>${s.lastLogin ? new Date(s.lastLogin).toLocaleString() : '-'}</td>
+                        <td>${escapeHtml(u.name || '')}</td>
+                        <td>${escapeHtml(u.username || '')}</td>
+                        <td>${escapeHtml(u.role || '')}</td>
+                        <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
+                        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}</td>
                     </tr>
                 `).join('');
             } catch (e) {

@@ -41,7 +41,7 @@ const allowlistProd = [
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow server-to-server or no-origin (curl/postman)
+    // Allow server-to-server or tools (no origin)
     if (!origin) return callback(null, true);
 
     const isProd = process.env.NODE_ENV === 'production';
@@ -50,11 +50,11 @@ const corsOptions = {
       return callback(allowed ? null : new Error('CORS not allowed'), allowed);
     }
 
-    // Development: allow localhost and LAN IPs on common dev ports
+    // Development: allow localhost and common private LAN ranges
     const devAllowed = [
-      /^http:\/\/localhost:(3000|5173|5000)$/,
-      /^http:\/\/127\.0\.0\.1:(3000|5173|5000)$/,
-      /^http:\/\/[0-9]{1,3}(\.[0-9]{1,3}){3}:(3000|5173)$/ // e.g., 172.20.10.5:3000
+      /^http:\/\/localhost:\d{2,5}$/,
+      /^http:\/\/127\.0\.0\.1:\d{2,5}$/,
+      /^http:\/\/(10|172|192)\.(\d{1,3})\.(\d{1,3})\.(\d{1,3}):\d{2,5}$/
     ];
     const matched = devAllowed.some((re) => re.test(origin));
     return callback(matched ? null : new Error('CORS not allowed'), matched);

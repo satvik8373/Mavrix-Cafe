@@ -3892,8 +3892,9 @@
         // =============== Users Tab (Admin) ===============
         // Inject Users tab button and content if not present
         document.addEventListener('DOMContentLoaded', () => {
-            const tabsBar = document.querySelector('.tab-bar, .tab-buttons, .tabs, .tab-container');
-            const tabsHeader = document.querySelector('.tab-container') || document.querySelector('.tab-buttons');
+            const tabsHeader = document.querySelector('.admin-tabs')
+                || document.querySelector('.tab-container')
+                || document.querySelector('.tab-buttons');
             if (!document.querySelector('[data-tab="users"]') && tabsHeader) {
                 const btn = document.createElement('button');
                 btn.className = 'tab-btn';

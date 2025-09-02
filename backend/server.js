@@ -607,26 +607,7 @@ app.get('/api/admin/users', async (req, res) => {
 });
 
 // Admin: Create staff user (admin only)
-// Admin: Create staff user (supports adminAuth or admin PIN fallback)
-app.post('/api/admin/staff', async (req, res, next) => {
-  // If Authorization present, try adminAuth
-  if (req.header('Authorization')) {
-    return auth(req, res, (err) => {
-      if (err) return res.status(401).json({ error: 'Unauthorized' });
-      return adminAuth(req, res, (err2) => {
-        if (err2) return res.status(403).json({ error: 'Admin privileges required' });
-        return next();
-      });
-    });
-  }
-  // Otherwise allow via admin PIN
-  const { adminPin } = req.body || {};
-  const expectedPin = process.env.ADMIN_PIN || '837337';
-  if (adminPin && String(adminPin) === String(expectedPin)) {
-    return next();
-  }
-  return res.status(401).json({ error: 'Unauthorized' });
-}, async (req, res) => {
+app.post('/api/admin/staff', auth, adminAuth, async (req, res) => {
   try {
     const { name, username, password } = req.body || {};
     if (!name || !username || !password) {
@@ -653,18 +634,6 @@ app.post('/api/admin/staff', async (req, res, next) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create staff' });
-  }
-});
-
-// Admin: List staff users
-app.get('/api/admin/staff', auth, adminAuth, async (req, res) => {
-  try {
-    const staff = await User.find({ role: { $in: ['staff', 'admin'] } }, {
-      name: 1, username: 1, role: 1, createdAt: 1, lastLogin: 1
-    }).sort({ createdAt: -1 }).lean();
-    res.json(staff);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch staff' });
   }
 });
 
@@ -702,6 +671,18 @@ app.get('/api/staff/orders', auth, staffAuth, async (req, res) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching orders' });
+  }
+});
+
+// Admin: List staff users
+app.get('/api/admin/staff', auth, adminAuth, async (req, res) => {
+  try {
+    const staff = await User.find({ role: { $in: ['staff', 'admin'] } }, {
+      name: 1, username: 1, role: 1, createdAt: 1, lastLogin: 1
+    }).sort({ createdAt: -1 }).lean();
+    res.json(staff);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch staff' });
   }
 });
 app.post('/api/orders/import', async (req, res) => {

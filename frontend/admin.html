@@ -3909,6 +3909,16 @@
                     <div class="users-header">
                         <h2>Users</h2>
                         <button class="action-btn" id="refreshUsersBtn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        <button class="action-btn" id="openAddStaff"><i class="fas fa-user-plus"></i> Add Staff</button>
+                    </div>
+                    <div class="add-staff" id="addStaffForm" style="display:none;">
+                        <div class="form-row">
+                            <input id="staffName" placeholder="Name" />
+                            <input id="staffUsername" placeholder="Username" />
+                            <input id="staffPassword" type="password" placeholder="Password" />
+                            <button class="action-btn" id="createStaffBtn"><i class="fas fa-save"></i> Create</button>
+                        </div>
+                        <div id="addStaffMsg" class="message" style="display:none;"></div>
                     </div>
                     <div class="users-table-wrapper">
                         <table class="users-table">
@@ -3920,10 +3930,11 @@
                                     <th>Orders</th>
                                     <th>Created</th>
                                     <th>Last Login</th>
+                                    <th>Role</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <tr><td colspan="6">Loading...</td></tr>
+                                <tr><td colspan="7">Loading...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -3940,9 +3951,30 @@
                     loadUsers();
                 });
 
-                usersContent.addEventListener('click', (e) => {
+                usersContent.addEventListener('click', async (e) => {
                     if (e.target && e.target.id === 'refreshUsersBtn') {
                         loadUsers();
+                    } else if (e.target && e.target.id === 'openAddStaff') {
+                        const f = document.getElementById('addStaffForm');
+                        if (f) f.style.display = f.style.display === 'none' ? 'block' : 'none';
+                    } else if (e.target && e.target.id === 'createStaffBtn') {
+                        const name = document.getElementById('staffName').value.trim();
+                        const username = document.getElementById('staffUsername').value.trim();
+                        const password = document.getElementById('staffPassword').value.trim();
+                        const msg = document.getElementById('addStaffMsg');
+                        try {
+                            if (!name || !username || !password) throw new Error('All fields are required');
+                            const res = await fetch(`${API_BASE_URL}/admin/staff`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name, username, password })
+                            });
+                            if (!res.ok) throw new Error('Create failed');
+                            if (msg) { msg.style.display = 'block'; msg.textContent = 'Staff created'; msg.className = 'message message-success'; }
+                            loadUsers();
+                        } catch (err) {
+                            if (msg) { msg.style.display = 'block'; msg.textContent = err.message || 'Error'; msg.className = 'message message-error'; }
+                        }
                     }
                 });
             }
@@ -3967,6 +3999,7 @@
                         <td>${u.ordersCount || 0}</td>
                         <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
                         <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}</td>
+                        <td>${escapeHtml(u.role || 'user')}</td>
                     </tr>
                 `).join('');
             } catch (e) {

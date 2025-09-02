@@ -1,737 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - Mavrix Cafe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #e74c3c;
-            --accent-color: #f39c12;
-            --success-color: #2ecc71;
-            --background-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --border-radius: 12px;
-            --transition: all 0.3s ease;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+            --primary: #2196f3;
+            --text: #263238;
+            --muted: #607d8b;
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --radius: 14px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--primary-color), #34495e);
-            color: var(--text-primary);
-            line-height: 1.6;
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            display: grid;
+            place-items: center;
+            padding: 24px;
         }
-
-        .login-container {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-hover);
-            padding: 2rem;
+        .card {
             width: 100%;
-            max-width: 400px;
-            position: relative;
-            overflow: hidden;
+            max-width: 420px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            padding: 24px;
         }
-
-        .login-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
+        .title {
+            display: flex; align-items: center; gap: 10px;
+            margin: 4px 0 18px;
+        }
+        .title h1 { font-size: 22px; margin: 0; }
+        .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+        .field { margin-bottom: 14px; }
+        label { display:block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        input {
             width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .header p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .form-step {
-            display: none;
-        }
-
-        .form-step.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e1e8ed;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            transition: var(--transition);
-            background: #f8f9fa;
-        }
-
-        .form-group input:focus {
+            padding: 12px 14px;
+            border: 1px solid #e0e6ef;
+            border-radius: 10px;
             outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+            font-size: 14px;
         }
-
-        .phone-input {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .country-code {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem 0.5rem;
-            border-radius: var(--border-radius);
-            font-weight: 600;
-            min-width: 60px;
-            text-align: center;
-        }
-
-        .phone-input input {
-            flex: 1;
-        }
-
-        .verification-code {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-
-        .verification-code input {
-            width: 50px;
-            height: 50px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-            border: 2px solid #e1e8ed;
-            border-radius: var(--border-radius);
-            transition: var(--transition);
-        }
-
-        .verification-code input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
-        }
-
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(33,150,243,0.12); }
         .btn {
             width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--primary); color: #fff; border: 0; border-radius: 10px;
+            padding: 12px 16px; font-weight: 600; cursor: pointer;
         }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #34495e;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .btn-secondary {
-            background: var(--text-secondary);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #6c757d;
-        }
-
-        .btn:disabled {
-            background: var(--text-secondary);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .resend-section {
-            text-align: center;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e1e8ed;
-        }
-
-        .resend-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .resend-btn {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            cursor: pointer;
-            font-weight: 500;
-            text-decoration: underline;
-        }
-
-        .resend-btn:disabled {
-            color: var(--text-secondary);
-            cursor: not-allowed;
-            text-decoration: none;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .auto-verify-indicator {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: rgba(46, 204, 113, 0.1);
-            border-radius: 8px;
-            color: var(--success-color);
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .auto-verify-indicator.show {
-            display: block;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
-        }
-
-        .back-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 1rem 0;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: #fee;
-            color: var(--secondary-color);
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .success-message {
-            background: #efe;
-            color: var(--success-color);
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-        .test-code {
-            background: #fff3cd;
-            color: #856404;
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            text-align: center;
-            display: none;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 1.5rem;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
-            }
-
-            .verification-code input {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-        }
+        .btn.secondary { background: #eceff1; color: #37474f; }
+        .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+        .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+        .hidden { display: none; }
+        .toast { position: fixed; top: 16px; right: 16px; padding: 12px 16px; border-radius: 8px; color:#fff; background:#e74c3c; box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+        .toast.success { background: #2ecc71; }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="header">
-            <h1><i class="fas fa-coffee"></i> Mavrix Cafe</h1>
-            <p>Login to track your orders</p>
+    <div class="card">
+        <div class="title">
+            <i class="fas fa-mug-hot" style="color: var(--primary);"></i>
+            <h1>Login to Mavrix Cafe</h1>
+        </div>
+        <div class="subtitle">Enter your details to receive a verification code.</div>
+
+        <div id="step1">
+            <div class="field">
+                <label for="name">Your Name</label>
+                <input id="name" placeholder="John Doe" autocomplete="name" />
+            </div>
+            <div class="field">
+                <label for="phone">Phone Number</label>
+                <input id="phone" placeholder="10-digit number" inputmode="numeric" />
+                <div class="note">We'll send a 6-digit code to verify.</div>
+            </div>
+            <button class="btn" id="sendCodeBtn"><i class="fas fa-paper-plane"></i> Send Code</button>
         </div>
 
-        <div class="error-message" id="errorMessage"></div>
-        <div class="success-message" id="successMessage"></div>
-        <div class="test-code" id="testCode"></div>
-
-        <!-- Step 1: Phone Number Input -->
-        <div class="form-step active" id="step1">
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" placeholder="Enter your full name" required>
+        <div id="step2" class="hidden">
+            <div class="field">
+                <label for="code">Verification Code</label>
+                <input id="code" placeholder="Enter 6-digit code" inputmode="numeric" />
             </div>
-            <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <div class="phone-input">
-                    <div class="country-code">+91</div>
-                    <input type="tel" id="phoneNumber" placeholder="Enter your phone number" maxlength="10" required>
-                </div>
+            <div class="row">
+                <button class="btn secondary" id="editBtn"><i class="fas fa-pencil-alt"></i> Edit</button>
+                <button class="btn" id="verifyBtn"><i class="fas fa-check"></i> Verify & Continue</button>
             </div>
-            <button class="btn btn-primary" onclick="sendVerification()">
-                <i class="fas fa-paper-plane"></i> Send Verification Code
-            </button>
+            <div class="note">Didn’t receive it? <a href="#" id="resendLink">Resend code</a></div>
         </div>
 
-        <!-- Step 2: Verification Code Input -->
-        <div class="form-step" id="step2">
-            <button class="back-btn" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-            <div class="form-group">
-                <label>Enter Verification Code</label>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
-                    We've sent a 6-digit code to <span id="phoneDisplay"></span>
-                </p>
-                <div class="verification-code">
-                    <input type="text" maxlength="1" class="code-input" data-index="0">
-                    <input type="text" maxlength="1" class="code-input" data-index="1">
-                    <input type="text" maxlength="1" class="code-input" data-index="2">
-                    <input type="text" maxlength="1" class="code-input" data-index="3">
-                    <input type="text" maxlength="1" class="code-input" data-index="4">
-                    <input type="text" maxlength="1" class="code-input" data-index="5">
-                </div>
-                <div class="auto-verify-indicator" id="autoVerifyIndicator">
-                    <i class="fas fa-magic"></i> Auto-verifying...
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="verifyCode()">
-                <i class="fas fa-check"></i> Verify Code
-            </button>
-            <div class="resend-section">
-                <div class="resend-text">Didn't receive the code?</div>
-                <button class="resend-btn" onclick="resendCode()" id="resendBtn">
-                    Resend Code
-                </button>
-            </div>
-        </div>
-
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Please wait...</p>
-        </div>
+        <div class="note" id="tableNote"></div>
     </div>
+
+    <div id="toast" class="toast hidden"></div>
 
     <script src="config.js"></script>
     <script>
-        let currentPhoneNumber = '';
-        let currentName = '';
-        let resendTimer = 30;
-
-        // API Configuration
         const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:5000/api';
 
-        // Handle verification code input
-        document.querySelectorAll('.code-input').forEach(input => {
-            input.addEventListener('input', function() {
-                const maxLength = 1;
-                const currentIndex = parseInt(this.dataset.index);
-                
-                if (this.value.length >= maxLength) {
-                    if (currentIndex < 5) {
-                        document.querySelector(`[data-index="${currentIndex + 1}"]`).focus();
-                    } else {
-                        // All 6 digits entered, auto-verify
-                        autoVerifyCode();
-                    }
-                }
-            });
-
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && this.value === '') {
-                    const currentIndex = parseInt(this.dataset.index);
-                    if (currentIndex > 0) {
-                        document.querySelector(`[data-index="${currentIndex - 1}"]`).focus();
-                    }
-                }
-            });
-        });
-
-        function showStep(stepNumber) {
-            document.querySelectorAll('.form-step').forEach(step => {
-                step.classList.remove('active');
-            });
-            document.getElementById(`step${stepNumber}`).classList.add('active');
+        const qs = new URLSearchParams(window.location.search);
+        const table = qs.get('table');
+        if (table) {
+            document.getElementById('tableNote').textContent = `You are logging in for table ${table}.`;
         }
 
-        function showLoading(show) {
-            const loading = document.getElementById('loading');
-            if (show) {
-                loading.classList.add('show');
-            } else {
-                loading.classList.remove('show');
-            }
+        const nameEl = document.getElementById('name');
+        const phoneEl = document.getElementById('phone');
+        const codeEl = document.getElementById('code');
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const toast = document.getElementById('toast');
+
+        function showToast(msg, ok=false) {
+            toast.textContent = msg;
+            toast.className = `toast ${ok ? 'success' : ''}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2500);
         }
 
-        function showMessage(message, type) {
-            const errorMsg = document.getElementById('errorMessage');
-            const successMsg = document.getElementById('successMessage');
-            const testCode = document.getElementById('testCode');
-
-            // Hide all messages
-            errorMsg.style.display = 'none';
-            successMsg.style.display = 'none';
-            testCode.style.display = 'none';
-
-            if (type === 'error') {
-                errorMsg.textContent = message;
-                errorMsg.style.display = 'block';
-            } else if (type === 'success') {
-                successMsg.textContent = message;
-                successMsg.style.display = 'block';
-            } else if (type === 'test') {
-                testCode.textContent = `Test Code: ${message}`;
-                testCode.style.display = 'block';
-            }
-        }
-
-        async function sendVerification() {
-            const name = document.getElementById('name').value.trim();
-            const phoneNumber = document.getElementById('phoneNumber').value.trim();
-
-            if (!name) {
-                showMessage('Please enter your name', 'error');
-                return;
-            }
-
-            if (!phoneNumber || phoneNumber.length !== 10) {
-                showMessage('Please enter a valid 10-digit phone number', 'error');
-                return;
-            }
-
-            showLoading(true);
-            currentName = name;
-            currentPhoneNumber = phoneNumber;
-
+        async function sendCode() {
+            const name = nameEl.value.trim();
+            const phone = phoneEl.value.trim();
+            if (!name || name.length < 2) return showToast('Enter a valid name');
+            if (!/^\d{10}$/.test(phone)) return showToast('Enter 10-digit phone');
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/send-verification`, {
+                const res = await fetch(`${API_BASE_URL}/auth/send-verification`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: name,
-                        phoneNumber: phoneNumber
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber: phone, name })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('Verification code sent successfully!', 'success');
-                    document.getElementById('phoneDisplay').textContent = `+91 ${phoneNumber}`;
-                    
-                    // Show test code if available (for development)
-                    if (data.testCode) {
-                        showMessage(data.testCode, 'test');
-                    }
-                    
-                    showStep(2);
-                    startResendTimer();
-                } else {
-                    showMessage(data.error || 'Failed to send verification code', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-            } finally {
-                showLoading(false);
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to send code');
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+                showToast('Code sent', true);
+            } catch (e) {
+                showToast(e.message || 'Failed to send code');
             }
         }
 
         async function verifyCode() {
-            const codeInputs = document.querySelectorAll('.code-input');
-            const code = Array.from(codeInputs).map(input => input.value).join('');
-
-            if (code.length !== 6) {
-                showMessage('Please enter the complete 6-digit code', 'error');
-                return;
-            }
-
-            showLoading(true);
-
+            const phone = phoneEl.value.trim();
+            const code = codeEl.value.trim();
+            if (!/^\d{6}$/.test(code)) return showToast('Enter 6-digit code');
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/verify-code`, {
+                const res = await fetch(`${API_BASE_URL}/auth/verify-code`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: currentPhoneNumber,
-                        code: code
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phoneNumber: phone, code })
                 });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Verification failed');
 
-                const data = await response.json();
+                // Persist auth
+                if (data.token) localStorage.setItem('authToken', data.token);
+                if (data.user) localStorage.setItem('userData', JSON.stringify(data.user));
 
-                if (response.ok) {
-                    showMessage('Phone number verified successfully!', 'success');
-                    
-                    // Store token and user data
-                    localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('userData', JSON.stringify(data.user));
-                    
-                    // Redirect to home page with table parameter if available
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const table = urlParams.get('table');
-                    const redirectUrl = table ? `/?table=${table}` : '/';
-                    
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    showMessage(data.error || 'Invalid verification code', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-            } finally {
-                showLoading(false);
+                // Redirect back to index, preserving table param
+                const redirectUrl = table ? `/index.html?table=${encodeURIComponent(table)}` : '/index.html';
+                window.location.replace(redirectUrl);
+            } catch (e) {
+                showToast(e.message || 'Verification failed');
             }
         }
 
-        // Auto-verify function that triggers when all 6 digits are entered
-        async function autoVerifyCode() {
-            const codeInputs = document.querySelectorAll('.code-input');
-            const code = Array.from(codeInputs).map(input => input.value).join('');
-
-            if (code.length !== 6) {
-                return; // Don't proceed if not all digits entered
-            }
-
-            // Show auto-verify indicator
-            const autoVerifyIndicator = document.getElementById('autoVerifyIndicator');
-            autoVerifyIndicator.classList.add('show');
-
-            // Show loading state
-            showLoading(true);
-            showMessage('Verifying code...', 'success');
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/verify-code`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        phoneNumber: currentPhoneNumber,
-                        code: code
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('Phone number verified successfully! Redirecting...', 'success');
-                    
-                    // Store token and user data
-                    localStorage.setItem('authToken', data.token);
-                    localStorage.setItem('userData', JSON.stringify(data.user));
-                    
-                    // Redirect to home page with table parameter if available
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const table = urlParams.get('table');
-                    const redirectUrl = table ? `/?table=${table}` : '/';
-                    
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1000); // Shorter delay for auto-redirect
-                } else {
-                    showMessage(data.error || 'Invalid verification code', 'error');
-                    // Clear the code inputs on error
-                    codeInputs.forEach(input => input.value = '');
-                    document.querySelector('[data-index="0"]').focus();
-                    // Hide auto-verify indicator
-                    autoVerifyIndicator.classList.remove('show');
-                }
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-                // Clear the code inputs on error
-                codeInputs.forEach(input => input.value = '');
-                document.querySelector('[data-index="0"]').focus();
-                // Hide auto-verify indicator
-                autoVerifyIndicator.classList.remove('show');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function goBack() {
-            showStep(1);
-            // Clear verification code inputs
-            document.querySelectorAll('.code-input').forEach(input => {
-                input.value = '';
-            });
-            // Hide auto-verify indicator
-            const autoVerifyIndicator = document.getElementById('autoVerifyIndicator');
-            autoVerifyIndicator.classList.remove('show');
-        }
-
-        function startResendTimer() {
-            const resendBtn = document.getElementById('resendBtn');
-            resendBtn.disabled = true;
-            resendTimer = 30;
-
-            const timer = setInterval(() => {
-                resendBtn.textContent = `Resend Code (${resendTimer}s)`;
-                resendTimer--;
-
-                if (resendTimer < 0) {
-                    clearInterval(timer);
-                    resendBtn.disabled = false;
-                    resendBtn.textContent = 'Resend Code';
-                }
-            }, 1000);
-        }
-
-        async function resendCode() {
-            if (resendTimer > 0) return;
-
-            showLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/auth/send-verification`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: currentName,
-                        phoneNumber: currentPhoneNumber
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('Verification code resent successfully!', 'success');
-                    
-                    // Show test code if available (for development)
-                    if (data.testCode) {
-                        showMessage(data.testCode, 'test');
-                    }
-                    
-                    startResendTimer();
-                } else {
-                    showMessage(data.error || 'Failed to resend verification code', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        // Check if user is already logged in
-        window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('authToken');
-            if (token) {
-                // User is already logged in, redirect to home page
-                const urlParams = new URLSearchParams(window.location.search);
-                const table = urlParams.get('table');
-                const redirectUrl = table ? `/?table=${table}` : '/';
-                window.location.href = redirectUrl;
-            }
+        document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
+        document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+        document.getElementById('editBtn').addEventListener('click', () => {
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
         });
+        document.getElementById('resendLink').addEventListener('click', (e) => { e.preventDefault(); sendCode(); });
     </script>
 </body>
 </html>
+
+

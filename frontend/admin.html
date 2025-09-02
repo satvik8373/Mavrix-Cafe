@@ -3685,12 +3685,7 @@
             if (isAuthenticated) {
                 showAdminContent();
             } else {
-                // Check for stored password in localStorage
-                const storedPassword = localStorage.getItem('adminPassword');
-                if (storedPassword === ADMIN_PASSWORD) {
-                    sessionStorage.setItem('adminAuthenticated', 'true');
-                    showAdminContent();
-                }
+                // Require manual login each session; do not auto-authenticate from localStorage
             }
         });
 
@@ -3773,7 +3768,8 @@
             if (enteredPassword === ADMIN_PASSWORD) {
                 // Store authentication
                 sessionStorage.setItem('adminAuthenticated', 'true');
-                localStorage.setItem('adminPassword', ADMIN_PASSWORD);
+                // Do not persist admin password in localStorage
+                localStorage.removeItem('adminPassword');
                 
                 // Show admin content
                 showAdminContent();

@@ -1803,24 +1803,29 @@
             document.title = storeName;
         }
 
-        // Authentication Functions
+        // Authentication Functions (enforce login; no guest mode)
         function checkAuthStatus() {
             authToken = localStorage.getItem('authToken');
             const storedUserData = localStorage.getItem('userData');
-            
+
             if (authToken && storedUserData) {
                 try {
                     userData = JSON.parse(storedUserData);
                     updateUserInterface();
+                    return true;
                 } catch (error) {
-                    // Invalid user data, clear storage
+                    // Invalid user data; clear and redirect to login
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('userData');
-                    updateUserInterface();
                 }
-            } else {
-                updateUserInterface();
             }
+
+            // Redirect to login page (preserve table param if present)
+            const urlParams = new URLSearchParams(window.location.search);
+            const table = urlParams.get('table');
+            const loginUrl = table ? `/login.html?table=${table}` : '/login.html';
+            window.location.href = loginUrl;
+            return false;
         }
 
                 function updateUserInterface() {
@@ -1828,8 +1833,6 @@
 
             if (userData) {
                 menuUserNameElement.textContent = userData.name;
-            } else {
-                menuUserNameElement.textContent = 'Guest';
             }
         }
 
@@ -1970,7 +1973,8 @@
         // Initialize the page
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                checkAuthStatus();
+                const isAuthed = checkAuthStatus();
+                if (!isAuthed) { return; }
                 loadStoreName();
                 getTableNumber();
                 await displayMenuItems('all');

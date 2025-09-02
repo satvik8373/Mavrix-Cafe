@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs');
 const { MenuItem } = require('./models/MenuItem');
 const { Order } = require('./models/Order');
 const User = require('./models/User');
-const auth = require('./middleware/auth');
+const { auth, adminAuth, staffAuth } = require('./middleware/auth');
 
 dotenv.config();
 
@@ -606,14 +606,10 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
-// Admin: Create staff user (PIN-protected to work without JWT admin flow)
-app.post('/api/admin/staff', async (req, res) => {
+// Admin: Create staff user (admin only)
+app.post('/api/admin/staff', auth, adminAuth, async (req, res) => {
   try {
-    const { name, username, password, adminPin } = req.body || {};
-    const ADMIN_PIN = process.env.ADMIN_PIN || '837337';
-    if (adminPin !== ADMIN_PIN) {
-      return res.status(403).json({ error: 'Invalid admin PIN' });
-    }
+    const { name, username, password } = req.body || {};
     if (!name || !username || !password) {
       return res.status(400).json({ error: 'Name, username and password are required' });
     }
@@ -669,7 +665,7 @@ app.post('/api/auth/staff/login', async (req, res) => {
 });
 
 // Staff-only: view orders
-app.get('/api/staff/orders', auth, (req, res, next) => require('./middleware/auth').staffAuth(req, res, next), async (req, res) => {
+app.get('/api/staff/orders', auth, staffAuth, async (req, res) => {
   try {
     const orders = await Order.find().sort({ timestamp: -1 });
     res.json(orders);

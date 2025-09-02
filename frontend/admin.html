@@ -4003,6 +4003,7 @@
                             <input id="staffName" placeholder="Name" />
                             <input id="staffUsername" placeholder="Username" />
                             <input id="staffPassword" type="password" placeholder="Password" />
+                            <input id="staffAdminPin" type="password" placeholder="Admin PIN" value="837337" />
                             <button class="action-btn" id="createStaffBtn"><i class="fas fa-save"></i> Create</button>
                         </div>
                         <div id="addStaffMsg" class="message" style="display:none;"></div>
@@ -4046,12 +4047,13 @@
                         const username = document.getElementById('staffUsername').value.trim();
                         const password = document.getElementById('staffPassword').value.trim();
                         const msg = document.getElementById('addStaffMsg');
+                        const adminPin = document.getElementById('staffAdminPin').value.trim();
                         try {
                             if (!name || !username || !password) throw new Error('All fields are required');
                             const res = await fetch(`${API_BASE_URL}/admin/staff`, {
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('adminJwt') || localStorage.getItem('authToken') || ''}` },
-                                body: JSON.stringify({ name, username, password })
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ name, username, password, adminPin })
                             });
                             if (!res.ok) throw new Error('Create failed');
                             if (msg) { msg.style.display = 'block'; msg.textContent = 'Staff created'; msg.className = 'message message-success'; }

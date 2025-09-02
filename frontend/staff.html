@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Dashboard - Mavrix Cafe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        :root { --primary:#2196f3; --bg:#f5f7fb; --card:#fff; --text:#263238; --muted:#607d8b; --radius:14px; }
+        *{ box-sizing: border-box }
+        body{ margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text) }
+        .container{ max-width:1100px; margin:0 auto; padding:16px }
+        .card{ background:var(--card); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.06); padding:18px }
+        .login{ height:100vh; display:grid; place-items:center }
+        .title{ display:flex; align-items:center; gap:10px; margin-bottom:12px }
+        .title h1{ font-size:20px; margin:0 }
+        .field{ margin:10px 0 }
+        label{ display:block; font-weight:600; margin-bottom:6px; font-size:14px }
+        input{ width:100%; padding:12px 14px; border:1px solid #e0e6ef; border-radius:10px; outline:0 }
+        input:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(33,150,243,.12) }
+        .btn{ background:var(--primary); border:0; color:#fff; padding:12px 16px; border-radius:10px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px }
+        .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center }
+        .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 }
+        .orders{ overflow:auto }
+        table{ width:100%; border-collapse:collapse; min-width:800px }
+        th,td{ padding:10px 12px; border-bottom:1px solid #eceff1; text-align:left; font-size:14px }
+        th{ background:#f7f9fc; color:#546e7a; font-weight:600 }
+        .pill{ padding:4px 10px; border-radius:999px; font-size:12px; background:#eceff1; color:#37474f; display:inline-block }
+        .pill.pending{ background:#fff3cd; color:#8a6d3b }
+        .pill.completed{ background:#d4edda; color:#155724 }
+        .toast{ position:fixed; top:16px; right:16px; background:#e74c3c; color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.12) }
+        .toast.ok{ background:#2ecc71 }
+        .hidden{ display:none }
+    </style>
+</head>
+<body>
+    <div id="loginView" class="login">
+        <div class="card" style="width:100%; max-width:420px;">
+            <div class="title"><i class="fas fa-id-badge" style="color:var(--primary);"></i><h1>Staff Login</h1></div>
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" placeholder="staff username" autocomplete="username" />
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" placeholder="password" autocomplete="current-password" />
+            </div>
+            <button id="loginBtn" class="btn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </div>
+    </div>
+
+    <div id="appView" class="container hidden">
+        <div class="toolbar">
+            <div class="title"><i class="fas fa-mug-hot" style="color:var(--primary);"></i><h1>Staff Orders</h1></div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button id="refreshBtn" class="btn" title="Refresh"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <button id="logoutBtn" class="btn" style="background:#eceff1; color:#37474f"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </div>
+        <div class="card orders">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Table</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="ordersBody"><tr><td colspan="6">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:5000/api';
+        const toast = document.getElementById('toast');
+        const loginView = document.getElementById('loginView');
+        const appView = document.getElementById('appView');
+        const ordersBody = document.getElementById('ordersBody');
+
+        function showToast(msg, ok=false){
+            toast.textContent = msg; toast.className = `toast ${ok?'ok':''}`; toast.classList.remove('hidden');
+            setTimeout(()=>toast.classList.add('hidden'), 2200);
+        }
+
+        function authed(){ return !!sessionStorage.getItem('staffToken'); }
+
+        function setAuthed(token, user){
+            sessionStorage.setItem('staffToken', token);
+            sessionStorage.setItem('staffUser', JSON.stringify(user||{}));
+        }
+
+        function clearAuth(){
+            sessionStorage.removeItem('staffToken');
+            sessionStorage.removeItem('staffUser');
+        }
+
+        function updateView(){
+            if (authed()) { loginView.classList.add('hidden'); appView.classList.remove('hidden'); loadOrders(); }
+            else { appView.classList.add('hidden'); loginView.classList.remove('hidden'); }
+        }
+
+        async function staffLogin(){
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            if (!username || !password) return showToast('Enter username and password');
+            try{
+                const res = await fetch(`${API_BASE_URL}/auth/staff/login`, {
+                    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password})
+                });
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.error||'Login failed');
+                setAuthed(data.token, data.user);
+                showToast('Login successful', true);
+                updateView();
+            }catch(e){ showToast(e.message||'Login failed'); }
+        }
+
+        async function loadOrders(){
+            try{
+                ordersBody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+                const token = sessionStorage.getItem('staffToken') || '';
+                const res = await fetch(`${API_BASE_URL}/staff/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const orders = await res.json();
+                if(!res.ok) throw new Error(orders.error||'Failed to load orders');
+                if(!Array.isArray(orders) || orders.length===0){ ordersBody.innerHTML = '<tr><td colspan="6">No orders</td></tr>'; return; }
+                ordersBody.innerHTML = orders.map(o => `
+                    <tr>
+                        <td>${o._id?.slice(-6)||''}</td>
+                        <td>${o.tableNumber??'-'}</td>
+                        <td>${(o.customerName||'').replace(/</g,'&lt;')}</td>
+                        <td>₹${Number(o.totalAmount||0).toFixed(2)}</td>
+                        <td><span class="pill ${o.status}">${o.status}</span></td>
+                        <td>${o.timestamp ? new Date(o.timestamp).toLocaleString() : '-'}</td>
+                    </tr>
+                `).join('');
+            }catch(e){ ordersBody.innerHTML = `<tr><td colspan="6">${(e.message||'Error').replace(/</g,'&lt;')}</td></tr>`; }
+        }
+
+        document.getElementById('loginBtn').addEventListener('click', staffLogin);
+        document.getElementById('refreshBtn').addEventListener('click', loadOrders);
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{ clearAuth(); updateView(); });
+
+        // Init
+        updateView();
+    </script>
+</body>
+</html>
+
+

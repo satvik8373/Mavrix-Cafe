@@ -34,10 +34,31 @@ try {
 const app = express();
 
 // CORS configuration
+const allowlistProd = [
+  process.env.CORS_ORIGIN || 'https://mavrix-cafe.onrender.com',
+  'https://mavrix-cafe.vercel.app'
+];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CORS_ORIGIN || 'https://mavrix-cafe.onrender.com', 'https://mavrix-cafe.vercel.app']
-    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5000'],
+  origin: (origin, callback) => {
+    // Allow server-to-server or no-origin (curl/postman)
+    if (!origin) return callback(null, true);
+
+    const isProd = process.env.NODE_ENV === 'production';
+    if (isProd) {
+      const allowed = allowlistProd.includes(origin);
+      return callback(allowed ? null : new Error('CORS not allowed'), allowed);
+    }
+
+    // Development: allow localhost and LAN IPs on common dev ports
+    const devAllowed = [
+      /^http:\/\/localhost:(3000|5173|5000)$/,
+      /^http:\/\/127\.0\.0\.1:(3000|5173|5000)$/,
+      /^http:\/\/[0-9]{1,3}(\.[0-9]{1,3}){3}:(3000|5173)$/ // e.g., 172.20.10.5:3000
+    ];
+    const matched = devAllowed.some((re) => re.test(origin));
+    return callback(matched ? null : new Error('CORS not allowed'), matched);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -45,6 +66,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 

@@ -163,10 +163,20 @@
                                 ${items}
                                 <div class="order-total"><span>Total</span><span>₹${Number(o.totalAmount||0).toFixed(2)}</span></div>
                             </div>
+                            ${o.status === 'pending' ? `<div style="margin-top:10px; display:flex; justify-content:flex-end;"><button class=\"btn\" onclick=\"completeOrder('${o._id}')\"><i class=\"fas fa-check\"></i> Complete Order</button></div>` : ''}
                         </div>
                     </div>`;
                 }).join('');
             }catch(e){ ordersGrid.innerHTML = `<div class="no-orders">${(e.message||'Error').replace(/</g,'&lt;')}</div>`; }
+        }
+
+        async function completeOrder(orderId){
+            try{
+                const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status: 'completed' }) });
+                if(!res.ok){ const data = await res.json().catch(()=>({})); throw new Error(data.error||'Failed to update'); }
+                showToast('Order marked as completed', true);
+                loadOrders();
+            }catch(e){ showToast(e.message||'Failed to update'); }
         }
 
         document.getElementById('loginBtn').addEventListener('click', staffLogin);

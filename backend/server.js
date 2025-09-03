@@ -791,4 +791,43 @@ app.use((req, res) => {
   });
 });
 
+// Admin: Update staff password
+app.put('/api/admin/staff/:id/password', allowAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body || {};
+    if (!password || password.length < 4) {
+      return res.status(400).json({ error: 'Password is required (min 4 chars)' });
+    }
+
+    const staff = await User.findById(id).select('+password');
+    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+    if (staff.role !== 'staff' && staff.role !== 'admin') {
+      return res.status(400).json({ error: 'User is not staff/admin' });
+    }
+
+    staff.password = await bcrypt.hash(password, 10);
+    await staff.save();
+    res.json({ message: 'Password updated successfully' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update password' });
+  }
+});
+
+// Admin: Delete staff user
+app.delete('/api/admin/staff/:id', allowAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const staff = await User.findById(id);
+    if (!staff) return res.status(404).json({ error: 'Staff not found' });
+    if (staff.role !== 'staff') {
+      return res.status(400).json({ error: 'Only staff accounts can be deleted' });
+    }
+    await User.findByIdAndDelete(id);
+    res.json({ message: 'Staff deleted successfully' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to delete staff' });
+  }
+});
+
  

@@ -993,11 +993,13 @@
                         <strong>Total: ₹${Number(order.totalAmount || 0).toFixed(2)}</strong>
                     </div>
                     
+                    ${order.status === 'completed' ? '' : `
                     <div style="margin-top: 1rem; text-align: center;">
-                        <button class="btn-success" onclick="completeOrder('${order._id}')" ${order.status === 'completed' ? 'disabled' : ''}>
-                            <i class="fas fa-check"></i> ${order.status === 'completed' ? 'Completed' : 'Complete Order'}
+                        <button class="btn-success" onclick="completeOrder('${order._id}')">
+                            <i class="fas fa-check"></i> Complete Order
                         </button>
                     </div>
+                    `}
                 </div>
             `).join('');
         }

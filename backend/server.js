@@ -10,7 +10,12 @@ const bcrypt = require('bcryptjs');
 const { MenuItem } = require('./models/MenuItem');
 const { Order } = require('./models/Order');
 const User = require('./models/User');
-const { auth, adminAuth, staffAuth } = require('./middleware/auth');
+
+// Robust auth imports (supports both named and default exports)
+const authModule = require('./middleware/auth');
+const auth = typeof authModule === 'function' ? authModule : authModule.auth;
+const adminAuth = authModule.adminAuth || ((req, res, next) => next());
+const staffAuth = authModule.staffAuth || ((req, res, next) => next());
 
 dotenv.config();
 

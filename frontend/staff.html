@@ -1,189 +1,775 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Staff Dashboard - Mavrix Cafe</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login - Mavrix Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary:#2196f3; --bg:#f5f7fb; --card:#fff; --text:#263238; --muted:#607d8b; --radius:14px; }
-        *{ box-sizing: border-box }
-        body{ margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--bg); color:var(--text) }
-        .container{ max-width:1100px; margin:0 auto; padding:16px }
-        .card{ background:var(--card); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.06); padding:18px }
-        .login{ height:100vh; display:grid; place-items:center }
-        .title{ display:flex; align-items:center; gap:10px; margin-bottom:12px }
-        .title h1{ font-size:20px; margin:0 }
-        .field{ margin:10px 0 }
-        label{ display:block; font-weight:600; margin-bottom:6px; font-size:14px }
-        input{ width:100%; padding:12px 14px; border:1px solid #e0e6ef; border-radius:10px; outline:0 }
-        input:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(33,150,243,.12) }
-        .btn{ background:var(--primary); border:0; color:#fff; padding:12px 16px; border-radius:10px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px }
-        .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center }
-        .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 }
-        .orders{ overflow:auto }
-        .orders-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
-        .order-card{ background:#fff; border-radius: 12px; box-shadow:0 4px 6px rgba(0,0,0,.08); overflow:hidden; border-left:4px solid #ffcc00 }
-        .order-card.completed{ border-left-color:#2ecc71 }
-        .order-header{ padding: 12px 14px; background:#f7f9fc; display:flex; align-items:center; justify-content:space-between }
-        .order-title{ display:flex; flex-direction:column; gap:4px }
-        .order-time{ color:#607d8b; font-size:12px }
-        .status-badge{ padding:6px 10px; border-radius:999px; font-size:12px; background:#eceff1; color:#37474f; text-transform:capitalize }
-        .status-badge.pending{ background:#fff3cd; color:#8a6d3b }
-        .status-badge.completed{ background:#d4edda; color:#155724 }
-        .order-content{ padding:14px }
-        .order-customer{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px; margin-bottom:10px }
-        .info-group{ display:flex; align-items:center; gap:8px; color:#607d8b }
-        .order-items{ background:#f7f9fc; border-radius:10px; padding:10px; margin-top:8px }
-        .order-item{ display:grid; grid-template-columns: 1fr auto auto; gap:8px; padding:6px 0; border-bottom:1px solid #eceff1 }
-        .order-item:last-child{ border-bottom:none }
-        .item-price{ color:#2196f3; font-weight:600 }
-        .order-total{ display:flex; align-items:center; justify-content:space-between; padding-top:10px; margin-top:6px; border-top:2px solid #fff }
-        .pill{ padding:4px 10px; border-radius:999px; font-size:12px; background:#eceff1; color:#37474f; display:inline-block }
-        .pill.pending{ background:#fff3cd; color:#8a6d3b }
-        .pill.completed{ background:#d4edda; color:#155724 }
-        .toast{ position:fixed; top:16px; right:16px; background:#e74c3c; color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.12) }
-        .toast.ok{ background:#2ecc71 }
-        .hidden{ display:none }
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #f39c12;
+            --success-color: #2ecc71;
+            --background-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-hover);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: var(--secondary-color);
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: var(--success-color);
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Dashboard Styles - Matching Admin Orders Section */
+        .dashboard-container {
+            background: var(--background-color);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: none;
+        }
+
+        .dashboard-container.show {
+            display: block;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-button:hover:not(.active) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .orders-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .orders-header {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .orders-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .orders-title h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .orders-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #6c757d;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .orders-table th {
+            background: var(--background-color);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+            font-size: 0.9rem;
+        }
+
+        .orders-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .orders-table tbody tr:hover {
+            background: var(--background-color);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            display: inline-block;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #8a6d3b;
+        }
+
+        .status-badge.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .orders-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .orders-actions {
+                justify-content: center;
+            }
+
+            .admin-tabs {
+                justify-content: center;
+            }
+
+            .tab-button {
+                flex: 1;
+                text-align: center;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-container {
+                padding: 10px;
+            }
+
+            .orders-table {
+                min-width: 600px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="loginView" class="login">
-        <div class="card" style="width:100%; max-width:420px;">
-            <div class="title"><i class="fas fa-id-badge" style="color:var(--primary);"></i><h1>Staff Login</h1></div>
-            <div class="field">
-                <label for="username">Username</label>
-                <input id="username" placeholder="staff username" autocomplete="username" />
-            </div>
-            <div class="field">
-                <label for="password">Password</label>
-                <input id="password" type="password" placeholder="password" autocomplete="current-password" />
-            </div>
-            <button id="loginBtn" class="btn"><i class="fas fa-sign-in-alt"></i> Login</button>
+    <!-- Staff Login View -->
+    <div class="login-container" id="loginView">
+        <div class="header">
+            <h1><i class="fas fa-id-badge"></i> Staff Login</h1>
+            <p>Access your staff dashboard</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Please wait...</p>
         </div>
     </div>
 
-    <div id="appView" class="container hidden">
-        <div class="toolbar">
-            <div class="title"><i class="fas fa-mug-hot" style="color:var(--primary);"></i><h1>Staff Orders</h1></div>
-            <div style="display:flex; gap:8px; align-items:center;">
-                <button id="refreshBtn" class="btn" title="Refresh"><i class="fas fa-sync-alt"></i> Refresh</button>
-                <button id="logoutBtn" class="btn" style="background:#eceff1; color:#37474f"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <!-- Staff Dashboard View -->
+    <div class="dashboard-container" id="dashboardView">
+        <div class="admin-container">
+            <div class="admin-header">
+                <div class="orders-title">
+                    <i class="fas fa-mug-hot"></i>
+                    <h1>Staff Dashboard</h1>
+                </div>
+                <div class="orders-actions">
+                    <button class="btn-secondary" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn-secondary" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="tab-button active" data-tab="orders">Orders</button>
+            </div>
+
+            <div class="tab-content active" id="ordersTab">
+                <div class="orders-section">
+                    <div class="orders-header">
+                        <div class="orders-title">
+                            <i class="fas fa-list"></i>
+                            <h2>All Orders</h2>
+                        </div>
+                        <div class="orders-actions">
+                            <span id="ordersCount" class="orders-count">0 orders</span>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Table</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersBody">
+                                <tr>
+                                    <td colspan="8">
+                                        <div class="empty-state">
+                                            <i class="fas fa-coffee"></i>
+                                            <h3>No Orders Yet</h3>
+                                            <p>Orders will appear here when customers place them</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card orders">
-            <div id="ordersGrid" class="orders-grid"></div>
-        </div>
     </div>
-
-    <div id="toast" class="toast hidden"></div>
 
     <script src="config.js"></script>
     <script>
         const API_BASE_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:5000/api';
-        const toast = document.getElementById('toast');
+        
+        // DOM Elements
         const loginView = document.getElementById('loginView');
-        const appView = document.getElementById('appView');
-        const ordersGrid = document.getElementById('ordersGrid');
+        const dashboardView = document.getElementById('dashboardView');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+        const ordersBody = document.getElementById('ordersBody');
+        const ordersCount = document.getElementById('ordersCount');
 
-        function showToast(msg, ok=false){
-            toast.textContent = msg; toast.className = `toast ${ok?'ok':''}`; toast.classList.remove('hidden');
-            setTimeout(()=>toast.classList.add('hidden'), 2200);
+        // Show/Hide Functions
+        function showLoading(show) {
+            loading.classList.toggle('show', show);
         }
 
-        function authed(){ return !!sessionStorage.getItem('staffToken'); }
+        function showMessage(message, type) {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            if (type === 'error') {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            } else if (type === 'success') {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+            }
+        }
 
-        function setAuthed(token, user){
+        function updateView() {
+            if (isAuthenticated()) {
+                loginView.style.display = 'none';
+                dashboardView.classList.add('show');
+                loadOrders();
+            } else {
+                dashboardView.classList.remove('show');
+                loginView.style.display = 'block';
+            }
+        }
+
+        // Authentication Functions
+        function isAuthenticated() {
+            return !!sessionStorage.getItem('staffToken');
+        }
+
+        function setAuthenticated(token, user) {
             sessionStorage.setItem('staffToken', token);
-            sessionStorage.setItem('staffUser', JSON.stringify(user||{}));
+            sessionStorage.setItem('staffUser', JSON.stringify(user || {}));
         }
 
-        function clearAuth(){
+        function clearAuth() {
             sessionStorage.removeItem('staffToken');
             sessionStorage.removeItem('staffUser');
         }
 
-        function updateView(){
-            if (authed()) { loginView.classList.add('hidden'); appView.classList.remove('hidden'); loadOrders(); }
-            else { appView.classList.add('hidden'); loginView.classList.remove('hidden'); }
-        }
-
-        async function staffLogin(){
+        // API Functions
+        async function staffLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            if (!username || !password) return showToast('Enter username and password');
-            try{
-                const res = await fetch(`${API_BASE_URL}/auth/staff/login`, {
-                    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password})
+
+            if (!username || !password) {
+                showMessage('Please enter username and password', 'error');
+                return;
+            }
+
+            showLoading(true);
+            showMessage('', 'error');
+            showMessage('', 'success');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/staff/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
                 });
-                const data = await res.json();
-                if(!res.ok) throw new Error(data.error||'Login failed');
-                setAuthed(data.token, data.user);
-                showToast('Login successful', true);
-                updateView();
-            }catch(e){ showToast(e.message||'Login failed'); }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setAuthenticated(data.token, data.user);
+                    showMessage('Login successful!', 'success');
+                    setTimeout(() => updateView(), 1000);
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showMessage(error.message || 'Login failed', 'error');
+            } finally {
+                showLoading(false);
+            }
         }
 
-        async function loadOrders(){
-            try{
-                ordersGrid.innerHTML = '<div>Loading...</div>';
-                const token = sessionStorage.getItem('staffToken') || '';
-                const res = await fetch(`${API_BASE_URL}/staff/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
-                const orders = await res.json();
-                if(!res.ok) throw new Error(orders.error||'Failed to load orders');
-                if(!Array.isArray(orders) || orders.length===0){ ordersGrid.innerHTML = '<div class="no-orders">No orders</div>'; return; }
-                ordersGrid.innerHTML = orders.map(o => {
-                    const time = o.timestamp ? new Date(o.timestamp).toLocaleString() : '-';
-                    const items = (o.items||[]).map(it => `
-                        <div class="order-item">
-                            <span>${(it.name||'').replace(/</g,'&lt;')}</span>
-                            <span>×${it.quantity||0}</span>
-                            <span class="item-price">₹${Number((it.price||0)*(it.quantity||0)).toFixed(2)}</span>
-                        </div>
-                    `).join('');
-                    return `
-                    <div class="order-card ${o.status}">
-                        <div class="order-header">
-                            <div class="order-title">
-                                <strong>Order #${(o._id||'').slice(-6).toUpperCase()}</strong>
-                                <span class="order-time">${time}</span>
+        async function loadOrders() {
+            try {
+                const token = sessionStorage.getItem('staffToken');
+                const response = await fetch(`${API_BASE_URL}/staff/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const orders = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(orders.error || 'Failed to load orders');
+                }
+
+                displayOrders(orders);
+            } catch (error) {
+                ordersBody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>Error Loading Orders</h3>
+                                <p>${error.message}</p>
                             </div>
-                            <span class="status-badge ${o.status}">${o.status}</span>
-                        </div>
-                        <div class="order-content">
-                            <div class="order-customer">
-                                <div class="info-group"><i class="fas fa-user"></i>${(o.customerName||'').replace(/</g,'&lt;')}</div>
-                                <div class="info-group"><i class="fas fa-phone"></i>${o.phoneNumber||'-'}</div>
-                                <div class="info-group"><i class="fas fa-table"></i>Table ${o.tableNumber??'-'}</div>
-                            </div>
-                            <div class="order-items">
-                                ${items}
-                                <div class="order-total"><span>Total</span><span>₹${Number(o.totalAmount||0).toFixed(2)}</span></div>
-                            </div>
-                            ${o.status === 'pending' ? `<div style="margin-top:10px; display:flex; justify-content:flex-end;"><button class=\"btn\" onclick=\"completeOrder('${o._id}')\"><i class=\"fas fa-check\"></i> Complete Order</button></div>` : ''}
-                        </div>
-                    </div>`;
-                }).join('');
-            }catch(e){ ordersGrid.innerHTML = `<div class="no-orders">${(e.message||'Error').replace(/</g,'&lt;')}</div>`; }
+                        </td>
+                    </tr>
+                `;
+                ordersCount.textContent = '0 orders';
+            }
         }
 
-        async function completeOrder(orderId){
-            try{
-                const res = await fetch(`${API_BASE_URL}/orders/${orderId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ status: 'completed' }) });
-                if(!res.ok){ const data = await res.json().catch(()=>({})); throw new Error(data.error||'Failed to update'); }
-                showToast('Order marked as completed', true);
-                loadOrders();
-            }catch(e){ showToast(e.message||'Failed to update'); }
+        function displayOrders(orders) {
+            if (!Array.isArray(orders) || orders.length === 0) {
+                ordersBody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-coffee"></i>
+                                <h3>No Orders Yet</h3>
+                                <p>Orders will appear here when customers place them</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                ordersCount.textContent = '0 orders';
+                return;
+            }
+
+            ordersBody.innerHTML = orders.map(order => `
+                <tr>
+                    <td><strong>#${order._id?.slice(-6) || ''}</strong></td>
+                    <td>${order.tableNumber || '-'}</td>
+                    <td>${(order.customerName || '').replace(/</g, '&lt;')}</td>
+                    <td>${order.items?.length || 0} items</td>
+                    <td><strong>₹${Number(order.totalAmount || 0).toFixed(2)}</strong></td>
+                    <td><span class="status-badge ${order.status}">${order.status}</span></td>
+                    <td>${order.timestamp ? new Date(order.timestamp).toLocaleString() : '-'}</td>
+                    <td>
+                        <button class="btn-success" onclick="completeOrder('${order._id}')" ${order.status === 'completed' ? 'disabled' : ''}>
+                            <i class="fas fa-check"></i> Complete
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            ordersCount.textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
         }
 
+        async function completeOrder(orderId) {
+            try {
+                const token = sessionStorage.getItem('staffToken');
+                const response = await fetch(`${API_BASE_URL}/staff/orders/${orderId}/complete`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Order completed successfully!', 'success');
+                    loadOrders(); // Refresh the orders list
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to complete order');
+                }
+            } catch (error) {
+                showMessage(error.message || 'Failed to complete order', 'error');
+            }
+        }
+
+        // Event Listeners
         document.getElementById('loginBtn').addEventListener('click', staffLogin);
         document.getElementById('refreshBtn').addEventListener('click', loadOrders);
-        document.getElementById('logoutBtn').addEventListener('click', ()=>{ clearAuth(); updateView(); });
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            clearAuth();
+            updateView();
+            // Clear form
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        });
 
-        // Init
+        // Enter key support for login
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                staffLogin();
+            }
+        });
+
+        // Initialize
         updateView();
     </script>
 </body>

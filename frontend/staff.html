@@ -679,6 +679,9 @@
     </style>
 </head>
 <body>
+    <audio id="staffNewOrderSound" preload="auto">
+        <source src="mixkit-software-interface-start-2574.wav" type="audio/wav">
+    </audio>
     <!-- Staff Login View -->
     <div class="login-container" id="loginView">
         <div class="header">
@@ -802,6 +805,8 @@
         
         // Cached state
         let allOrders = [];
+        let lastOrderCheck = null; // timestamp of last check
+        let soundPrimed = false;
         
         // Show/Hide Functions
         function showLoading(show) {
@@ -826,6 +831,7 @@
                 loginView.style.display = 'none';
                 dashboardView.classList.add('show');
                 loadOrders();
+                startNewOrderWatcher();
             } else {
                 dashboardView.classList.remove('show');
                 loginView.style.display = 'block';
@@ -898,6 +904,9 @@
                 }
                 
                 allOrders = Array.isArray(orders) ? orders : [];
+                // Initialize last check to latest order timestamp
+                const latest = allOrders.reduce((max, o) => Math.max(max, new Date(o.timestamp || 0).getTime()), 0);
+                lastOrderCheck = latest || Date.now();
                 renderOrders();
             } catch (error) {
                 ordersGrid.innerHTML = `
@@ -908,6 +917,58 @@
                     </div>
                 `;
             }
+        }
+
+        // Prime audio on first user interaction to satisfy browser autoplay policies
+        function primeSound() {
+            if (soundPrimed) return;
+            const audio = document.getElementById('staffNewOrderSound');
+            if (!audio) return;
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                soundPrimed = true;
+            }).catch(() => {
+                // ignore; will try again on next interaction
+            });
+        }
+
+        // Watcher to poll for new orders and play alert for newly arrived pending orders
+        function startNewOrderWatcher() {
+            // prime sound on any click/touch
+            document.addEventListener('click', primeSound, { once: true });
+            document.addEventListener('touchstart', primeSound, { once: true, passive: true });
+
+            if (window.__staffWatcher) return; // avoid multiple intervals
+            window.__staffWatcher = setInterval(async () => {
+                try {
+                    if (!isAuthenticated()) return;
+                    const token = sessionStorage.getItem('staffToken');
+                    const res = await fetch(`${API_BASE_URL}/staff/orders`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) return;
+                    const orders = await res.json();
+                    const lastTs = lastOrderCheck || 0;
+                    // New pending orders since last check
+                    const newOnes = (orders || []).filter(o => o.status === 'pending' && new Date(o.timestamp || 0).getTime() > lastTs);
+                    if (newOnes.length > 0) {
+                        const audio = document.getElementById('staffNewOrderSound');
+                        if (audio) {
+                            audio.currentTime = 0;
+                            audio.play().catch(() => {});
+                        }
+                        // Update UI state to include new orders
+                        allOrders = orders;
+                        renderOrders();
+                    }
+                    // Update last check timestamp
+                    const latest = (orders || []).reduce((max, o) => Math.max(max, new Date(o.timestamp || 0).getTime()), lastTs);
+                    lastOrderCheck = latest || Date.now();
+                } catch (e) {
+                    // silent
+                }
+            }, 10000); // check every 10s
         }
         
         function getActiveStatusFilter() {
@@ -1044,6 +1105,8 @@
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         });
+        // Also prime sound on manual refresh
+        document.getElementById('refreshBtn').addEventListener('click', primeSound);
         
         // Enter key support for login
         document.getElementById('password').addEventListener('keypress', (e) => {

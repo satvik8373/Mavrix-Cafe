@@ -278,6 +278,200 @@
             animation: slideUp 0.5s ease;
         }
 
+        /* Filter Section Styles - Matching Admin Orders */
+        .filter-section {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            color: var(--text-secondary);
+            flex: 1;
+            text-align: center;
+        }
+
+        .filter-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Filter Container Styles */
+        .filter-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .filter-group input {
+            padding: 0.8rem;
+            border: 1px solid #e1e8ed;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .filter-group input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        /* Orders Grid Styles */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .order-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-color);
+            transition: var(--transition);
+        }
+
+        .order-card.completed::before {
+            background: var(--success-color);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .order-info {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+        }
+
+        .order-items {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-total {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
         @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
@@ -454,6 +648,15 @@
                 text-align: center;
                 min-width: 120px;
             }
+
+            .filter-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pagination-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -529,44 +732,49 @@
             </div>
 
             <div class="tab-content active" id="ordersTab">
-                <div class="orders-section">
-                    <div class="orders-header">
-                        <div class="orders-title">
-                            <i class="fas fa-list"></i>
-                            <h2>All Orders</h2>
+                <div class="filter-section">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-th-list"></i> All Orders
+                    </button>
+                    <button class="filter-btn" data-filter="pending">
+                        <i class="fas fa-clock"></i> Pending
+                    </button>
+                    <button class="filter-btn" data-filter="completed">
+                        <i class="fas fa-check-circle"></i> Completed
+                    </button>
+                </div>
+                
+                <div class="orders-section" id="ordersSection">
+                    <div class="filter-container">
+                        <div class="filter-group">
+                            <label for="orderNoFilter">
+                                <i class="fas fa-hashtag"></i> Order No
+                            </label>
+                            <input type="text" id="orderNoFilter" placeholder="Search by order number">
                         </div>
-                        <div class="orders-actions">
-                            <span id="ordersCount" class="orders-count">0 orders</span>
+                        <div class="filter-group">
+                            <label for="phoneFilter">
+                                <i class="fas fa-phone"></i> Phone Number
+                            </label>
+                            <input type="text" id="phoneFilter" placeholder="Search by phone number">
+                        </div>
+                        <div class="filter-group">
+                            <label for="startDate">
+                                <i class="fas fa-calendar"></i> Start Date
+                            </label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="filter-group">
+                            <label for="endDate">
+                                <i class="fas fa-calendar"></i> End Date
+                            </label>
+                            <input type="date" id="endDate">
                         </div>
                     </div>
+
+                    <div class="orders-grid" id="ordersGrid"></div>
                     
-                    <div class="table-responsive">
-                        <table class="orders-table">
-                            <thead>
-                                <tr>
-                                    <th>Order #</th>
-                                    <th>Table</th>
-                                    <th>Customer</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ordersBody">
-                                <tr>
-                                    <td colspan="8">
-                                        <div class="empty-state">
-                                            <i class="fas fa-coffee"></i>
-                                            <h3>No Orders Yet</h3>
-                                            <p>Orders will appear here when customers place them</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="pagination-container" id="paginationContainer"></div>
                 </div>
             </div>
         </div>
@@ -582,8 +790,15 @@
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         const loading = document.getElementById('loading');
-        const ordersBody = document.getElementById('ordersBody');
-        const ordersCount = document.getElementById('ordersCount');
+        const ordersGrid = document.getElementById('ordersGrid');
+        const paginationContainer = document.getElementById('paginationContainer');
+        
+        // Filter elements
+        const orderNoFilter = document.getElementById('orderNoFilter');
+        const phoneFilter = document.getElementById('phoneFilter');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const filterBtns = document.querySelectorAll('.filter-btn');
 
         // Show/Hide Functions
         function showLoading(show) {
@@ -681,56 +896,71 @@
 
                 displayOrders(orders);
             } catch (error) {
-                ordersBody.innerHTML = `
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <h3>Error Loading Orders</h3>
-                                <p>${error.message}</p>
-                            </div>
-                        </td>
-                    </tr>
+                ordersGrid.innerHTML = `
+                    <div class="no-orders">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Orders</h3>
+                        <p>${error.message}</p>
+                    </div>
                 `;
-                ordersCount.textContent = '0 orders';
             }
         }
 
         function displayOrders(orders) {
             if (!Array.isArray(orders) || orders.length === 0) {
-                ordersBody.innerHTML = `
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <i class="fas fa-coffee"></i>
-                                <h3>No Orders Yet</h3>
-                                <p>Orders will appear here when customers place them</p>
-                            </div>
-                        </td>
-                    </tr>
+                ordersGrid.innerHTML = `
+                    <div class="no-orders">
+                        <i class="fas fa-coffee"></i>
+                        <h3>No Orders Yet</h3>
+                        <p>Orders will appear here when customers place them</p>
+                    </div>
                 `;
-                ordersCount.textContent = '0 orders';
                 return;
             }
 
-            ordersBody.innerHTML = orders.map(order => `
-                <tr>
-                    <td><strong>#${order._id?.slice(-6) || ''}</strong></td>
-                    <td>${order.tableNumber || '-'}</td>
-                    <td>${(order.customerName || '').replace(/</g, '&lt;')}</td>
-                    <td>${order.items?.length || 0} items</td>
-                    <td><strong>₹${Number(order.totalAmount || 0).toFixed(2)}</strong></td>
-                    <td><span class="status-badge ${order.status}">${order.status}</span></td>
-                    <td>${order.timestamp ? new Date(order.timestamp).toLocaleString() : '-'}</td>
-                    <td>
+            ordersGrid.innerHTML = orders.map(order => `
+                <div class="order-card ${order.status === 'completed' ? 'completed' : ''}">
+                    <div class="order-header">
+                        <h3>Order #${order._id?.slice(-6) || ''}</h3>
+                        <span class="status-badge ${order.status}">${order.status}</span>
+                    </div>
+                    
+                    <div class="order-info">
+                        <div class="order-item">
+                            <span><i class="fas fa-table"></i> Table:</span>
+                            <span>${order.tableNumber || '-'}</span>
+                        </div>
+                        <div class="order-item">
+                            <span><i class="fas fa-user"></i> Customer:</span>
+                            <span>${(order.customerName || '').replace(/</g, '&lt;')}</span>
+                        </div>
+                        <div class="order-item">
+                            <span><i class="fas fa-clock"></i> Time:</span>
+                            <span>${order.timestamp ? new Date(order.timestamp).toLocaleString() : '-'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-items">
+                        <h4><i class="fas fa-list"></i> Items (${order.items?.length || 0})</h4>
+                        ${order.items ? order.items.map(item => `
+                            <div class="order-item">
+                                <span>${item.name}</span>
+                                <span>₹${Number(item.price || 0).toFixed(2)} x ${item.quantity || 1}</span>
+                            </div>
+                        `).join('') : '<p>No items found</p>'}
+                    </div>
+                    
+                    <div class="order-total">
+                        <strong>Total: ₹${Number(order.totalAmount || 0).toFixed(2)}</strong>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
                         <button class="btn-success" onclick="completeOrder('${order._id}')" ${order.status === 'completed' ? 'disabled' : ''}>
-                            <i class="fas fa-check"></i> Complete
+                            <i class="fas fa-check"></i> ${order.status === 'completed' ? 'Completed' : 'Complete Order'}
                         </button>
-                    </td>
-                </tr>
+                    </div>
+                </div>
             `).join('');
-
-            ordersCount.textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
         }
 
         async function completeOrder(orderId) {
@@ -768,6 +998,24 @@
         document.getElementById('password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 staffLogin();
+            }
+        });
+
+        // Filter functionality
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                loadOrders(); // Reload with filter
+            });
+        });
+
+        // Search filters
+        [orderNoFilter, phoneFilter, startDate, endDate].forEach(filter => {
+            if (filter) {
+                filter.addEventListener('input', () => {
+                    loadOrders(); // Reload with filters
+                });
             }
         });
 

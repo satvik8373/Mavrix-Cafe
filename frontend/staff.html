@@ -492,7 +492,7 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            color: var(--text-primary);
+            color:white;
         }
 
         .orders-title h2 {
@@ -1017,6 +1017,14 @@
                     // Optimistically update local state to avoid refetch delay
                     allOrders = allOrders.map(o => o._id === orderId ? { ...o, status: 'completed' } : o);
                     renderOrders();
+                    
+                    // Notify other dashboards (e.g., admin) to refresh via storage event
+                    try {
+                        const payload = { id: orderId, status: 'completed', ts: Date.now() };
+                        localStorage.setItem('order-updated', JSON.stringify(payload));
+                        // Clean up the key shortly after to allow future events
+                        setTimeout(() => localStorage.removeItem('order-updated'), 100);
+                    } catch (_) { /* ignore storage errors */ }
                 } else {
                     const data = await response.json();
                     throw new Error(data.error || 'Failed to complete order');

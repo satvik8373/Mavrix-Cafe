@@ -3694,6 +3694,23 @@
         document.addEventListener('DOMContentLoaded', () => {
             initializeAdmin();
             setupFilterButtons();
+            
+            // Listen for cross-tab updates from staff dashboard
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'order-updated' && e.newValue) {
+                    try {
+                        const evt = JSON.parse(e.newValue);
+                        // Refresh orders and stats when an order is updated
+                        displayOrders(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+                        updateStats();
+                        showNotification(`Order #${String(evt.id).slice(-6).toUpperCase()} marked completed by staff`, 'success');
+                    } catch (_) {
+                        // fallback refresh
+                        displayOrders();
+                        updateStats();
+                    }
+                }
+            });
         });
 
         // Update time frame

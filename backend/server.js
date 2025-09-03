@@ -690,6 +690,36 @@ app.get('/api/staff/orders', auth, staffAuth, async (req, res) => {
     res.status(500).json({ error: 'Error fetching orders' });
   }
 });
+
+// Staff: complete an order
+app.put('/api/staff/orders/:id/complete', auth, staffAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: 'Order ID is required' });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // If already completed, return idempotent success
+    if (order.status === 'completed') {
+      return res.json(order);
+    }
+
+    order.status = 'completed';
+    await order.save();
+
+    res.json(order);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid order ID format' });
+    }
+    res.status(500).json({ error: 'Failed to complete order' });
+  }
+});
 app.post('/api/orders/import', async (req, res) => {
     try {
         const orders = req.body;

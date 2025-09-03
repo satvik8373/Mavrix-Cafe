@@ -4081,6 +4081,38 @@
                         } catch (err) {
                             if (msg) { msg.style.display = 'block'; msg.textContent = err.message || 'Error'; msg.className = 'message message-error'; }
                         }
+                    } else if (e.target && (e.target.dataset.action === 'edit-pass' || e.target.closest('[data-action="edit-pass"]'))) {
+                        const btn = e.target.dataset.action ? e.target : e.target.closest('[data-action="edit-pass"]');
+                        const id = btn.dataset.id;
+                        const newPass = prompt('Enter new password (min 4 chars):');
+                        if (!newPass) return;
+                        if (newPass.length < 4) { showNotification('Password too short', 'error'); return; }
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/admin/staff/${id}/password`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json', 'x-admin-pin': '837337' },
+                                body: JSON.stringify({ password: newPass })
+                            });
+                            if (!res.ok) throw new Error('Update failed');
+                            showNotification('Password updated', 'success');
+                        } catch (err) {
+                            showNotification(err.message || 'Failed to update password', 'error');
+                        }
+                    } else if (e.target && (e.target.dataset.action === 'delete' || e.target.closest('[data-action="delete"]'))) {
+                        const btn = e.target.dataset.action ? e.target : e.target.closest('[data-action="delete"]');
+                        const id = btn.dataset.id;
+                        if (!confirm('Delete this staff user?')) return;
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/admin/staff/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'x-admin-pin': '837337' }
+                            });
+                            if (!res.ok) throw new Error('Delete failed');
+                            showNotification('Staff deleted', 'success');
+                            loadStaff();
+                        } catch (err) {
+                            showNotification(err.message || 'Failed to delete staff', 'error');
+                        }
                     }
                 });
             }
@@ -4126,12 +4158,16 @@
                     return;
                 }
                 tbody.innerHTML = staff.map(u => `
-                    <tr>
+                    <tr data-staff-id="${u._id}">
                         <td>${escapeHtml(u.name || '')}</td>
                         <td>${escapeHtml(u.username || '')}</td>
                         <td>${escapeHtml(u.role || '')}</td>
                         <td>${u.createdAt ? new Date(u.createdAt).toLocaleString() : '-'}</td>
                         <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString() : '-'}</td>
+                        <td>
+                            ${u.role === 'staff' ? `<button class="action-btn" data-action="edit-pass" data-id="${u._id}"><i class="fas fa-key"></i> Edit Password</button>
+                            <button class="action-btn danger" data-action="delete" data-id="${u._id}"><i class="fas fa-trash"></i> Delete</button>` : '<em>Admin</em>'}
+                        </td>
                     </tr>
                 `).join('');
             } catch (e) {

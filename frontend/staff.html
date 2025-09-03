@@ -799,12 +799,15 @@
         const startDate = document.getElementById('startDate');
         const endDate = document.getElementById('endDate');
         const filterBtns = document.querySelectorAll('.filter-btn');
-
+        
+        // Cached state
+        let allOrders = [];
+        
         // Show/Hide Functions
         function showLoading(show) {
             loading.classList.toggle('show', show);
         }
-
+        
         function showMessage(message, type) {
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
@@ -817,7 +820,7 @@
                 successMessage.style.display = 'block';
             }
         }
-
+        
         function updateView() {
             if (isAuthenticated()) {
                 loginView.style.display = 'none';
@@ -828,45 +831,45 @@
                 loginView.style.display = 'block';
             }
         }
-
+        
         // Authentication Functions
         function isAuthenticated() {
             return !!sessionStorage.getItem('staffToken');
         }
-
+        
         function setAuthenticated(token, user) {
             sessionStorage.setItem('staffToken', token);
             sessionStorage.setItem('staffUser', JSON.stringify(user || {}));
         }
-
+        
         function clearAuth() {
             sessionStorage.removeItem('staffToken');
             sessionStorage.removeItem('staffUser');
         }
-
+        
         // API Functions
         async function staffLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-
+            
             if (!username || !password) {
                 showMessage('Please enter username and password', 'error');
                 return;
             }
-
+            
             showLoading(true);
             showMessage('', 'error');
             showMessage('', 'success');
-
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/auth/staff/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-
+                
                 const data = await response.json();
-
+                
                 if (response.ok) {
                     setAuthenticated(data.token, data.user);
                     showMessage('Login successful!', 'success');
@@ -880,21 +883,22 @@
                 showLoading(false);
             }
         }
-
+        
         async function loadOrders() {
             try {
                 const token = sessionStorage.getItem('staffToken');
                 const response = await fetch(`${API_BASE_URL}/staff/orders`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
+                
                 const orders = await response.json();
-
+                
                 if (!response.ok) {
                     throw new Error(orders.error || 'Failed to load orders');
                 }
-
-                displayOrders(orders);
+                
+                allOrders = Array.isArray(orders) ? orders : [];
+                renderOrders();
             } catch (error) {
                 ordersGrid.innerHTML = `
                     <div class="no-orders">
@@ -905,19 +909,54 @@
                 `;
             }
         }
-
-        function displayOrders(orders) {
+        
+        function getActiveStatusFilter() {
+            const active = document.querySelector('.filter-btn.active');
+            return active ? active.getAttribute('data-filter') : 'all';
+        }
+        
+        function matchesTextFilters(order) {
+            const orderQuery = (orderNoFilter?.value || '').trim().toLowerCase();
+            const phoneQuery = (phoneFilter?.value || '').trim().toLowerCase();
+            const orderIdFrag = (order?._id || '').toLowerCase();
+            const shortId = orderIdFrag.slice(-6);
+            const phone = (order?.phone || order?.customerPhone || '').toLowerCase();
+            
+            const orderOk = !orderQuery || orderIdFrag.includes(orderQuery) || shortId.includes(orderQuery);
+            const phoneOk = !phoneQuery || phone.includes(phoneQuery);
+            return orderOk && phoneOk;
+        }
+        
+        function matchesDateFilters(order) {
+            if (!startDate?.value && !endDate?.value) return true;
+            const ts = order?.timestamp ? new Date(order.timestamp).getTime() : null;
+            if (!ts) return false;
+            const startOk = startDate?.value ? ts >= new Date(startDate.value).setHours(0,0,0,0) : true;
+            const endOk = endDate?.value ? ts <= new Date(endDate.value).setHours(23,59,59,999) : true;
+            return startOk && endOk;
+        }
+        
+        function getFilteredOrders() {
+            const status = getActiveStatusFilter();
+            return allOrders.filter(order => {
+                const statusOk = status === 'all' ? true : (order?.status === status);
+                return statusOk && matchesTextFilters(order) && matchesDateFilters(order);
+            });
+        }
+        
+        function renderOrders() {
+            const orders = getFilteredOrders();
             if (!Array.isArray(orders) || orders.length === 0) {
                 ordersGrid.innerHTML = `
                     <div class="no-orders">
                         <i class="fas fa-coffee"></i>
-                        <h3>No Orders Yet</h3>
-                        <p>Orders will appear here when customers place them</p>
+                        <h3>No Orders Found</h3>
+                        <p>Try changing the filters</p>
                     </div>
                 `;
                 return;
             }
-
+            
             ordersGrid.innerHTML = orders.map(order => `
                 <div class="order-card ${order.status === 'completed' ? 'completed' : ''}">
                     <div class="order-header">
@@ -962,7 +1001,7 @@
                 </div>
             `).join('');
         }
-
+        
         async function completeOrder(orderId) {
             try {
                 const token = sessionStorage.getItem('staffToken');
@@ -970,10 +1009,12 @@
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
+                
                 if (response.ok) {
                     showMessage('Order completed successfully!', 'success');
-                    loadOrders(); // Refresh the orders list
+                    // Optimistically update local state to avoid refetch delay
+                    allOrders = allOrders.map(o => o._id === orderId ? { ...o, status: 'completed' } : o);
+                    renderOrders();
                 } else {
                     const data = await response.json();
                     throw new Error(data.error || 'Failed to complete order');
@@ -982,7 +1023,7 @@
                 showMessage(error.message || 'Failed to complete order', 'error');
             }
         }
-
+        
         // Event Listeners
         document.getElementById('loginBtn').addEventListener('click', staffLogin);
         document.getElementById('refreshBtn').addEventListener('click', loadOrders);
@@ -993,32 +1034,32 @@
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         });
-
+        
         // Enter key support for login
         document.getElementById('password').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 staffLogin();
             }
         });
-
+        
         // Filter functionality
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                loadOrders(); // Reload with filter
+                renderOrders();
             });
         });
-
+        
         // Search filters
         [orderNoFilter, phoneFilter, startDate, endDate].forEach(filter => {
             if (filter) {
                 filter.addEventListener('input', () => {
-                    loadOrders(); // Reload with filters
+                    renderOrders();
                 });
             }
         });
-
+        
         // Initialize
         updateView();
     </script>

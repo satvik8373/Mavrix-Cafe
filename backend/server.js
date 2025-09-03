@@ -775,23 +775,7 @@ app.delete('/api/menu/all', async (req, res) => {
     }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  res.status(500).json({
-    error: 'Something went wrong!',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: `Cannot ${req.method} ${req.url}`
-  });
-});
-
-// Admin: Update staff password
+// Admin: Update staff password (must be BEFORE 404 handler)
 app.put('/api/admin/staff/:id/password', allowAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -814,7 +798,7 @@ app.put('/api/admin/staff/:id/password', allowAdmin, async (req, res) => {
   }
 });
 
-// Admin: Delete staff user
+// Admin: Delete staff user (must be BEFORE 404 handler)
 app.delete('/api/admin/staff/:id', allowAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -830,4 +814,19 @@ app.delete('/api/admin/staff/:id', allowAdmin, async (req, res) => {
   }
 });
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  res.status(500).json({
+    error: 'Something went wrong!',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Cannot ${req.method} ${req.url}`
+  });
+});
  
